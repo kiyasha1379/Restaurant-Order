@@ -4,7 +4,8 @@
 {% import "macros/icons.html" as icons %}
 {% set admin_styles = [
     "css/fonts.css", "css/tokens.css", "css/base.css", "css/components/button.css",
-    "css/components/demo-bar.css", "css/admin/admin-shell.css", "css/admin/admin-ui.css",
+    "css/components/demo-bar.css", "css/components/date-picker.css",
+    "css/admin/admin-shell.css", "css/admin/admin-ui.css",
 ] %}
 <!doctype html>
 <html lang="{{ language.code }}" dir="{{ language.direction }}">
@@ -19,6 +20,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename=stylesheet) }}">
   {% endfor %}
   {% block page_styles %}{% endblock %}
+  {% include "partials/theme_style.html" %}
 </head>
 <body class="admin">
   <a class="admin-skip u-visually-hidden" href="#admin-main">{{ t("admin.skip") }}</a>
@@ -31,7 +33,7 @@
   <div class="admin-shell" data-admin-shell>
     <aside class="admin-sidebar" id="admin-sidebar">
       <a class="admin-brand" href="{{ url_for('admin.index') }}">
-        <span class="admin-brand__mark">{{ icons.icon("logo", 30) }}</span>
+        <span class="admin-brand__mark">{% if site_logo %}<img class="brand-logo" src="{{ url_for('static', filename=site_logo) }}" alt="">{% else %}{{ icons.icon("logo", 30) }}{% endif %}</span>
         <span><span class="admin-brand__name">{{ brand_name }}</span><span class="admin-brand__sub">{{ t("admin.title") }}</span></span>
       </a>
       <nav class="admin-nav" aria-label="{{ t('admin.nav.label') }}">
@@ -82,6 +84,7 @@
     </div>
   </div>
   {% endif %}
+  <script type="application/json" id="site-config">{{ site_config()|tojson }}</script>
   <script type="module" src="{{ url_for('static', filename='js/admin/admin.js') }}"></script>
   {% block page_scripts %}{% endblock %}
 </body>

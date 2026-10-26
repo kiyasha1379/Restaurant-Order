@@ -10,9 +10,6 @@
 {% block body_class %}page-checkout{% endblock %}
 
 {#- Parameters: `form` (CheckoutForm), `priced` (PricedCart for takeaway). -#}
-{% macro field_error(field) %}
-{% for message in field.errors %}<p class="field__error" role="alert">{{ message }}</p>{% endfor %}
-{% endmacro %}
 
 {% block content %}
 <div class="checkout" data-checkout>
@@ -23,16 +20,21 @@
 
       <fieldset class="field-group">
         <legend class="field-group__title">{{ t("checkout.details") }}</legend>
+        {% if current_user.is_authenticated %}
+        <p class="field__hint">{{ t("checkout.signed_in_as", name=current_user.display_name) }}</p>
+        {% else %}
+        <p class="field__hint">{{ t("checkout.login_hint") }} <a href="{{ url_for('public.login', next=url_for('public.checkout')) }}">{{ t("checkout.login_link") }}</a></p>
+        {% endif %}
         <div class="field">
           <label class="field__label" for="customer_name">{{ t("checkout.name") }}</label>
           <input class="field__input" id="customer_name" name="customer_name" autocomplete="name" value="{{ form.customer_name.data or '' }}" required>
-          {{ field_error(form.customer_name) }}
+          {{ ui.field_error(form.customer_name) }}
         </div>
         <div class="field">
           <label class="field__label" for="customer_phone">{{ t("checkout.phone") }}</label>
           <input class="field__input field__input--ltr" id="customer_phone" name="customer_phone" type="tel" inputmode="tel" autocomplete="tel" value="{{ form.customer_phone.data or '' }}" required aria-describedby="phone-hint">
           <p class="field__hint" id="phone-hint">{{ t("checkout.phone_hint") }}</p>
-          {{ field_error(form.customer_phone) }}
+          {{ ui.field_error(form.customer_phone) }}
         </div>
       </fieldset>
 
@@ -51,28 +53,39 @@
         </div>
         {% if form.fulfillment.errors %}<p class="field__error" role="alert">{{ t("checkout.error.choice") }}</p>{% endif %}
         <div class="field" data-address-field{% if form.fulfillment.data != "delivery" %} hidden{% endif %}>
+          {% if saved_addresses %}
+          <div class="chip-row" role="group" aria-label="{{ t('checkout.saved_addresses') }}">
+            {% for address in saved_addresses %}
+            <button class="chip" type="button" data-fill-address="{{ address.text }}">{{ address.label or address.text|truncate(24) }}</button>
+            {% endfor %}
+          </div>
+          {% endif %}
           <label class="field__label" for="delivery_address">{{ t("checkout.address") }}</label>
           <textarea class="field__input" id="delivery_address" name="delivery_address" rows="3" autocomplete="street-address">{{ form.delivery_address.data or "" }}</textarea>
-          {{ field_error(form.delivery_address) }}
+          {{ ui.field_error(form.delivery_address) }}
+          {% if current_user.is_authenticated %}{{ ui.checkbox(form.save_address, t("checkout.save_address")) }}{% endif %}
         </div>
       </fieldset>
 
       <fieldset class="field-group">
         <legend class="field-group__title">{{ t("checkout.payment") }}</legend>
+        {% set chosen_payment = form.payment_method.data if form.payment_method.data in payment_methods|map("attr", "value")|list else payment_methods[0].value %}
         <div class="choice-row">
+          {% for method in payment_methods %}
           <label class="choice">
-            <input class="choice__input" type="radio" name="payment_method" value="cash_on_site" checked>
+            <input class="choice__input" type="radio" name="payment_method" value="{{ method.value }}"{% if chosen_payment == method.value %} checked{% endif %}>
             <span class="choice__box">
-              <span class="choice__title">{{ t("checkout.pay_on_site") }}</span>
-              <span class="choice__hint">{{ t("checkout.pay_on_site_hint") }}</span>
+              <span class="choice__title">{{ t("checkout.pay_online") if method.value == "online" else t("checkout.pay_on_site") }}</span>
+              <span class="choice__hint">{{ t("checkout.pay_online_hint") if method.value == "online" else t("checkout.pay_on_site_hint") }}</span>
             </span>
           </label>
+          {% endfor %}
         </div>
-        {% if form.payment_method.errors %}<p class="field__error" role="alert">{{ t("checkout.error.choice") }}</p>{% endif %}
+        {% if form.payment_method.errors %}<p class="field__error" role="alert">{{ form.payment_method.errors[0] if form.payment_method.errors[0] != "Not a valid choice." else t("checkout.error.choice") }}</p>{% endif %}
         <div class="field">
           <label class="field__label" for="note">{{ t("checkout.note") }}</label>
           <textarea class="field__input" id="note" name="note" rows="2">{{ form.note.data or "" }}</textarea>
-          {{ field_error(form.note) }}
+          {{ ui.field_error(form.note) }}
         </div>
       </fieldset>
 

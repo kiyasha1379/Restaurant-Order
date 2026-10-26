@@ -13,11 +13,11 @@ A running report of what was built, in order. Each phase has its tasks, the deci
 | 4 | Cart and checkout (pay on site) | Done (2026-10-26) |
 | 5 | Admin panel and roles | Done (2026-10-26) |
 | 6 | Builder | Done (2026-10-26) |
-| 7 | Table reservation | Next |
-| 8 | Customer account | Not started |
-| 9 | Mock online payment | Not started |
-| 10 | Site appearance and settings | Not started |
-| 11 | Polish and demo readiness | Not started |
+| 7 | Table reservation | Done (2026-10-26) |
+| 8 | Customer account | Done (2026-10-26) |
+| 9 | Mock online payment | Done (2026-10-26) |
+| 10 | Site appearance and settings | Done (2026-10-26) |
+| 11 | Polish and demo readiness | Next |
 
 ## Phase 0: Project setup (2026-10-26)
 
@@ -214,3 +214,110 @@ A running report of what was built, in order. Each phase has its tasks, the deci
 
 - The admin form does not yet have a live price preview panel; the public page already shows the server price, and the quote API is covered by tests.
 - Pictures are SVG and CSS placeholders drawn from colour, shape and size; real photos upload per option and replace them. The plan's photo-based preview waits for the user's own images.
+
+## Phase 7: Table reservation (2026-10-26)
+
+**Done**
+
+- **Data model**: `DiningTable`, `Reservation` (public token, status, start/end, guests, contact), `OpeningHour` (per weekday, Saturday first) and `SpecialClosure`. Migration `2b403a5e74f1_booking.py`. Statuses: pending, confirmed, cancelled; only a confirmed reservation holds a table.
+- **Overlap protection**: two reservations clash when `start_a < end_b and start_b < end_a`. `BookingService` checks inside `begin_immediate` (SQLite `BEGIN IMMEDIATE`), so two simultaneous bookings cannot both win. Refusals are typed (`closed`, `outside_hours`, `past`, `too_far`, `bad_time`, `bad_guests`, `no_table`, `table_too_small`, `table_taken`, `not_pending`, `already_cancelled`).
+- **Rules in settings**: advance days, duration, slot step, minimum notice (validated ranges), opening hours per weekday and closure days.
+- **Public pages**: `/<lang>/reserve` (quick-day chips, shared Jalali `DatePicker` for other days with dimmed past/closed days, time chips, guest stepper, live floor plan of the 12 demo tables with free / taken / too-small states, summary), `/<lang>/reservation/<token>` (status page with cancel) and `GET /api/availability`. Works without JavaScript through the normal form post.
+- **Admin "Tables and reservations"** (permission `tables`): reservation list by day and status with a pending counter, detail page (confirm, cancel, move to another table), manual reservation form, table CRUD with order up/down and an active switch (a table with reservations cannot be deleted), schedule page (weekly hours, closures, booking rules).
+- **Shared pieces**: `DatePicker` (used on the public page and in admin), `field.css` moved out of `checkout.css` so every form shares one field style, `ui.field_error` macro.
+
+**Checked**
+
+- 538 automated tests pass (about 110 new for phase 7): overlap edge cases (touching ends, same table, cancelled and pending), opening hours and closures, notice and advance limits, table capacity, race protection, public pages in both languages, API payload, admin permissions (none, view, edit), CRUD, ordering. JS tests (11) cover the Jalali calendar; one browser test compares server and browser Jalali dates.
+- Real browser (`tests/browser/reserve_flow.js`), desktop 1366 px and phone 390 px, Persian and English: quick days, month picker, time slots, table states, booking and confirmation page; admin list, detail, new, tables, table form, schedule. No horizontal overflow, no console errors, no failed requests.
+- ruff and black clean.
+
+**Bugs found and fixed while testing**
+
+- The contact fields on the reservation page were unstyled, because the field rules lived only in the checkout stylesheet; they now live in `components/field.css`, loaded everywhere.
+- A form field named `date` shadowed the `datetime` import; the form uses `import datetime`.
+- A test for "past today" used a fixed 10:00 slot; it now sets its own clock.
+
+**Differences from the plan, and why**
+
+- The dashboard does not yet show tonight's reservations or a pending alert; the list page has the pending counter. It is a small addition for phase 10 or 11.
+- No SMS or e-mail confirmation (demo); the status page is the confirmation.
+
+## Phase 8: Customer account (2026-10-26)
+
+**Done**
+
+- **Data model**: `Address`, `VerificationCode`, `ContactMessage`; `User.registration_pending` and `User.saved_cart`; `OrderItem.builder_id` and `OrderItemOption.option_id` (so an order can be repeated). Migration `2f06b2de0129_customer_accounts.py`. A customer is a `users` row with no role; staff and customers share one sign-in session.
+- **Registration**: name, phone, optional e-mail, password; the account stays pending until the phone code is entered. Codes are keyed-SHA256 hashed, valid 10 minutes, 5 attempts, with a resend. The `CodeIssuer` strategy is a logging stand-in (no SMS); in demo mode the code is `12345` and the verify page shows a hint.
+- **Sign-in** by phone or e-mail plus password, rate limited. Guest orders and reservations with the same phone are claimed once the account is verified.
+- **Cart follows the account**: `AccountCartStorage` keeps the cart in the session and in `user.saved_cart`; signing in merges the guest cart, signing out empties the browser's cart.
+- **Account pages** (`/<lang>/account/...`): overview, order history with "order again", reservations, address book (add, edit, delete, default, at most 10), profile and password. Checkout and reservation forms prefill from the account; checkout can save the delivery address.
+- **Contact page** (`/<lang>/contact`), rate limited, stored for the admin.
+- **Admin "Customers and messages"** (permission `customers`): searchable customer list with order totals, detail page (orders, reservations, addresses, active switch), message inbox (read, delete). Manager can edit, cashier can view, kitchen sees nothing.
+- **Seed**: demo customer `customer@example.com` / `09120000000`, password `demo-pass-1234`, one address and two messages.
+
+**Checked**
+
+- Full automated suite passes (new: registration, code rules, sign-in, cart merge, history and reorder, addresses, ownership checks between customers, contact form, admin permissions). ruff and black clean.
+- Real browser (`tests/browser/account_flow.js`), desktop 1366 px and phone 390 px, Persian and English: register, wrong then right code, cart kept (2 to 2), address saved, checkout chips, order, history, "order again", profile, reservations, contact, sign-out empties the cart; admin customers, messages and detail. No console errors, no horizontal overflow.
+
+**Bugs found and fixed while testing**
+
+- Macros in imported templates lost the translation helper; they are imported `with context`.
+- Flash counts used Latin digits in Persian; they use `format_number`.
+- Booking tests depended on the real clock; they patch `now_tehran`.
+- Order and booking rows on wide screens stacked vertically; they are now one row.
+
+**Differences from the plan, and why**
+
+- No real SMS; the logging issuer is a stand-in until a provider is chosen.
+- The admin dashboard still does not show unread messages or tonight's reservations (phase 10 or 11).
+
+## Phase 9: Mock online payment (2026-10-26)
+
+**Done**
+
+- **Data model**: `Payment` (one row per attempt: method, gateway, status `pending/paid/failed/cancelled`, amount, `authority`, `transaction_id`, `paid_at`) and the order status `awaiting_payment`. Migration `d2a58ea71365_payments.py`; it also gives every older order its one pay-on-site payment row.
+- **Gateway interface** (`services/payment_gateway.py`): `PaymentGateway` with `start()`, `authority_from()` and `verify()`; `MockGateway` (references `MOCKA-...`, transaction ids `MOCK-...`) and `create_gateway()`, which reads the `PAYMENT_GATEWAY` config value (`mock`; empty switches online payment off). A real gateway is one new class plus one line in the factory.
+- **`PaymentService`**: `start_online`, `complete` (the callback), `switch_to_cash`, `mark_cash_received`. An order leaves `awaiting_payment` only through a verified payment (or the customer's choice to pay on arrival). The gateway is asked before anything is stored; the answer is applied under SQLite's write lock; a finished attempt never changes again, so replayed callbacks are harmless; a "paid" answer for the wrong amount counts as failed.
+- **Customer side**: checkout offers "Pay online" and sends the customer straight to the gateway. `/<lang>/pay/mock/<authority>` is the test page (no card form, three buttons: successful, failed, cancel, clearly marked as a test); `/<lang>/pay/callback/<gateway>` calls `verify()`; `/<lang>/pay/<token>/start` retries and `/<lang>/pay/<token>/cash` switches to pay on arrival. The tracking page shows the "payment not complete" panel while waiting, and updates live.
+- **Admin**: waiting orders stay off the kitchen board (they are in the history under "Waiting for payment"); the order page lists every attempt with its transaction id, a "Test" badge for test payments, and a "Mark cash received" button (orders edit permission) for pay-on-site orders; board cards show "Paid" or "Cash due"; the receipt shows paid or pending. Unpaid online orders are not counted as sales or customer spending; cancelling an order cancels its open payments.
+
+**Checked**
+
+- Automated tests (about 50 new): gateway and factory, every outcome, retry, repeated and forged callbacks, wrong amount, gateway down, switching to cash, cash recording, cancel, pages in both languages, permissions, dashboard and customer totals, and the migration backfill.
+- Real browser (`tests/browser/pay_flow.js`), desktop 1366 px and phone 390 px, Persian and English: checkout, gateway page (no input fields), failure then retry then success, cancel then pay on arrival, admin board, history, dashboard and order page. No console errors and no horizontal overflow.
+
+**Differences from the plan, and why**
+
+- Routes carry the language prefix (`/<lang>/pay/...`) so the pages use the customer's language; the callback address given to a real gateway is the same kind of address.
+- No refunds: cancelling an order that was already paid online only cancels the order (a real gateway needs a refund call, added with that gateway).
+- The mock page trusts the `status` in the callback address, as a test page must; never run production with `PAYMENT_GATEWAY=mock`.
+- The settings page toggle for "payment methods" arrives with the admin settings in phase 10; for now the config value decides.
+
+## Phase 10: Site appearance and settings (2026-10-26)
+
+**Done**
+
+- **Settings page** (`/admin/settings`, permission `settings`): pause online ordering (with a message per language), the fixed delivery fee, which payment methods are offered (cash, online; at least one must stay on, online also needs the configured gateway), and the contact details shown in the footer (phone, address, hours). `SettingsAdminService` validates everything and saves it as one unit; contact texts are stored as interface texts, so the Languages section can still edit them. The built-in placeholders ("[شماره تماس]") can be saved untouched.
+- **Pause**: while on, a notice sits in the sticky header on every public page, the cart API and "order again" refuse with a clear message, and checkout sends the visitor back to the cart. Existing orders, tracking and table booking are not affected.
+- **Payment methods** now come from the settings (`available_payment_methods()`): checkout lists only the offered methods, the order page offers "pay on arrival instead" only when cash is on, and a forged method is refused.
+- **Site appearance** (`/admin/site`, permission `site`), three tabs:
+  - *General*: brand name, accent colour (the text colour on top is chosen automatically for contrast; "use the default colour" restores the built-in one) and logo upload (shown in the header, footer and admin sidebar).
+  - *Backgrounds*: all ten backgrounds (home sections, menu, builder, reservation) with darkening 0-100 %, on/off, phone mode (poster only or video), poster upload (re-encoded to WebP, up to 1920 px) and MP4 video upload (checked for an MP4 header, up to 12 MB, random file name). Replaced or removed uploads are deleted; the seeded files under `media/` are never deleted.
+  - *Home page*: order and visibility of the four movable sections (`site_sections` table, migration `e41b7c9d3a10_site_sections.py`; hero and footer stay fixed; a section added later appears after the stored ones) and the eight main home texts in both languages. The home template is now one partial per section (`templates/home/_<key>.html`) drawn in the stored order; the dots on the side follow it.
+- `settings_texts.py` and `appearance_texts.py` hold the new interface texts (Persian and English); `theme.py` builds the accent CSS from one validated `#rrggbb` value.
+
+**Checked**
+
+- Automated tests (about 75 new in `test_admin_settings.py` and `test_admin_site.py`): permissions (viewer can look, not change; cashier refused), validation of every field, the pause on every entry point, payment toggles, delivery fee reaching the order total, footer texts, brand/colour/logo, uploads with cleanup of replaced and failed files, fake images and videos, unknown keys, section order and visibility, broken orders refused, home text whitelist.
+- Real browser (`tests/browser/site_flow.js`), desktop 1366 px and phone 390 px, Persian and English: every change made in the panel and seen on the public site, then the demo restored. No console errors (apart from the expected refused add-to-cart) and no horizontal overflow.
+- Found and fixed in the browser: the untouched settings page could not be saved (placeholder phone text rejected); the pause notice was scrolled out of sight on the home page by scroll snapping (now inside the sticky header).
+
+**Differences from the plan, and why**
+
+- Uploaded videos are stored as they are (no re-encoding on the server); the page says "short, silent and compressed, 12 MB at most". Re-encoding would need ffmpeg on the server.
+- Posters, logos and videos are not cropped in the panel; the site crops them with CSS.
+- Section order uses arrow buttons (work without JavaScript) instead of drag and drop.
+
+**Open for phase 11**: replace the sample videos that carry a watermark, realistic contact details in the demo data, a long brand name is cut with an ellipsis on phones.

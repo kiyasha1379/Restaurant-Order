@@ -1,0 +1,82 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.TABLES %}
+{% set editable = access.can_edit(keys.TABLES) %}
+
+{% block title %}{{ t("admin.reservations.tab_schedule") }}{% endblock %}
+{% block heading %}{{ t("admin.nav.tables") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/reservations.css') }}">{% endblock %}
+
+{#- Parameters: `hours` (weekday to stored row), `weekdays` (number, name), `closures`,
+    `closure_form`, `rules_form`, `today`. -#}
+{% block content %}
+<div class="toolbar">
+  {% with active = "schedule" %}{% include "admin/reservations/_tabs.html" %}{% endwith %}
+</div>
+
+<form class="card form" method="post" action="{{ url_for('admin.schedule_hours') }}" novalidate>
+  {{ ui.csrf() }}
+  <h2 class="card__title">{{ t("admin.schedule.hours") }}</h2>
+  <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+    <div class="hours-row hours-row--head" aria-hidden="true"><span>{{ t("admin.schedule.weekday") }}</span><span>{{ t("admin.schedule.closed") }}</span><span>{{ t("admin.schedule.opens") }}</span><span>{{ t("admin.schedule.closes") }}</span></div>
+    {% for number, name in weekdays %}
+    {% set row = hours.get(number) %}
+    <div class="hours-row">
+      <strong>{{ name }}</strong>
+      <label class="check"><input type="checkbox" name="closed_{{ number }}" value="1"{% if row and row.is_closed %} checked{% endif %}> <span>{{ t("admin.schedule.closed") }}</span></label>
+      <input class="field__control hours-row__time" type="time" name="opens_{{ number }}" value="{{ row.opens_at.strftime('%H:%M') if row else '12:00' }}" aria-label="{{ name }} · {{ t('admin.schedule.opens') }}">
+      <input class="field__control hours-row__time" type="time" name="closes_{{ number }}" value="{{ row.closes_at.strftime('%H:%M') if row else '23:00' }}" aria-label="{{ name }} · {{ t('admin.schedule.closes') }}">
+    </div>
+    {% endfor %}
+  </fieldset>
+  {% if editable %}<div class="form__actions"><button class="btn btn--primary" type="submit">{{ t("admin.schedule.save_hours") }}</button></div>{% endif %}
+</form>
+
+<section class="card form">
+  <h2 class="card__title">{{ t("admin.schedule.closures") }}</h2>
+  <p class="card__hint">{{ t("admin.schedule.closure_hint") }}</p>
+  {% if editable %}
+  <form class="closure-form" method="post" action="{{ url_for('admin.schedule_closure_add') }}" novalidate>
+    {{ closure_form.hidden_tag() }}
+    <div class="field{% if closure_form.date.errors %} field--invalid{% endif %}">
+      <span class="field__label">{{ t("admin.reservations.day") }}</span>
+      {{ ui.date_field("date", None, t("admin.reservations.pick_day"), min=today) }}
+      {% for error in closure_form.date.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+    </div>
+    {{ ui.form_field(closure_form.reason, t("admin.schedule.reason")) }}
+    <button class="btn btn--primary" type="submit">{{ t("admin.schedule.add_closure") }}</button>
+  </form>
+  {% endif %}
+  {% if closures %}
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <tbody>
+        {% for closure in closures %}
+        <tr>
+          <td data-label="{{ t('admin.reservations.day') }}"><strong>{{ closure.day|jdate(true) }}</strong></td>
+          <td data-label="{{ t('admin.schedule.reason') }}">{{ closure.reason or "—" }}</td>
+          <td>{% if editable %}<div class="table__actions">{{ ui.post_button(url_for('admin.schedule_closure_remove', closure_id=closure.id), t("admin.schedule.reopen"), "ghost") }}</div>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">{{ t("admin.schedule.no_closures") }}</p>{% endif %}
+</section>
+
+<form class="card form" method="post" action="{{ url_for('admin.schedule_rules') }}" novalidate>
+  {{ rules_form.hidden_tag() }}
+  <h2 class="card__title">{{ t("admin.rules.title") }}</h2>
+  <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+    <div class="rules-grid">
+      {{ ui.form_field(rules_form.max_advance_days, t("admin.rules.max_advance_days"), inputmode="numeric") }}
+      {{ ui.form_field(rules_form.duration_minutes, t("admin.rules.duration_minutes"), inputmode="numeric") }}
+      {{ ui.form_field(rules_form.slot_minutes, t("admin.rules.slot_minutes"), inputmode="numeric") }}
+      {{ ui.form_field(rules_form.min_notice_minutes, t("admin.rules.min_notice_minutes"), inputmode="numeric") }}
+    </div>
+    {{ ui.checkbox(rules_form.auto_confirm, t("admin.rules.auto_confirm")) }}
+    <span class="muted">{{ t("admin.rules.auto_confirm_hint") }}</span>
+  </fieldset>
+  {% if editable %}<div class="form__actions"><button class="btn btn--primary" type="submit">{{ t("admin.rules.save") }}</button></div>{% endif %}
+</form>
+{% endblock %}

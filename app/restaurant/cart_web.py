@@ -2,7 +2,11 @@
 
 from restaurant.constants import FulfillmentType
 from restaurant.language_context import get_active_language
-from restaurant.service_factory import make_cart_service, make_pricing_service
+from restaurant.service_factory import (
+    make_cart_service,
+    make_pricing_service,
+    make_site_settings_service,
+)
 from restaurant.services import PricedCart, PricedLine
 
 
@@ -52,3 +56,8 @@ def cart_to_dict(priced: PricedCart, removed_unavailable: bool = False) -> dict:
         "total": priced.total,
         "removed_unavailable": removed_unavailable,
     }
+
+
+def is_ordering_paused() -> bool:
+    """Return True while the restaurant has paused online ordering (a setting in the panel)."""
+    return make_site_settings_service().is_ordering_paused()

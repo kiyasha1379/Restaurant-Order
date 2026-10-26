@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% import "macros/icons.html" as icons %}
+{% import "macros/ui.html" as ui %}
+{% import "macros/background.html" as backgrounds with context %}
+{% import "macros/reserve.html" as reserve_ui with context %}
+
+{% block title %}{{ t("reserve.title") }} · {{ brand_name }}{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components/date-picker.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reserve.css') }}">
+{% endblock %}
+
+{% block body_class %}page-reserve{% endblock %}
+
+{#- Parameters: `form`, `error`, `choice` (day, guests), `start` (time or None), `table_id`,
+    `tables` (active tables), `states` (table id to state), `slots`, `is_open`, `max_guests`,
+    `window_first`, `window_last`, `closed_days`, `quick_days`.
+    The server draws the first view; reserve.js keeps it in step with /api/availability. -#}
+{% set quick_dates = quick_days|map(attribute="day")|list %}
+{% set start_text = start.strftime("%H:%M") if start else "" %}
+{% set other_day = choice.day not in quick_dates %}
+
+{% block content %}
+{{ backgrounds.backdrop("reserve-page") }}
+<div class="reserve" data-reserve data-window-first="{{ window_first.isoformat() }}" data-window-last="{{ window_last.isoformat() }}" data-max-guests="{{ max_guests }}">
+  <header class="reserve__top">
+    <h1 class="reserve__title" data-reveal>{{ t("reserve.title") }}</h1>
+    <p class="reserve__subtitle" data-reveal>{{ t("reserve.subtitle") }}</p>
+  </header>
+
+  <form class="reserve__body" method="post" action="{{ url_for('public.reserve') }}" data-reserve-form novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="date" value="{{ choice.day.isoformat() }}" data-reserve-date>
+    <input type="hidden" name="guests" value="{{ choice.guests }}" data-reserve-guests>
+
+    <div class="reserve__steps">
+      <fieldset class="reserve-step">
+        <legend class="reserve-step__label"><span class="reserve-step__num">{{ 1|number }}</span>{{ t("reserve.day") }}</legend>
+        <div class="chip-row" role="group" aria-label="{{ t('reserve.day') }}">
+          {% for quick in quick_days %}
+          <button class="chip" type="button" data-day="{{ quick.day.isoformat() }}" aria-pressed="{{ 'true' if quick.day == choice.day else 'false' }}"{% if not quick.is_bookable %} disabled{% endif %}>{{ t(quick.label_key) }}</button>
+          {% endfor %}
+          <div class="date-field" data-date-field data-min="{{ window_first.isoformat() }}" data-max="{{ window_last.isoformat() }}" data-closed='{{ closed_days|map("string")|list|tojson }}' data-empty-label="{{ t('reserve.other_day') }}">
+            <input type="hidden" data-date-input value="{{ choice.day.isoformat() if other_day else '' }}">
+            <button class="chip chip--other" type="button" data-date-trigger aria-expanded="false" aria-pressed="{{ 'true' if other_day else 'false' }}">
+              {{ icons.icon("reserve", 18) }}
+              <span data-date-label>{{ choice.day|jdate(true) if other_day else t("reserve.other_day") }}</span>
+            </button>
+            <div class="date-field__panel" data-date-panel hidden></div>
+          </div>
+        </div>
+        {{ ui.field_error(form.date) }}
+      </fieldset>
+
+      <fieldset class="reserve-step">
+        <legend class="reserve-step__label"><span class="reserve-step__num">{{ 2|number }}</span>{{ t("reserve.time") }}</legend>
+        <div class="chip-row chip-row--times" role="radiogroup" aria-label="{{ t('reserve.time') }}" data-reserve-slots>
+          {% for slot in slots %}
+          <label class="time-chip">
+            <input class="time-chip__input" type="radio" name="time" value="{{ slot.time }}"
+              {%- if slot.time == start_text %} checked{% endif %}
+              {%- if not slot.available %} disabled{% endif %}>
+            <span class="time-chip__face">{{ slot.label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        <p class="reserve-step__note" data-reserve-slots-empty{% if slots %} hidden{% endif %}>{{ t("reserve.no_slots") if is_open else t("reserve.closed_day") }}</p>
+        {{ ui.field_error(form.time) }}
+      </fieldset>
+
+      <fieldset class="reserve-step">
+        <legend class="reserve-step__label"><span class="reserve-step__num">{{ 3|number }}</span>{{ t("reserve.guests") }}</legend>
+        <div class="stepper" role="group" aria-label="{{ t('reserve.guests') }}">
+          <button class="stepper__button" type="button" data-guests-step="-1" aria-label="{{ t('reserve.guests_less') }}">−</button>
+          <span class="stepper__value" data-guests-text aria-live="polite">{{ t("reserve.guests_unit_one" if choice.guests == 1 else "reserve.guests_unit", count=choice.guests|number) }}</span>
+          <button class="stepper__button" type="button" data-guests-step="1" aria-label="{{ t('reserve.guests_more') }}">+</button>
+        </div>
+        {{ ui.field_error(form.guests) }}
+      </fieldset>
+
+      <fieldset class="reserve-step">
+        <legend class="reserve-step__label"><span class="reserve-step__num">{{ 4|number }}</span>{{ t("reserve.contact") }}</legend>
+        <div class="reserve-contact">
+          <div class="field">
+            <label class="field__label" for="customer_name">{{ t("reserve.name") }}</label>
+            <input class="field__input" id="customer_name" name="customer_name" autocomplete="name" placeholder="{{ t('reserve.name_placeholder') }}" value="{{ form.customer_name.data or '' }}" required>
+            {{ ui.field_error(form.customer_name) }}
+          </div>
+          <div class="field">
+            <label class="field__label" for="customer_phone">{{ t("reserve.phone") }}</label>
+            <input class="field__input field__input--ltr" id="customer_phone" name="customer_phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="{{ t('reserve.phone_placeholder') }}" value="{{ form.customer_phone.data or '' }}" required>
+            {{ ui.field_error(form.customer_phone) }}
+          </div>
+          <div class="field reserve-contact__wide">
+            <label class="field__label" for="note">{{ t("reserve.note") }}</label>
+            <textarea class="field__input" id="note" name="note" rows="2">{{ form.note.data or "" }}</textarea>
+            {{ ui.field_error(form.note) }}
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="reserve__side">
+      <section class="plan" aria-labelledby="plan-title">
+        <div class="plan__head">
+          <h2 class="plan__title" id="plan-title">{{ t("reserve.plan.title") }}</h2>
+          <ul class="plan__legend">
+            <li><span class="plan__key plan__key--free"></span>{{ t("reserve.legend.free") }}</li>
+            <li><span class="plan__key plan__key--selected"></span>{{ t("reserve.legend.selected") }}</li>
+            <li><span class="plan__key plan__key--off"></span>{{ t("reserve.legend.unavailable") }}</li>
+          </ul>
+        </div>
+        <p class="plan__zone">{{ t("reserve.kitchen") }}</p>
+        {% if tables %}
+        <div class="plan__hall" role="radiogroup" aria-label="{{ t('reserve.plan.label') }}" data-reserve-plan>
+          {% for table in tables %}
+          {{ reserve_ui.plan_table(table, states.get(table.id, "idle"), table.id == table_id) }}
+          {% endfor %}
+        </div>
+        <p class="plan__hint" data-plan-hint{% if start %} hidden{% endif %}>{{ t("reserve.pick_time_first") }}</p>
+        {% else %}
+        <p class="plan__hint">{{ t("reserve.no_tables") }}</p>
+        {% endif %}
+        <p class="plan__zone">{{ t("reserve.entrance") }}</p>
+        {{ ui.field_error(form.table_id) }}
+      </section>
+
+      <section class="reserve-summary" aria-labelledby="summary-title">
+        <h2 class="reserve-summary__title" id="summary-title">{{ t("reserve.summary.title") }}</h2>
+        <dl class="reserve-summary__facts">
+          <div><dt>{{ t("reserve.summary.day") }}</dt><dd data-sum-day>{{ choice.day|jdate(true) }}</dd></div>
+          <div><dt>{{ t("reserve.summary.time") }}</dt><dd data-sum-time>{% for slot in slots if slot.time == start_text %}{{ slot.label }}{% else %}{{ t("reserve.summary.none") }}{% endfor %}</dd></div>
+          <div><dt>{{ t("reserve.summary.guests") }}</dt><dd data-sum-guests>{{ t("reserve.guests_unit_one" if choice.guests == 1 else "reserve.guests_unit", count=choice.guests|number) }}</dd></div>
+          <div><dt>{{ t("reserve.summary.table") }}</dt><dd class="reserve-summary__table" data-sum-table>{% for table in tables if table.id == table_id %}{{ t("reserve.table_label", label=table.label|digits) }}{% else %}{{ t("reserve.table_none") }}{% endfor %}</dd></div>
+        </dl>
+        <p class="reserve-summary__note">{{ t("reserve.pending_note") }}</p>
+        {% if error %}<p class="reserve-summary__error" role="alert" data-reserve-error>{{ error }}</p>{% else %}<p class="reserve-summary__error" role="alert" data-reserve-error hidden></p>{% endif %}
+        <button class="btn btn--primary reserve-summary__submit" type="submit" data-reserve-submit>{{ t("reserve.submit") }}</button>
+      </section>
+    </div>
+  </form>
+</div>
+{% endblock %}

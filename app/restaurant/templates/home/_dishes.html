@@ -1,0 +1,18 @@
+{#- One home page section. Parameter: dishes (the chef's picks). -#}
+{% import "macros/ui.html" as ui %}
+{% import "macros/dish.html" as dish_cards with context %}
+{% import "macros/background.html" as backgrounds with context %}
+{% if dishes %}
+<section class="screen" id="dishes" data-section>
+  {{ backgrounds.backdrop("home-dishes") }}
+  <div class="screen__inner">
+    <h2 class="screen__title" data-scroll-reveal>{{ t("home.dishes.title") }}</h2>
+    <div class="dish-grid dish-grid--picks">
+      {% for dish in dishes %}
+      <div data-scroll-reveal>{{ dish_cards.dish_card(dish, loop.index0) }}</div>
+      {% endfor %}
+    </div>
+    <p class="screen__more" data-scroll-reveal>{{ ui.button_link(url_for("public.menu"), t("home.dishes.all"), "ghost") }}</p>
+  </div>
+</section>
+{% endif %}

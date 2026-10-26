@@ -1,0 +1,118 @@
+/* Site appearance: brand, backgrounds and the home section list. */
+
+.fieldset-reset {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.stack > .check {
+  align-self: start;
+}
+
+.color-input {
+  inline-size: 5rem;
+  block-size: 2.6rem;
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+}
+
+.logo-preview {
+  max-inline-size: 12rem;
+  max-block-size: 6rem;
+  object-fit: contain;
+  align-self: start;
+}
+
+/* One background: a preview beside its fields (stacked on phones). */
+.bg-edit {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.bg-edit__preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.bg-edit__poster,
+.bg-edit__none {
+  inline-size: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-sm);
+  background: var(--color-raised);
+  object-fit: cover;
+}
+
+.bg-edit__none {
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+@media (width <= 40rem) {
+  .bg-edit {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Home sections: a short ordered list with arrow buttons. */
+.section-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.section-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-raised);
+}
+
+.section-list__item--fixed {
+  opacity: 0.7;
+}
+
+.section-list__moves {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.texts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.texts__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-3);
+  padding-block-end: var(--space-4);
+  border-block-end: 1px solid var(--color-line);
+}
+
+.texts__key {
+  grid-column: 1 / -1;
+}
+
+@media (width <= 40rem) {
+  .texts__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

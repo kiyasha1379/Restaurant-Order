@@ -6,10 +6,17 @@ text for a key yet. `flask sync-ui-strings` copies missing ones into the
 database so the admin panel can list and edit them.
 """
 
+from restaurant.account_texts import ACCOUNT_TEXTS
+from restaurant.admin_booking_texts import ADMIN_BOOKING_TEXTS
+from restaurant.admin_customer_texts import ADMIN_CUSTOMER_TEXTS
 from restaurant.admin_texts import ADMIN_TEXTS
+from restaurant.appearance_texts import SITE_TEXTS
 from restaurant.builder_texts import BUILDER_TEXTS
 from restaurant.constants import LANGUAGE_CODE_ENGLISH as EN
 from restaurant.constants import LANGUAGE_CODE_PERSIAN as FA
+from restaurant.payment_texts import PAYMENT_TEXTS
+from restaurant.reserve_texts import RESERVE_TEXTS
+from restaurant.settings_texts import SETTINGS_TEXTS
 
 DEFAULT_TEXTS: dict[str, dict[str, str]] = {
     "demo.bar": {
@@ -231,3 +238,10 @@ DEFAULT_TEXTS: dict[str, dict[str, str]] = {
 
 DEFAULT_TEXTS |= ADMIN_TEXTS
 DEFAULT_TEXTS |= BUILDER_TEXTS
+DEFAULT_TEXTS |= RESERVE_TEXTS
+DEFAULT_TEXTS |= ADMIN_BOOKING_TEXTS
+DEFAULT_TEXTS |= ACCOUNT_TEXTS
+DEFAULT_TEXTS |= ADMIN_CUSTOMER_TEXTS
+DEFAULT_TEXTS |= PAYMENT_TEXTS
+DEFAULT_TEXTS |= SETTINGS_TEXTS
+DEFAULT_TEXTS |= SITE_TEXTS

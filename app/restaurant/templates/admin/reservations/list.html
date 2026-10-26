@@ -1,0 +1,66 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.TABLES %}
+
+{% block title %}{{ t("admin.reservations.title") }}{% endblock %}
+{% block heading %}{{ t("admin.nav.tables") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/reservations.css') }}">{% endblock %}
+
+{#- Parameters: `bookings`, `day` (date or None), `status`, `statuses`, `waiting`, `today`. -#}
+{% block content %}
+<div class="toolbar">
+  {% with active = "list" %}{% include "admin/reservations/_tabs.html" %}{% endwith %}
+  <span class="toolbar__spacer"></span>
+  {% if access.can_edit(keys.TABLES) %}<a class="btn btn--primary btn--small" href="{{ url_for('admin.reservation_new') }}"><span class="btn__icon">{{ icons.icon("plus", 16) }}</span>{{ t("admin.reservations.new") }}</a>{% endif %}
+</div>
+
+{% if waiting %}<p class="admin-notice admin-notice--info">{{ t("admin.reservations.waiting", count=waiting|number) }}</p>{% endif %}
+
+<section class="card">
+  <form class="filter-bar" method="get" action="{{ url_for('admin.reservations') }}">
+    <span class="muted">{{ t("admin.reservations.day") }}</span>
+    {{ ui.date_field("day", day, t("admin.reservations.pick_day")) }}
+    {% if status %}<input type="hidden" name="status" value="{{ status.value }}">{% endif %}
+    <button class="btn btn--ghost btn--small" type="submit">{{ t("admin.reservations.filter") }}</button>
+    {% if day %}<a class="btn btn--ghost btn--small" href="{{ url_for('admin.reservations', status=status.value if status else None) }}">{{ t("admin.reservations.clear") }}</a>
+    {% else %}<span class="filter-bar__note">{{ t("admin.reservations.upcoming") }}</span>{% endif %}
+  </form>
+  <nav class="chips" aria-label="{{ t('admin.reservations.status') }}">
+    <a class="chip" href="{{ url_for('admin.reservations', day=day.isoformat() if day else None) }}"{% if not status %} aria-current="true"{% endif %}>{{ t("admin.reservations.all") }}</a>
+    {% for item in statuses %}
+    <a class="chip" href="{{ url_for('admin.reservations', day=day.isoformat() if day else None, status=item.value) }}"{% if status == item %} aria-current="true"{% endif %}>{{ t("reservation.status." ~ item.value) }}</a>
+    {% endfor %}
+  </nav>
+</section>
+
+<section class="card">
+  {% if bookings %}
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead><tr>
+        <th>{{ t("admin.reservations.number") }}</th><th>{{ t("admin.reservations.when") }}</th><th>{{ t("admin.reservations.guests") }}</th>
+        <th>{{ t("admin.reservations.table") }}</th><th>{{ t("admin.reservations.guest") }}</th><th>{{ t("admin.reservations.status") }}</th><th></th>
+      </tr></thead>
+      <tbody>
+        {% for booking in bookings %}
+        <tr>
+          <td data-label="{{ t('admin.reservations.number') }}"><bdi>{{ booking.number|number }}</bdi></td>
+          <td data-label="{{ t('admin.reservations.when') }}">{{ booking.starts_at|jdate(true) }} · <bdi>{{ booking.starts_at|jtime }}</bdi></td>
+          <td data-label="{{ t('admin.reservations.guests') }}">{{ booking.guests|number }}</td>
+          <td data-label="{{ t('admin.reservations.table') }}">{{ booking.table_label|digits }}</td>
+          <td data-label="{{ t('admin.reservations.guest') }}"><strong>{{ booking.customer_name }}</strong><br><bdi dir="ltr" class="muted">{{ booking.customer_phone }}</bdi></td>
+          <td data-label="{{ t('admin.reservations.status') }}"><span class="badge badge--{{ booking.status.value }}">{{ t("reservation.status." ~ booking.status.value) }}</span></td>
+          <td><div class="table__actions">
+            {% if access.can_edit(keys.TABLES) and booking.status.value == "pending" %}{{ ui.post_button(url_for('admin.reservation_confirm', reservation_id=booking.id), t("admin.reservations.confirm"), "primary", fields={"next": request.full_path}) }}{% endif %}
+            {% if access.can_edit(keys.TABLES) and booking.status.value != "cancelled" %}{{ ui.post_button(url_for('admin.reservation_cancel', reservation_id=booking.id), t("admin.reservations.cancel"), "ghost", confirm=t("admin.reservations.cancel_confirm"), fields={"next": request.full_path}) }}{% endif %}
+            <a class="btn btn--ghost btn--small" href="{{ url_for('admin.reservation_detail', reservation_id=booking.id) }}">{{ t("admin.reservations.view") }}</a>
+          </div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">{{ t("admin.reservations.empty") }}</p>{% endif %}
+</section>
+{% endblock %}

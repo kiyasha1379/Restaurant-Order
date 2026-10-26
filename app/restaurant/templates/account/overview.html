@@ -1,0 +1,42 @@
+{% extends "account/account_base.html" %}
+{% import "account/_cards.html" as cards with context %}
+
+{% block title %}{{ t("account.title") }} · {{ brand_name }}{% endblock %}
+{% block account_title %}{{ t("account.title") }}{% endblock %}
+
+{#- Parameters: `orders` (the latest), `order_total`, `bookings` (upcoming), `default_address`. -#}
+{% block account_body %}
+<div class="account__grid">
+  <section class="panel">
+    <div class="panel__head">
+      <h2 class="panel__title">{{ t("account.overview.recent_orders") }}</h2>
+      {% if order_total > orders|length %}<a class="panel__link" href="{{ url_for('public.account_orders') }}">{{ t("account.overview.view_all") }}</a>{% endif %}
+    </div>
+    {% for order in orders %}{{ cards.order_card(order) }}{% else %}
+    <p class="panel__empty">{{ t("account.overview.none_orders") }}</p>
+    <a class="btn btn--primary btn--small" href="{{ url_for('public.menu') }}">{{ t("account.overview.order_now") }}</a>
+    {% endfor %}
+  </section>
+
+  <section class="panel">
+    <div class="panel__head">
+      <h2 class="panel__title">{{ t("account.overview.upcoming") }}</h2>
+      <a class="panel__link" href="{{ url_for('public.account_reservations') }}">{{ t("account.overview.view_all") }}</a>
+    </div>
+    {% for booking in bookings %}{{ cards.booking_card(booking) }}{% else %}
+    <p class="panel__empty">{{ t("account.overview.none_bookings") }}</p>
+    <a class="btn btn--primary btn--small" href="{{ url_for('public.reserve') }}">{{ t("account.reservations.book") }}</a>
+    {% endfor %}
+  </section>
+
+  <section class="panel">
+    <div class="panel__head">
+      <h2 class="panel__title">{{ t("account.overview.default_address") }}</h2>
+      <a class="panel__link" href="{{ url_for('public.account_addresses') }}">{{ t("account.nav.addresses") }}</a>
+    </div>
+    {% if default_address %}
+    <p class="address__text">{% if default_address.label %}<strong>{{ default_address.label }}</strong><br>{% endif %}{{ default_address.text }}</p>
+    {% else %}<p class="panel__empty">{{ t("account.overview.none_address") }}</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

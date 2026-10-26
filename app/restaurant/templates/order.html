@@ -13,7 +13,7 @@
     the timeline and the headline in step with the server (stream, then polling). -#}
 {% block content %}
 <div class="order-page" data-order-tracker data-token="{{ order.public_token }}" data-status="{{ order.status.value }}">
-  <p class="order-page__kicker" data-reveal>{{ t("order.thanks") }}</p>
+  <p class="order-page__kicker" data-reveal>{{ t("order.pay.kicker") if awaiting_payment else t("order.thanks") }}</p>
   <h1 class="order-page__title" data-reveal>{{ t("order.number", number=order.number|number) }}</h1>
   <p class="order-page__status" data-status-label aria-live="polite">{{ t("order.status." ~ order.status.value) }}</p>
   <p class="order-page__live" data-live-note{% if is_final %} hidden{% endif %}>{{ t("order.live") }}</p>
@@ -28,6 +28,25 @@
     {% endfor %}
   </ol>
   <p class="order-page__cancelled" data-cancelled{% if order.status.value != "cancelled" %} hidden{% endif %}>{{ t("order.cancelled") }}</p>
+
+  {% if order.payment_method.value == "online" and awaiting_payment %}
+  <section class="pay-panel" data-pay-panel>
+    <h2 class="pay-panel__title">{{ t("order.pay.title") }}</h2>
+    <p class="pay-panel__hint">{{ t("order.pay.hint") }}</p>
+    <div class="pay-panel__actions">
+      <form method="post" action="{{ url_for('public.payment_start', public_token=order.public_token) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn--primary" type="submit">{{ t("order.pay.retry") }}</button>
+      </form>
+      {% if cash_available %}
+      <form method="post" action="{{ url_for('public.payment_switch_to_cash', public_token=order.public_token) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn--ghost" type="submit">{{ t("order.pay.switch_to_cash") }}</button>
+      </form>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
 
   <div class="order-card">
     <h2 class="order-card__title">{{ t("order.items") }}</h2>
@@ -47,14 +66,14 @@
     <dl class="order-card__facts">
       <div><dt>{{ t("order.fulfillment") }}</dt><dd>{{ t("checkout." ~ order.fulfillment.value) }}</dd></div>
       {% if order.fulfillment == fulfillment_delivery %}<div><dt>{{ t("order.address") }}</dt><dd>{{ order.delivery_address }}</dd></div>{% endif %}
-      <div><dt>{{ t("order.payment") }}</dt><dd>{{ t("checkout.pay_on_site") }}</dd></div>
+      <div><dt>{{ t("order.payment") }}</dt><dd>{{ t("order.payment_state." ~ payment_state) }}</dd></div>
       <div><dt>{{ t("order.placed_at") }}</dt><dd>{{ order.created_at|jdatetime }}</dd></div>
     </dl>
   </div>
 
   <div class="order-page__actions">
     {{ ui.button_link(url_for("public.menu"), t("order.back_to_menu"), "ghost") }}
-    {% if demo_mode and not is_final %}
+    {% if demo_mode and not is_final and not awaiting_payment %}
     <form method="post" action="{{ url_for('public.demo_advance_order', public_token=order.public_token) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button class="btn btn--primary" type="submit">{{ t("order.demo_advance") }}</button>

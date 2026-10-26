@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.CUSTOMERS %}
+
+{% block title %}{{ t("admin.messages.title") }}{% endblock %}
+{% block heading %}{{ t("admin.nav.customers") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/customers.css') }}">{% endblock %}
+
+{#- Parameters: `items` (messages of one page), `page`, `pages`, `unread`. -#}
+{% block content %}
+{% with active = "messages" %}{% include "admin/customers/_tabs.html" %}{% endwith %}
+{% if unread %}<p class="admin-notice admin-notice--info">{{ t("admin.messages.unread", count=unread|number) }}</p>{% endif %}
+
+{% for message in items %}
+<article class="card message{% if not message.is_read %} message--new{% endif %}">
+  <header class="message__head">
+    <strong>{{ message.name }}</strong>
+    {% if not message.is_read %}<span class="badge badge--pending">{{ t("admin.messages.new_badge") }}</span>{% endif %}
+    {% if message.user_id %}<a class="muted" href="{{ url_for('admin.customer_detail', user_id=message.user_id) }}">{{ t("admin.messages.account") }}</a>{% endif %}
+    <span class="toolbar__spacer"></span>
+    <span class="muted">{{ message.created_at|jdatetime }}</span>
+  </header>
+  <p class="message__contact"><span class="muted">{{ t("admin.messages.reply_to") }}:</span> <bdi dir="ltr">{{ message.contact }}</bdi></p>
+  <p class="message__body">{{ message.body }}</p>
+  {% if access.can_edit(keys.CUSTOMERS) %}
+  <div class="table__actions">
+    {% if message.is_read %}{{ ui.post_button(url_for('admin.message_read', message_id=message.id), t("admin.messages.mark_unread"), "ghost", fields={"read": "0", "page": page}) }}
+    {% else %}{{ ui.post_button(url_for('admin.message_read', message_id=message.id), t("admin.messages.mark_read"), "primary", fields={"read": "1", "page": page}) }}{% endif %}
+    {{ ui.post_button(url_for('admin.message_delete', message_id=message.id), t("admin.messages.delete"), "danger", confirm=t("admin.messages.delete_confirm")) }}
+  </div>
+  {% endif %}
+</article>
+{% else %}
+<section class="card"><p class="empty">{{ t("admin.messages.empty") }}</p></section>
+{% endfor %}
+{{ ui.pagination(page, pages, 'admin.messages', {}) }}
+{% endblock %}

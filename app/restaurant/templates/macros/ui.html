@@ -5,3 +5,50 @@
 {% macro button_link(href, label, variant="primary") %}
 <a class="btn btn--{{ variant }}" href="{{ href }}">{{ label }}</a>
 {% endmacro %}
+
+{#- The error messages of a form field, one paragraph each. Parameters: field (a WTForms field). -#}
+{% macro field_error(field) %}
+{% for message in field.errors %}<p class="field__error" role="alert">{{ message }}</p>{% endfor %}
+{% endmacro %}
+
+{#- A labelled text input with its hint and error messages. Parameters: field (WTForms field),
+    label, type ("text", "password", "email", "tel"), autocomplete, hint, ltr (numbers and
+    addresses typed left to right), inputmode. Passwords are never written back into the page. -#}
+{% macro input(field, label, type="text", autocomplete="", hint="", ltr=false, inputmode="") %}
+<div class="field">
+  <label class="field__label" for="{{ field.id }}">{{ label }}</label>
+  <input class="field__input{% if ltr %} field__input--ltr{% endif %}" id="{{ field.id }}" name="{{ field.name }}" type="{{ type }}"
+    {%- if type != "password" %} value="{{ field.data or '' }}"{% endif %}
+    {%- if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}
+    {%- if inputmode %} inputmode="{{ inputmode }}"{% endif %}
+    {%- if hint %} aria-describedby="{{ field.id }}-hint"{% endif %}>
+  {% if hint %}<p class="field__hint" id="{{ field.id }}-hint">{{ hint }}</p>{% endif %}
+  {{ field_error(field) }}
+</div>
+{% endmacro %}
+
+{#- A labelled multi-line box. Parameters: field (WTForms field), label, rows, autocomplete. -#}
+{% macro textarea(field, label, rows=3, autocomplete="") %}
+<div class="field">
+  <label class="field__label" for="{{ field.id }}">{{ label }}</label>
+  <textarea class="field__input" id="{{ field.id }}" name="{{ field.name }}" rows="{{ rows }}"{% if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}>{{ field.data or "" }}</textarea>
+  {{ field_error(field) }}
+</div>
+{% endmacro %}
+
+{#- A tick box with its label. Parameters: field (WTForms field), label. -#}
+{% macro checkbox(field, label) %}
+<label class="check">
+  <input class="check__input" type="checkbox" id="{{ field.id }}" name="{{ field.name }}" value="y"{% if field.data %} checked{% endif %}>
+  <span class="check__label">{{ label }}</span>
+</label>
+{% endmacro %}
+
+{#- A button that posts to an address (delete, make default...). Parameters: action, label,
+    variant ("ghost" by default), confirm (an optional question asked before sending). -#}
+{% macro post_button(action, label, variant="ghost", confirm="") %}
+<form method="post" action="{{ action }}"{% if confirm %} data-confirm="{{ confirm }}"{% endif %}>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn--{{ variant }} btn--small" type="submit">{{ label }}</button>
+</form>
+{% endmacro %}

@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.SITE %}
+{% set editable = access.can_edit(keys.SITE) %}
+
+{% block title %}{{ t("admin.site.tab_home") }}{% endblock %}
+{% block heading %}{{ t("admin.nav.site") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/site.css') }}">{% endblock %}
+
+{#- Parameters: sections (SectionRow list in order) and texts ({key: {language: text}}). -#}
+{% block content %}
+{% with active = "home" %}{% include "admin/site/_tabs.html" %}{% endwith %}
+
+<section class="card stack" id="sections">
+  <h2 class="card__title">{{ t("admin.site.sections") }}</h2>
+  <p class="muted">{{ t("admin.site.sections_hint") }}</p>
+  <form method="post" action="{{ url_for('admin.site_home_sections_save') }}" class="form">
+    {{ ui.csrf() }}
+    <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+      <ol class="section-list">
+        <li class="section-list__item section-list__item--fixed"><span>{{ t("admin.site.section.top") }}</span><span class="muted">{{ t("admin.site.fixed") }}</span></li>
+        {% for section in sections %}
+        <li class="section-list__item">
+          <input type="hidden" name="order" value="{{ section.key }}">
+          <label class="check"><input type="checkbox" name="visible" value="{{ section.key }}"{% if section.is_visible %} checked{% endif %}> <span>{{ t("admin.site.section." ~ section.key) }}</span></label>
+          <span class="section-list__moves">
+            <button class="btn btn--ghost btn--small btn--icon" type="submit" name="move" value="{{ section.key }}:up" aria-label="{{ t('admin.site.move_up') }}" title="{{ t('admin.site.move_up') }}"{% if loop.first %} disabled{% endif %}>{{ icons.icon("arrow-up", 16) }}</button>
+            <button class="btn btn--ghost btn--small btn--icon" type="submit" name="move" value="{{ section.key }}:down" aria-label="{{ t('admin.site.move_down') }}" title="{{ t('admin.site.move_down') }}"{% if loop.last %} disabled{% endif %}>{{ icons.icon("arrow-down", 16) }}</button>
+          </span>
+        </li>
+        {% endfor %}
+        <li class="section-list__item section-list__item--fixed"><span>{{ t("admin.site.section.contact") }}</span><span class="muted">{{ t("admin.site.fixed") }}</span></li>
+      </ol>
+    </fieldset>
+    {% if editable %}<div class="form__actions"><button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button></div>{% endif %}
+  </form>
+</section>
+
+<section class="card stack" id="texts">
+  <h2 class="card__title">{{ t("admin.site.home_texts") }}</h2>
+  <p class="muted">{{ t("admin.site.home_texts_hint") }}</p>
+  <form method="post" action="{{ url_for('admin.site_home_texts_save') }}" class="form">
+    {{ ui.csrf() }}
+    <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+      <div class="texts">
+        {% for key, by_language in texts.items() %}
+        <div class="texts__row">
+          <code class="texts__key" dir="ltr">{{ key }}</code>
+          <label class="field"><span class="field__label">{{ t("admin.menu.texts_fa") }}</span>
+            <textarea class="field__control" name="{{ key }}.fa" rows="2" maxlength="400" dir="rtl" lang="fa">{{ by_language["fa"] }}</textarea></label>
+          <label class="field"><span class="field__label">{{ t("admin.menu.texts_en") }}</span>
+            <textarea class="field__control" name="{{ key }}.en" rows="2" maxlength="400" dir="ltr" lang="en">{{ by_language["en"] }}</textarea></label>
+        </div>
+        {% endfor %}
+      </div>
+    </fieldset>
+    {% if editable %}<div class="form__actions"><button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button></div>{% endif %}
+  </form>
+</section>
+{% endblock %}

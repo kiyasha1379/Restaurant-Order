@@ -180,3 +180,69 @@ def option_ids(builder, *keys: str) -> list[int]:
     """Return the ids of the options with these keys, in the order the keys are given."""
     found = {option.key: option.id for step in builder.steps for option in step.options}
     return [found[key] for key in keys]
+
+
+def add_tables(*capacities: int):
+    """Create active tables labelled "1", "2"... with these capacities and return them."""
+    from restaurant.models import DiningTable
+
+    tables = [
+        DiningTable(label=str(number), capacity=capacity, sort_order=number)
+        for number, capacity in enumerate(capacities, start=1)
+    ]
+    db.session.add_all(tables)
+    db.session.flush()
+    return tables
+
+
+CUSTOMER_PASSWORD = "customer-pass-1"
+DEMO_CODE = "12345"
+
+
+def make_customer(
+    phone: str = "09121234567",
+    name: str = "Sara Customer",
+    email: str | None = None,
+    password: str = CUSTOMER_PASSWORD,
+    **fields,
+):
+    """Create a verified customer account (no role) and return it."""
+    from restaurant.models import User
+    from restaurant.services.auth_service import hash_password
+
+    user = User(
+        phone=phone,
+        email=email,
+        display_name=name,
+        password_hash=hash_password(password),
+        **fields,
+    )
+    db.session.add(user)
+    db.session.commit()
+    return user
+
+
+def customer_sign_in(client, identifier: str, password: str = CUSTOMER_PASSWORD, lang: str = "fa"):
+    """Post the public sign-in form and return the response."""
+    return client.post(f"/{lang}/login", data={"identifier": identifier, "password": password})
+
+
+def customer_client(app, **fields):
+    """Return (client, user): a client signed in as a new customer."""
+    user = make_customer(**fields)
+    client = app.test_client()
+    customer_sign_in(client, user.phone)
+    return client, user
+
+
+def register(client, lang: str = "fa", **overrides):
+    """Post the registration form with valid values (override any of them)."""
+    data = {
+        "customer_name": "Sara Customer",
+        "phone": "09121234567",
+        "email": "",
+        "password": CUSTOMER_PASSWORD,
+        "password_again": CUSTOMER_PASSWORD,
+        **overrides,
+    }
+    return client.post(f"/{lang}/register", data=data)

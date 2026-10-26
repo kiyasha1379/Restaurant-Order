@@ -162,6 +162,14 @@ class LanguageAdminService:
             max(math.ceil(len(rows) / TEXTS_PER_PAGE), 1),
         )
 
+    def get_texts(self, keys: list[str]) -> dict[str, dict[str, str]]:
+        """Return what each language shows now for these keys: stored text, else built-in."""
+        stored = self._ui_strings.get_texts(SUPPORTED_LANGUAGE_CODES)
+        return {
+            key: {code: self._effective(stored, key, code) for code in SUPPORTED_LANGUAGE_CODES}
+            for key in keys
+        }
+
     def save_texts(self, entries: Mapping[str, Mapping[str, str]]) -> int:
         """Store the texts that differ from what is shown now; return how many were changed.
 

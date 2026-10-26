@@ -7,6 +7,7 @@ from restaurant.extensions import db
 from restaurant.seed.demo_staff import DEMO_STAFF_PASSWORD
 from restaurant.service_factory import (
     make_access_service,
+    make_demo_customer_seeder,
     make_demo_seed_service,
     make_demo_staff_seeder,
     make_order_service,
@@ -35,8 +36,8 @@ def seed_demo_command() -> None:
     db.session.commit()
     click.echo(
         f"seed-demo: added {report.backgrounds} backgrounds, "
-        f"{report.categories} categories, {report.dishes} dishes and "
-        f"{report.builders} builders."
+        f"{report.categories} categories, {report.dishes} dishes, "
+        f"{report.builders} builders and {report.tables} tables."
     )
     staff_added = make_demo_staff_seeder().seed()
     db.session.commit()
@@ -45,6 +46,13 @@ def seed_demo_command() -> None:
             f"seed-demo: added {staff_added} sample staff accounts "
             f"(admin@example.com, manager@, cashier@, kitchen@, viewer@) "
             f"with the password {DEMO_STAFF_PASSWORD}. Use them for the demo only."
+        )
+    customer_rows = make_demo_customer_seeder().seed()
+    db.session.commit()
+    if customer_rows:
+        click.echo(
+            "seed-demo: added a sample customer (customer@example.com or 09120000000, "
+            f"password {DEMO_STAFF_PASSWORD}) and sample contact messages."
         )
 
 

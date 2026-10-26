@@ -3,7 +3,7 @@
 from datetime import datetime
 
 from flask_login import UserMixin
-from sqlalchemy import Column, ForeignKey, String, Table, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, String, Table, Text, UniqueConstraint, false
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from restaurant.constants import AccessLevel
@@ -32,8 +32,17 @@ class User(UserMixin, TimestampMixin, db.Model):
     display_name: Mapped[str] = mapped_column(String(120), default="")
     is_active: Mapped[bool] = mapped_column(default=True)
     last_login_at: Mapped[datetime | None] = mapped_column()
+    # A customer who registered but has not yet typed the verification code cannot sign in.
+    registration_pending: Mapped[bool] = mapped_column(default=False, server_default=false())
+    # The customer's cart as JSON, so it follows the account to another device.
+    saved_cart: Mapped[str | None] = mapped_column(Text)
 
     roles: Mapped[list["Role"]] = relationship(secondary=user_roles, back_populates="users")
+    addresses: Mapped[list["Address"]] = relationship(  # noqa: F821 - defined in customer.py
+        back_populates="user",
+        cascade="all, delete-orphan",
+        order_by="(Address.is_default.desc(), Address.id)",
+    )
 
 
 class Role(db.Model):

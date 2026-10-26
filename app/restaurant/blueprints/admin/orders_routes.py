@@ -20,12 +20,28 @@ from restaurant.blueprints.admin.guards import (
     is_safe_admin_path,
     permission_required,
 )
-from restaurant.constants import AccessLevel, FulfillmentType, OrderStatus, PermissionKey
+from restaurant.constants import (
+    AccessLevel,
+    FulfillmentType,
+    OrderStatus,
+    PaymentMethod,
+    PaymentStatus,
+    PermissionKey,
+)
 from restaurant.extensions import db
 from restaurant.language_context import get_translator, reset_session_after_error
 from restaurant.order_stream import ChangeStream
-from restaurant.service_factory import make_order_board_service, make_order_service
-from restaurant.services import InvalidTransitionError, OrderStatusMachine
+from restaurant.service_factory import (
+    make_order_board_service,
+    make_order_service,
+    make_payment_service,
+)
+from restaurant.services import (
+    InvalidTransitionError,
+    OrderStatusMachine,
+    PaymentError,
+    UnknownGatewayError,
+)
 
 ORDERS = PermissionKey.ORDERS
 EDIT = AccessLevel.EDIT
@@ -41,11 +57,21 @@ def _can_cancel(order) -> bool:  # noqa: ANN001 - an Order row
     return OrderStatusMachine.can_move(order.status, OrderStatus.CANCELLED, order.fulfillment)
 
 
+def _can_mark_paid(order) -> bool:  # noqa: ANN001 - an Order row
+    """Return True while a pay-on-site order still waits for its money."""
+    return (
+        order.payment_method is PaymentMethod.CASH_ON_SITE
+        and any(payment.status is PaymentStatus.PENDING for payment in order.payments)
+        and order.status not in (OrderStatus.AWAITING_PAYMENT, OrderStatus.CANCELLED)
+    )
+
+
 def _order_template_values() -> dict:
     """Helpers every order template uses: the next step, cancel rule and money visibility."""
     return {
         "next_status": _next_status,
         "can_cancel": _can_cancel,
+        "can_mark_paid": _can_mark_paid,
         "show_money": current_profile().can_see_money,
         "can_edit_orders": current_profile().can_edit(ORDERS),
     }
@@ -191,3 +217,23 @@ def order_cancel(order_id: int) -> Response:
         order_id,
         lambda service, order: service.change_status(order, OrderStatus.CANCELLED, current_user.id),
     )
+
+
+@admin_blueprint.post("/orders/<int:order_id>/paid")
+@permission_required(ORDERS, EDIT)
+def order_mark_paid(order_id: int) -> Response:
+    """Record that the money of a pay-on-site order was received."""
+    service = make_order_service()
+    order = service.get(order_id)
+    if order is None:
+        abort(404)
+    translate = get_translator()
+    try:
+        make_payment_service().mark_cash_received(order)
+    except (PaymentError, UnknownGatewayError):
+        db.session.rollback()
+        flash(translate("admin.orders.error.not_cash"), "error")
+    else:
+        db.session.commit()
+        flash(translate("admin.orders.marked_paid"), "success")
+    return _after_action(order_id)

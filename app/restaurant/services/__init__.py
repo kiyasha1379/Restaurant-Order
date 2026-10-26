@@ -8,6 +8,16 @@ from restaurant.services.auth_service import (
     WeakPasswordError,
 )
 from restaurant.services.background_service import BackgroundService, BackgroundView
+from restaurant.services.booking_service import (
+    BookingError,
+    BookingProblem,
+    BookingService,
+    DayAvailability,
+    ReservationRequest,
+    SlotAvailability,
+    TableAvailability,
+    TableState,
+)
 from restaurant.services.build_resolver import (
     BuildResolver,
     InvalidSelectionError,
@@ -39,6 +49,27 @@ from restaurant.services.cart_service import (
     CartService,
     CartStorage,
     CustomBuild,
+)
+from restaurant.services.contact_service import ContactError, ContactProblem, ContactService
+from restaurant.services.customer_admin_service import (
+    CustomerAdminService,
+    CustomerDetail,
+    CustomerRow,
+)
+from restaurant.services.customer_auth_service import (
+    CodeOutcome,
+    CustomerAuthService,
+    CustomerLoginOutcome,
+    CustomerLoginResult,
+    RegistrationError,
+    RegistrationProblem,
+    RegistrationRequest,
+)
+from restaurant.services.customer_profile_service import (
+    AddressInput,
+    CustomerProfileService,
+    ProfileError,
+    ProfileProblem,
 )
 from restaurant.services.dashboard_service import DashboardData, DashboardService
 from restaurant.services.language_admin_service import (
@@ -79,6 +110,24 @@ from restaurant.services.order_service import (
     UnavailableDishError,
 )
 from restaurant.services.order_status import OrderStatusMachine
+from restaurant.services.payment_gateway import (
+    GatewayError,
+    GatewayOutcome,
+    MockGateway,
+    PaymentGateway,
+    StartRequest,
+    StartResult,
+    UnknownGatewayError,
+    VerifyResult,
+    create_gateway,
+)
+from restaurant.services.payment_service import (
+    PaymentError,
+    PaymentProblem,
+    PaymentResult,
+    PaymentService,
+    StartedPayment,
+)
 from restaurant.services.pricing_service import (
     DeliveryFeeStrategy,
     FixedDeliveryFee,
@@ -86,7 +135,33 @@ from restaurant.services.pricing_service import (
     PricedLine,
     PricingService,
 )
-from restaurant.services.site_settings_service import SiteSettingsService
+from restaurant.services.reorder_service import ReorderResult, ReorderService
+from restaurant.services.schedule_service import (
+    DayHours,
+    DuplicateClosureError,
+    InvalidHoursError,
+    ScheduleError,
+    ScheduleService,
+)
+from restaurant.services.settings_admin_service import (
+    ContactDetails,
+    SettingsAdminService,
+    SettingsData,
+)
+from restaurant.services.site_appearance_service import (
+    HOME_TEXT_KEYS,
+    BackgroundRow,
+    SectionRow,
+    SiteAppearanceError,
+    SiteAppearanceService,
+)
+from restaurant.services.site_settings_service import (
+    BookingRules,
+    InvalidSettingError,
+    OrderingSettings,
+    SiteLook,
+    SiteSettingsService,
+)
 from restaurant.services.staff_service import (
     DuplicateEmailError,
     LockoutError,
@@ -96,9 +171,60 @@ from restaurant.services.staff_service import (
     SystemRoleError,
     UnknownRoleError,
 )
+from restaurant.services.table_admin_service import (
+    DuplicateTableLabelError,
+    InvalidTableError,
+    TableAdminError,
+    TableAdminService,
+    TableInput,
+    TableInUseError,
+)
 from restaurant.services.translation_service import SyncReport, TranslationService, Translator
+from restaurant.services.verification_codes import CodeIssuer, FixedCodeIssuer, LoggedCodeIssuer
 
 __all__ = [
+    "AddressInput",
+    "CodeIssuer",
+    "CodeOutcome",
+    "ContactError",
+    "ContactProblem",
+    "ContactService",
+    "CustomerAdminService",
+    "CustomerAuthService",
+    "CustomerDetail",
+    "CustomerLoginOutcome",
+    "CustomerLoginResult",
+    "CustomerProfileService",
+    "CustomerRow",
+    "FixedCodeIssuer",
+    "LoggedCodeIssuer",
+    "ProfileError",
+    "ProfileProblem",
+    "RegistrationError",
+    "RegistrationProblem",
+    "RegistrationRequest",
+    "ReorderResult",
+    "ReorderService",
+    "BookingError",
+    "BookingProblem",
+    "BookingRules",
+    "BookingService",
+    "DayAvailability",
+    "DuplicateTableLabelError",
+    "InvalidTableError",
+    "DayHours",
+    "DuplicateClosureError",
+    "InvalidHoursError",
+    "ReservationRequest",
+    "ScheduleError",
+    "ScheduleService",
+    "SlotAvailability",
+    "TableAdminError",
+    "TableAdminService",
+    "TableAvailability",
+    "TableInUseError",
+    "TableInput",
+    "TableState",
     "BuilderAdminError",
     "BuilderAdminService",
     "BuilderInput",
@@ -175,6 +301,31 @@ __all__ = [
     "OrderError",
     "OrderService",
     "OrderStatusMachine",
+    "ContactDetails",
+    "InvalidSettingError",
+    "BackgroundRow",
+    "HOME_TEXT_KEYS",
+    "SectionRow",
+    "SiteAppearanceError",
+    "SiteAppearanceService",
+    "SettingsAdminService",
+    "SettingsData",
+    "OrderingSettings",
+    "SiteLook",
+    "GatewayError",
+    "GatewayOutcome",
+    "MockGateway",
+    "PaymentError",
+    "PaymentGateway",
+    "PaymentProblem",
+    "PaymentResult",
+    "PaymentService",
+    "StartRequest",
+    "StartResult",
+    "StartedPayment",
+    "UnknownGatewayError",
+    "VerifyResult",
+    "create_gateway",
     "PlaceOrderRequest",
     "PricedCart",
     "PricedLine",

@@ -134,7 +134,7 @@ ADMIN_TEXTS: dict[str, dict[str, str]] = {
     "admin.orders.takeaway": {FA: "بیرون‌بر", EN: "Takeaway"},
     "admin.orders.delivery": {FA: "ارسال", EN: "Delivery"},
     "admin.orders.payment.cash_on_site": {FA: "پرداخت در محل", EN: "Pay on site"},
-    "admin.orders.payment.online": {FA: "پرداخت آنلاین", EN: "Paid online"},
+    "admin.orders.payment.online": {FA: "پرداخت آنلاین", EN: "Online payment"},
     "admin.orders.action.preparing": {FA: "تأیید و شروع آماده‌سازی", EN: "Accept and start"},
     "admin.orders.action.ready": {FA: "آماده شد", EN: "Mark ready"},
     "admin.orders.action.out_for_delivery": {FA: "ارسال شد", EN: "Send out"},

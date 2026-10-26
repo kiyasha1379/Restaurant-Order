@@ -14,3 +14,8 @@ class BackgroundRepository(BaseRepository[Background]):
     def get_by_key(self, key: str) -> Background | None:
         """Return the background with this key, or None."""
         return self._session.scalar(select(Background).where(Background.key == key))
+
+    def list_by_keys(self, keys: tuple[str, ...]) -> dict[str, Background]:
+        """Return the stored backgrounds among these keys, by key."""
+        rows = self._session.scalars(select(Background).where(Background.key.in_(keys)))
+        return {row.key: row for row in rows}

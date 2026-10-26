@@ -1,0 +1,21 @@
+{% extends "account/account_base.html" %}
+{% import "macros/ui.html" as ui %}
+
+{% block title %}{{ t("account.addresses.edit") }} · {{ brand_name }}{% endblock %}
+{% block account_title %}{{ t("account.addresses.edit") }}{% endblock %}
+
+{#- Parameters: `form` (AddressForm), `address`. -#}
+{% block account_body %}
+<section class="panel panel--narrow">
+  <form class="account-form" method="post" novalidate>
+    {{ form.csrf_token }}
+    {{ ui.input(form.label, t("account.addresses.label")) }}
+    {{ ui.textarea(form.text, t("account.addresses.text"), autocomplete="street-address") }}
+    {{ ui.checkbox(form.is_default, t("account.addresses.is_default")) }}
+    <div class="account-form__actions">
+      <button class="btn btn--primary" type="submit">{{ t("account.addresses.save") }}</button>
+      <a class="btn btn--ghost" href="{{ url_for('public.account_addresses') }}">{{ t("account.addresses.cancel") }}</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

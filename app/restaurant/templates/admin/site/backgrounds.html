@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.SITE %}
+{% set editable = access.can_edit(keys.SITE) %}
+
+{% block title %}{{ t("admin.site.tab_backgrounds") }}{% endblock %}
+{% block heading %}{{ t("admin.nav.site") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/site.css') }}">{% endblock %}
+
+{#- Parameters: rows (BackgroundRow list) and forms (BackgroundForm by key). -#}
+{% block content %}
+{% with active = "backgrounds" %}{% include "admin/site/_tabs.html" %}{% endwith %}
+<p class="muted">{{ t("admin.site.backgrounds_hint") }}</p>
+<div class="stack">
+  {% for row in rows %}
+  {% set form = forms[row.key] %}
+  <section class="card" id="bg-{{ row.key }}">
+    <form class="form bg-edit" method="post" action="{{ url_for('admin.site_background_save', key=row.key) }}" enctype="multipart/form-data" novalidate>
+      {{ ui.csrf() }}
+      <div class="bg-edit__preview">
+        {% if row.poster_path %}<img class="bg-edit__poster" src="{{ url_for('static', filename=row.poster_path) }}" alt="" loading="lazy">{% else %}<span class="bg-edit__none">{{ t("admin.site.no_poster") }}</span>{% endif %}
+        {% if row.video_path %}<a class="muted" href="{{ url_for('static', filename=row.video_path) }}" target="_blank" rel="noopener">{{ t("admin.site.preview_video") }}</a>{% else %}<span class="muted">{{ t("admin.site.no_video") }}</span>{% endif %}
+      </div>
+      <fieldset class="fieldset-reset stack bg-edit__fields" {% if not editable %}disabled{% endif %}>
+        <h2 class="card__title">{{ t("admin.site.bg." ~ row.key) }} <code class="muted" dir="ltr">{{ row.key }}</code></h2>
+        <div class="grid grid--two">
+          <div class="field{% if form.dim_percent.errors %} field--invalid{% endif %}">
+            <label class="field__label" for="dim-{{ row.key }}">{{ t("admin.site.dim") }}</label>
+            {{ form.dim_percent(id="dim-" ~ row.key, class="field__control", inputmode="numeric", dir="ltr") }}
+            {% for error in form.dim_percent.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+          <div class="field">
+            <label class="field__label" for="mode-{{ row.key }}">{{ t("admin.site.mobile_mode") }}</label>
+            <select class="field__control" id="mode-{{ row.key }}" name="mobile_mode">
+              {% for mode in ("poster_only", "video") %}<option value="{{ mode }}"{% if form.mobile_mode.data == mode %} selected{% endif %}>{{ t("admin.site.mode." ~ mode) }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <label class="check">{{ form.is_enabled(id="on-" ~ row.key) }} <span>{{ t("admin.site.enabled") }}</span></label>
+        <div class="grid grid--two">
+          <div class="field{% if form.poster.errors %} field--invalid{% endif %}">
+            <label class="field__label" for="poster-{{ row.key }}">{{ t("admin.site.poster") }}</label>
+            {{ form.poster(id="poster-" ~ row.key, class="field__control", accept="image/png,image/jpeg,image/webp") }}
+            {% for error in form.poster.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+            {% if row.poster_path %}<label class="check">{{ form.remove_poster(id="rmposter-" ~ row.key) }} <span>{{ t("admin.site.remove_poster") }}</span></label>{% endif %}
+          </div>
+          <div class="field{% if form.video.errors %} field--invalid{% endif %}">
+            <label class="field__label" for="video-{{ row.key }}">{{ t("admin.site.video") }}</label>
+            {{ form.video(id="video-" ~ row.key, class="field__control", accept="video/mp4") }}
+            <span class="muted">{{ t("admin.site.video_hint") }}</span>
+            {% for error in form.video.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+            {% if row.video_path %}<label class="check">{{ form.remove_video(id="rmvideo-" ~ row.key) }} <span>{{ t("admin.site.remove_video") }}</span></label>{% endif %}
+          </div>
+        </div>
+        {% if editable %}<div class="form__actions"><button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button></div>{% endif %}
+      </fieldset>
+    </form>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

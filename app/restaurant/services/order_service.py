@@ -3,8 +3,8 @@
 import secrets
 from dataclasses import dataclass
 
-from restaurant.constants import FulfillmentType, OrderStatus, PaymentMethod
-from restaurant.models import Order, OrderItem, OrderItemOption, OrderStatusLog
+from restaurant.constants import FulfillmentType, OrderStatus, PaymentMethod, PaymentStatus
+from restaurant.models import Order, OrderItem, OrderItemOption, OrderStatusLog, Payment
 from restaurant.repositories import OrderRepository
 from restaurant.services.cart_service import CartLine
 from restaurant.services.order_status import OrderStatusMachine
@@ -67,7 +67,7 @@ class OrderService:
         if not priced.lines:
             raise EmptyCartError("The cart is empty")
         order = self._build_order(request, priced)
-        order.status_log.append(OrderStatusLog(from_status=None, to_status=OrderStatus.PLACED))
+        order.status_log.append(OrderStatusLog(from_status=None, to_status=order.status))
         self._order_repository.add(order)
         return order
 
@@ -83,7 +83,30 @@ class OrderService:
             )
         )
         order.status = target
+        if target is OrderStatus.CANCELLED:
+            self._close_open_payments(order)
         return order
+
+    def confirm_payment(self, order: Order) -> Order:
+        """Let an order that waited for its payment into the kitchen's queue.
+
+        Called only after a payment was verified, or when the customer chose to pay on
+        arrival instead. The caller commits.
+        """
+        if order.status is not OrderStatus.AWAITING_PAYMENT:
+            raise InvalidTransitionError(f"Order is not waiting for payment: {order.status}")
+        order.status_log.append(
+            OrderStatusLog(from_status=order.status, to_status=OrderStatus.PLACED)
+        )
+        order.status = OrderStatus.PLACED
+        return order
+
+    @staticmethod
+    def _close_open_payments(order: Order) -> None:
+        """Cancel the payments of a cancelled order that nobody has paid yet."""
+        for payment in order.payments:
+            if payment.status is PaymentStatus.PENDING:
+                payment.status = PaymentStatus.CANCELLED
 
     def advance(self, order: Order, changed_by_user_id: int | None = None) -> Order:
         """Move the order one normal step forward (used by the demo and the kitchen board)."""
@@ -104,6 +127,14 @@ class OrderService:
         """Return the order with this id, or None."""
         return self._order_repository.get(order_id)
 
+    def list_for_user(self, user_id: int, offset: int, limit: int) -> tuple[list[Order], int]:
+        """Return one page of a customer's orders (newest first) and how many they have."""
+        return self._order_repository.list_for_user(user_id, offset, limit)
+
+    def find_for_user(self, user_id: int, public_token: str) -> Order | None:
+        """Return the order behind this token only when it belongs to the customer."""
+        return self._order_repository.get_for_user(user_id, public_token)
+
     def find_by_token(self, public_token: str) -> Order | None:
         """Return the order behind a tracking address, or None."""
         return self._order_repository.get_by_token(public_token)
@@ -112,6 +143,20 @@ class OrderService:
     def _build_order(request: PlaceOrderRequest, priced: PricedCart) -> Order:
         """Create the order row and its lines from the priced cart."""
         is_delivery = request.fulfillment is FulfillmentType.DELIVERY
+        pays_online = request.payment_method is PaymentMethod.ONLINE
+        # An online order waits for its payment; the payment attempt is created when it starts.
+        # Pay on site starts with one open payment that staff mark as received.
+        payments = (
+            []
+            if pays_online
+            else [
+                Payment(
+                    method=PaymentMethod.CASH_ON_SITE,
+                    status=PaymentStatus.PENDING,
+                    amount=priced.total,
+                )
+            ]
+        )
         return Order(
             public_token=secrets.token_urlsafe(TOKEN_BYTES),
             user_id=request.user_id,
@@ -122,13 +167,15 @@ class OrderService:
             delivery_address=request.delivery_address if is_delivery else "",
             note=request.note,
             payment_method=request.payment_method,
-            status=OrderStatus.PLACED,
+            status=OrderStatus.AWAITING_PAYMENT if pays_online else OrderStatus.PLACED,
+            payments=payments,
             subtotal=priced.subtotal,
             delivery_fee=priced.delivery_fee,
             total=priced.total,
             items=[
                 OrderItem(
                     dish_id=line.dish_id,
+                    builder_id=line.builder_id,
                     name_fa=line.name_fa,
                     name_en=line.name_en,
                     unit_price=line.unit_price,
@@ -137,6 +184,7 @@ class OrderService:
                     options=[
                         OrderItemOption(
                             order_index=option.order_index,
+                            option_id=option.option_id,
                             name_fa=option.name_fa,
                             name_en=option.name_en,
                             group_fa=option.group_fa,

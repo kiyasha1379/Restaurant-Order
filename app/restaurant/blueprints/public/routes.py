@@ -9,23 +9,33 @@ from flask import (
     request,
     url_for,
 )
+from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.wrappers import Response
 
 from restaurant.blueprints.public import public_blueprint
-from restaurant.cart_web import load_priced_cart
-from restaurant.constants import FulfillmentType
+from restaurant.cart_web import is_ordering_paused, load_priced_cart
+from restaurant.constants import (
+    DEFAULT_HOME_SECTION_ORDER,
+    FulfillmentType,
+    OrderStatus,
+    PaymentMethod,
+)
 from restaurant.extensions import db
-from restaurant.forms.checkout_form import CheckoutForm
+from restaurant.forms.checkout_form import CheckoutForm, available_payment_methods
 from restaurant.language_context import (
     get_active_language,
     get_translator,
     reset_session_after_error,
 )
+from restaurant.models import Order
+from restaurant.payment_web import start_payment_response
 from restaurant.service_factory import (
     make_cart_service,
+    make_customer_profile_service,
     make_menu_service,
     make_order_service,
+    make_site_appearance_service,
 )
 from restaurant.services import (
     EmptyCartError,
@@ -36,6 +46,16 @@ from restaurant.services import (
 )
 
 CHEFS_PICKS_ON_HOME = 4
+
+
+def _home_layout() -> list[str]:
+    """Return the keys of the movable home sections to draw, in the owner's order."""
+    try:
+        return make_site_appearance_service().visible_home_sections()
+    except SQLAlchemyError:
+        current_app.logger.exception("Could not read the home section order")
+        reset_session_after_error()
+        return [key.value for key in DEFAULT_HOME_SECTION_ORDER]
 
 
 @public_blueprint.get("/")
@@ -49,7 +69,7 @@ def home() -> str:
         current_app.logger.exception("Could not read the chef's picks")
         reset_session_after_error()
         dishes = []
-    return render_template("home.html", dishes=dishes)
+    return render_template("home.html", dishes=dishes, layout=_home_layout())
 
 
 @public_blueprint.get("/menu")
@@ -85,6 +105,9 @@ def _flash_unavailable_notice() -> None:
 @public_blueprint.route("/checkout", methods=["GET", "POST"])
 def checkout() -> str | Response:
     """Show the checkout form and, when it is valid, place the order and go to its tracking page."""
+    if is_ordering_paused():
+        # The site-wide bar already says why; keep the cart, but do not take the order.
+        return redirect(url_for("public.cart"))
     priced, removed = load_priced_cart()
     if removed:
         _flash_unavailable_notice()
@@ -100,7 +123,26 @@ def checkout() -> str | Response:
         if placed is not None:
             return placed
         return redirect(url_for("public.checkout"))
-    return render_template("checkout.html", form=form, priced=priced)
+    saved_addresses = []
+    if current_user.is_authenticated:
+        saved_addresses = make_customer_profile_service().list_addresses(current_user)
+        if request.method == "GET":
+            _prefill_from_account(form, saved_addresses)
+    return render_template(
+        "checkout.html",
+        form=form,
+        priced=priced,
+        saved_addresses=saved_addresses,
+        payment_methods=available_payment_methods(),
+    )
+
+
+def _prefill_from_account(form: CheckoutForm, saved_addresses: list) -> None:
+    """Fill the checkout form with the signed-in customer's name, phone and main address."""
+    form.customer_name.data = current_user.display_name
+    form.customer_phone.data = current_user.phone or ""
+    if saved_addresses:
+        form.delivery_address.data = saved_addresses[0].text
 
 
 def _place_order(form: CheckoutForm) -> Response | None:
@@ -114,9 +156,18 @@ def _place_order(form: CheckoutForm) -> Response | None:
         note=form.note.data,
         payment_method=form.chosen_payment_method,
         language_code=get_active_language().code,
+        user_id=current_user.id if current_user.is_authenticated else None,
     )
     try:
         order = make_order_service().place_order(order_request, cart_service.lines())
+        if (
+            current_user.is_authenticated
+            and form.save_address.data
+            and form.fulfillment_type is FulfillmentType.DELIVERY
+        ):
+            make_customer_profile_service().remember_address(
+                current_user, form.delivery_address.data
+            )
         db.session.commit()
     except UnavailableDishError as error:
         db.session.rollback()
@@ -127,7 +178,21 @@ def _place_order(form: CheckoutForm) -> Response | None:
         db.session.rollback()
         return redirect(url_for("public.cart"))
     cart_service.clear()
+    if order.payment_method is PaymentMethod.ONLINE:
+        return start_payment_response(order)
     return redirect(url_for("public.order_tracking", public_token=order.public_token))
+
+
+def _payment_state(order: Order) -> str:
+    """Name the payment situation of an order for its tracking page.
+
+    One of: paid_online, awaiting_online, cash_paid, cash_due, cancelled.
+    """
+    if order.status is OrderStatus.CANCELLED:
+        return "cancelled"
+    if order.payment_method is PaymentMethod.ONLINE:
+        return "paid_online" if order.is_paid else "awaiting_online"
+    return "cash_paid" if order.is_paid else "cash_due"
 
 
 @public_blueprint.get("/order/<public_token>")
@@ -142,6 +207,9 @@ def order_tracking(public_token: str) -> str:
         timeline=OrderStatusMachine.timeline(order.fulfillment),
         is_final=OrderStatusMachine.is_final(order.status),
         fulfillment_delivery=FulfillmentType.DELIVERY,
+        awaiting_payment=order.status is OrderStatus.AWAITING_PAYMENT,
+        payment_state=_payment_state(order),
+        cash_available=PaymentMethod.CASH_ON_SITE in available_payment_methods(),
     )
 
 

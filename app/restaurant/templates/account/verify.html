@@ -1,0 +1,22 @@
+{% extends "account/auth_base.html" %}
+{% import "macros/ui.html" as ui %}
+
+{% block title %}{{ t("account.verify.title") }} · {{ brand_name }}{% endblock %}
+{% block auth_title %}{{ t("account.verify.title") }}{% endblock %}
+{% block auth_subtitle %}{{ t("account.verify.subtitle", phone=phone|digits) }}{% endblock %}
+
+{#- Parameters: `form` (VerifyForm), `phone`, `demo_code` (the fixed code in demo mode, else None). -#}
+{% block auth_body %}
+{% if demo_code %}<p class="auth__demo">{{ t("account.verify.demo_hint", code=demo_code|digits) }}</p>{% endif %}
+<form class="auth__form" method="post" novalidate>
+  {{ form.csrf_token }}
+  <input type="hidden" name="next" value="{{ request.values.get('next', '') }}">
+  {{ ui.input(form.code, t("account.verify.code"), autocomplete="one-time-code", ltr=true, inputmode="numeric") }}
+  <button class="btn btn--primary auth__submit" type="submit">{{ t("account.verify.submit") }}</button>
+</form>
+<form class="auth__resend" method="post" action="{{ url_for('public.resend_code') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="next" value="{{ request.values.get('next', '') }}">
+  <button class="auth__link" type="submit">{{ t("account.verify.resend") }}</button>
+</form>
+{% endblock %}

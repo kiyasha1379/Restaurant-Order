@@ -9,9 +9,13 @@ from restaurant.blueprints.admin import (  # noqa: E402,F401
     auth_routes,
     builders_routes,
     context,
+    customers_routes,
     dashboard_routes,
     languages_routes,
     menu_routes,
     orders_routes,
+    reservations_routes,
+    settings_routes,
+    site_routes,
     users_routes,
 )

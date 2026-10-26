@@ -1,0 +1,24 @@
+{% extends "account/account_base.html" %}
+{% import "account/_cards.html" as cards with context %}
+
+{% block title %}{{ t("account.reservations.title") }} · {{ brand_name }}{% endblock %}
+{% block account_title %}{{ t("account.reservations.title") }}{% endblock %}
+
+{#- Parameters: `upcoming`, `past` (lists of reservations). -#}
+{% block account_body %}
+<section class="panel">
+  <div class="panel__head">
+    <h2 class="panel__title">{{ t("account.overview.upcoming") }}</h2>
+    <a class="btn btn--primary btn--small" href="{{ url_for('public.reserve') }}">{{ t("account.reservations.book") }}</a>
+  </div>
+  {% for booking in upcoming %}{{ cards.booking_card(booking) }}{% else %}
+  <p class="panel__empty">{{ t("account.overview.none_bookings") }}</p>
+  {% endfor %}
+</section>
+{% if past %}
+<section class="panel">
+  <h2 class="panel__title">{{ t("account.reservations.past") }}</h2>
+  {% for booking in past %}{{ cards.booking_card(booking) }}{% endfor %}
+</section>
+{% endif %}
+{% endblock %}

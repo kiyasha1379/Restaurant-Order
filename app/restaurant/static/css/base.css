@@ -79,3 +79,10 @@ video {
     scroll-behavior: auto !important;
   }
 }
+
+/* The restaurant's own logo, used instead of the built-in mark wherever the brand appears. */
+.brand-logo {
+  inline-size: 34px;
+  block-size: 34px;
+  object-fit: contain;
+}

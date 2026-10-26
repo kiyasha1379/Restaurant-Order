@@ -1,0 +1,12 @@
+/* Settings page: the form sections are cards in a single column. */
+
+.fieldset-reset {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.stack > .check {
+  align-self: start;
+}

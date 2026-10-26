@@ -1,0 +1,30 @@
+{#- One home page section. Parameter: dishes (the chef's picks). -#}
+{% import "macros/ui.html" as ui %}
+{% import "macros/icons.html" as icons %}
+{% import "macros/background.html" as backgrounds with context %}
+<section class="screen" id="modes" data-section>
+  {{ backgrounds.backdrop("home-modes") }}
+  <div class="screen__inner">
+    <h2 class="screen__title" data-scroll-reveal>{{ t("home.modes.title") }}</h2>
+    <div class="modes">
+      {% for mode, endpoint in [("order", "public.menu"), ("reserve", "public.reserve"), ("takeaway", "public.menu"), ("builder", "public.builder")] if has_page(endpoint) %}
+      <div class="dish-card mode-card" data-dish-card data-scroll-reveal>
+        <button type="button" class="dish-card__flip" aria-pressed="false" aria-label="{{ t('home.mode.' ~ mode ~ '.title') }}. {{ t('home.mode.flip_hint') }}">
+          <span class="dish-card__inner">
+            <span class="dish-card__face mode-card__front">
+              {{ icons.icon({"order": "menu", "reserve": "reserve", "takeaway": "cart", "builder": "builder"}[mode], 44) }}
+              <span class="mode-card__title">{{ t("home.mode." ~ mode ~ ".title") }}</span>
+              <span class="dish-card__hint">{{ icons.icon("flip", 16) }}</span>
+            </span>
+            <span class="dish-card__face dish-card__back">
+              <span class="dish-card__back-title">{{ t("home.mode." ~ mode ~ ".title") }}</span>
+              <span class="dish-card__back-text">{{ t("home.mode." ~ mode ~ ".text") }}</span>
+              <a class="mode-card__go" href="{{ url_for(endpoint) }}">{{ t("home.mode.start") }} {{ icons.icon("arrow", 16) }}</a>
+            </span>
+          </span>
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>

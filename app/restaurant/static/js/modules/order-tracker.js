@@ -16,6 +16,11 @@ function showStatus(page, data) {
     step.classList.toggle("is-current", index === currentIndex);
   });
   page.querySelector("[data-cancelled]").hidden = data.status !== "cancelled";
+  // The pay-again panel only makes sense while the order waits for its payment.
+  const payPanel = page.querySelector("[data-pay-panel]");
+  if (payPanel) {
+    payPanel.hidden = data.status !== "awaiting_payment";
+  }
   page.querySelector("[data-live-note]").hidden = data.final;
 }
 

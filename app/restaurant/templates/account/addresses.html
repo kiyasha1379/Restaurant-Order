@@ -1,0 +1,40 @@
+{% extends "account/account_base.html" %}
+{% import "macros/ui.html" as ui %}
+
+{% block title %}{{ t("account.addresses.title") }} · {{ brand_name }}{% endblock %}
+{% block account_title %}{{ t("account.addresses.title") }}{% endblock %}
+
+{#- Parameters: `addresses`, `form` (AddressForm, to add one). -#}
+{% block account_body %}
+<div class="account__grid account__grid--wide">
+  <section class="panel">
+    {% for address in addresses %}
+    <article class="address">
+      <p class="address__text">
+        {% if address.label %}<strong>{{ address.label }}</strong>{% endif %}
+        {% if address.is_default %}<span class="pill pill--main">{{ t("account.addresses.default_badge") }}</span>{% endif %}
+        <br>{{ address.text }}
+      </p>
+      <div class="address__actions">
+        <a class="btn btn--ghost btn--small" href="{{ url_for('public.account_address_edit', address_id=address.id) }}">{{ t("account.addresses.edit_button") }}</a>
+        {% if not address.is_default %}{{ ui.post_button(url_for('public.account_address_default', address_id=address.id), t("account.addresses.make_default")) }}{% endif %}
+        {{ ui.post_button(url_for('public.account_address_delete', address_id=address.id), t("account.addresses.delete"), confirm=t("account.addresses.delete_confirm")) }}
+      </div>
+    </article>
+    {% else %}
+    <p class="panel__empty">{{ t("account.addresses.empty") }}</p>
+    {% endfor %}
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">{{ t("account.addresses.add") }}</h2>
+    <form class="account-form" method="post" novalidate>
+      {{ form.csrf_token }}
+      {{ ui.input(form.label, t("account.addresses.label")) }}
+      {{ ui.textarea(form.text, t("account.addresses.text"), autocomplete="street-address") }}
+      {{ ui.checkbox(form.is_default, t("account.addresses.is_default")) }}
+      <button class="btn btn--primary" type="submit">{{ t("account.addresses.save") }}</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

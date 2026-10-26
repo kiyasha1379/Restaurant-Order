@@ -110,7 +110,8 @@
 }
 
 .badge--accent,
-.badge--placed {
+.badge--placed,
+.badge--awaiting_payment {
   background: var(--color-accent-soft);
   color: var(--color-accent);
 }
@@ -400,4 +401,26 @@ textarea.field__control {
 .login__title {
   margin-block-end: var(--space-4);
   font-size: 1.6rem;
+}
+
+/* A grid of label / value pairs (booking, customer). */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.facts dt {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.facts dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.facts__wide {
+  grid-column: 1 / -1;
 }

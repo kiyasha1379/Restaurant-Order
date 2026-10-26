@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{#- Shared frame of the account pages: heading, section tabs and the page body.
+    Blocks: account_title, account_body. Parameter: `active`. -#}
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/account.css') }}">
+{% endblock %}
+
+{% block body_class %}page-account{% endblock %}
+
+{% block content %}
+<div class="account">
+  <header class="account__head" data-reveal>
+    <p class="account__hello">{{ t("account.hello", name=current_user.display_name) }}</p>
+    <h1 class="account__title">{% block account_title %}{% endblock %}</h1>
+  </header>
+  {% include "account/_tabs.html" %}
+  {% block account_body %}{% endblock %}
+</div>
+{% endblock %}

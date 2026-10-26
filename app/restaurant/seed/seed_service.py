@@ -1,6 +1,7 @@
 """Fills an empty database with the demo's sample content. Safe to run twice."""
 
 from dataclasses import dataclass
+from datetime import time
 
 from restaurant.constants import LANGUAGE_CODE_ENGLISH, LANGUAGE_CODE_PERSIAN
 from restaurant.models import (
@@ -13,8 +14,10 @@ from restaurant.models import (
     BuilderTranslation,
     Category,
     CategoryTranslation,
+    DiningTable,
     Dish,
     DishTranslation,
+    OpeningHour,
 )
 from restaurant.repositories import (
     BackgroundRepository,
@@ -22,9 +25,17 @@ from restaurant.repositories import (
     CategoryRepository,
     DishRepository,
     LanguageRepository,
+    ScheduleRepository,
+    TableRepository,
 )
 from restaurant.seed.demo_builders import DEMO_BUILDERS, DemoBuilder, DemoOption, DemoStep
-from restaurant.seed.demo_data import DEMO_BACKGROUNDS, DEMO_CATEGORIES, DemoCategory, DemoDish
+from restaurant.seed.demo_data import (
+    DEMO_BACKGROUNDS,
+    DEMO_CATEGORIES,
+    DEMO_TABLE_CAPACITIES,
+    DemoCategory,
+    DemoDish,
+)
 
 
 @dataclass(frozen=True)
@@ -35,6 +46,7 @@ class SeedReport:
     categories: int = 0
     dishes: int = 0
     builders: int = 0
+    tables: int = 0
 
 
 class DemoSeedService:
@@ -47,6 +59,8 @@ class DemoSeedService:
         category_repository: CategoryRepository,
         dish_repository: DishRepository,
         builder_repository: BuilderRepository,
+        table_repository: TableRepository,
+        schedule_repository: ScheduleRepository,
     ) -> None:
         """Receive the repositories instead of importing them, so tests can swap them."""
         self._language_repository = language_repository
@@ -54,14 +68,21 @@ class DemoSeedService:
         self._category_repository = category_repository
         self._dish_repository = dish_repository
         self._builder_repository = builder_repository
+        self._table_repository = table_repository
+        self._schedule_repository = schedule_repository
 
     def seed(self) -> SeedReport:
         """Add whatever is missing. Existing rows are never changed. The caller commits."""
         backgrounds = self._seed_backgrounds()
         categories, dishes = self._seed_menu()
         builders = self._seed_builders()
+        tables = self._seed_booking()
         return SeedReport(
-            backgrounds=backgrounds, categories=categories, dishes=dishes, builders=builders
+            backgrounds=backgrounds,
+            categories=categories,
+            dishes=dishes,
+            builders=builders,
+            tables=tables,
         )
 
     def _seed_backgrounds(self) -> int:
@@ -108,6 +129,22 @@ class DemoSeedService:
                 continue
             self._builder_repository.add(self._build_builder(demo, sort_order, language_ids))
             added += 1
+        return added
+
+    def _seed_booking(self) -> int:
+        """Add the demo hall when there are no tables, and opening hours for missing weekdays."""
+        added = 0
+        if self._table_repository.count() == 0:
+            for position, capacity in enumerate(DEMO_TABLE_CAPACITIES, start=1):
+                self._table_repository.add(
+                    DiningTable(label=str(position), capacity=capacity, sort_order=position)
+                )
+                added += 1
+        for weekday in range(7):
+            if self._schedule_repository.get_hours(weekday) is None:
+                self._schedule_repository.add_hours(
+                    OpeningHour(weekday=weekday, opens_at=time(12, 0), closes_at=time(23, 0))
+                )
         return added
 
     @staticmethod

@@ -1,0 +1,6 @@
+{#- Bookings / tables / hours tabs. Parameter: active ("list", "tables" or "schedule"). -#}
+<nav class="chips" aria-label="{{ t('admin.nav.tables') }}">
+  <a class="chip" href="{{ url_for('admin.reservations') }}"{% if active == "list" %} aria-current="true"{% endif %}>{{ t("admin.reservations.tab_list") }}</a>
+  <a class="chip" href="{{ url_for('admin.tables') }}"{% if active == "tables" %} aria-current="true"{% endif %}>{{ t("admin.reservations.tab_tables") }}</a>
+  <a class="chip" href="{{ url_for('admin.schedule') }}"{% if active == "schedule" %} aria-current="true"{% endif %}>{{ t("admin.reservations.tab_schedule") }}</a>
+</nav>

@@ -1,0 +1,21 @@
+{% extends "account/account_base.html" %}
+{% import "account/_cards.html" as cards with context %}
+
+{% block title %}{{ t("account.orders.title") }} · {{ brand_name }}{% endblock %}
+{% block account_title %}{{ t("account.orders.title") }}{% endblock %}
+
+{#- Parameters: `orders` (one page), `page`, `has_next`. -#}
+{% block account_body %}
+<section class="panel">
+  {% for order in orders %}{{ cards.order_card(order) }}{% else %}
+  <p class="panel__empty">{{ t("account.orders.empty") }}</p>
+  <a class="btn btn--primary btn--small" href="{{ url_for('public.menu') }}">{{ t("account.overview.order_now") }}</a>
+  {% endfor %}
+  {% if page > 1 or has_next %}
+  <nav class="pager">
+    {% if page > 1 %}<a class="btn btn--ghost btn--small" href="{{ url_for('public.account_orders', page=page - 1) }}">{{ t("account.orders.less") }}</a>{% endif %}
+    {% if has_next %}<a class="btn btn--ghost btn--small" href="{{ url_for('public.account_orders', page=page + 1) }}">{{ t("account.orders.more") }}</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endblock %}

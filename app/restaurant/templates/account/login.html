@@ -1,0 +1,20 @@
+{% extends "account/auth_base.html" %}
+{% import "macros/ui.html" as ui %}
+
+{% block title %}{{ t("account.login.title") }} · {{ brand_name }}{% endblock %}
+{% block auth_title %}{{ t("account.login.title") }}{% endblock %}
+{% block auth_subtitle %}{{ t("account.login.subtitle") }}{% endblock %}
+
+{#- Parameters: `form` (SignInForm), `failure` (a message or None). -#}
+{% block auth_body %}
+{% if failure %}<p class="auth__failure" role="alert">{{ failure }}</p>{% endif %}
+<form class="auth__form" method="post" novalidate>
+  {{ form.csrf_token }}
+  <input type="hidden" name="next" value="{{ request.values.get('next', '') }}">
+  {{ ui.input(form.identifier, t("account.login.identifier"), autocomplete="username", ltr=true) }}
+  {{ ui.input(form.password, t("account.login.password"), type="password", autocomplete="current-password") }}
+  <button class="btn btn--primary auth__submit" type="submit">{{ t("account.login.submit") }}</button>
+</form>
+<p class="auth__note">{{ t("account.login.cart_note") }}</p>
+<p class="auth__switch">{{ t("account.login.no_account") }} <a href="{{ url_for('public.register', next=request.values.get('next') or None) }}">{{ t("account.login.register_link") }}</a></p>
+{% endblock %}

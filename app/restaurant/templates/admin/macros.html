@@ -49,3 +49,20 @@
 </nav>
 {% endif %}
 {% endmacro %}
+
+{#- A Jalali date picker field (js/modules/date-picker.js). The chosen day is sent as `name`, in
+    the form YYYY-MM-DD. Parameters: name, value (a date or None), empty_label (text before a
+    day is chosen), min and max (dates, optional) and closed (list of dates that cannot be chosen). -#}
+{% macro date_field(name, value=None, empty_label="", min=None, max=None, closed=None) %}
+<div class="date-field date-field--admin" data-date-field data-empty-label="{{ empty_label }}"
+  {%- if min %} data-min="{{ min.isoformat() }}"{% endif %}
+  {%- if max %} data-max="{{ max.isoformat() }}"{% endif %}
+  {%- if closed %} data-closed='{{ closed|map("string")|list|tojson }}'{% endif %}>
+  <input type="hidden" name="{{ name }}" value="{{ value.isoformat() if value else '' }}" data-date-input>
+  <button class="btn btn--ghost date-field__trigger" type="button" data-date-trigger aria-expanded="false" aria-pressed="{{ 'true' if value else 'false' }}">
+    <span class="btn__icon">{{ icons.icon("reserve", 18) }}</span>
+    <span data-date-label>{{ value|jdate(true) if value else empty_label }}</span>
+  </button>
+  <div class="date-field__panel" data-date-panel hidden></div>
+</div>
+{% endmacro %}

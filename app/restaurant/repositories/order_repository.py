@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import joinedload, selectinload
 
 from restaurant.constants import FulfillmentType, OrderStatus
@@ -18,6 +18,15 @@ class OrderFilter:
     status: OrderStatus | None = None
     fulfillment: FulfillmentType | None = None
     text: str = ""
+
+
+@dataclass(frozen=True)
+class CustomerOrderStats:
+    """What one customer has ordered so far (cancelled and unpaid online orders are not counted)."""
+
+    order_count: int
+    total_spent: int
+    last_order_at: datetime
 
 
 class OrderRepository(BaseRepository[Order]):
@@ -88,6 +97,61 @@ class OrderRepository(BaseRepository[Order]):
             .limit(limit)
         )
         return list(self._session.scalars(statement)), total
+
+    def list_for_user(self, user_id: int, offset: int, limit: int) -> tuple[list[Order], int]:
+        """Return one page of a customer's orders (newest first) and how many they have."""
+        total = (
+            self._session.scalar(select(func.count(Order.id)).where(Order.user_id == user_id)) or 0
+        )
+        statement = (
+            select(Order)
+            .where(Order.user_id == user_id)
+            .options(selectinload(Order.items))
+            .order_by(Order.id.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        return list(self._session.scalars(statement)), total
+
+    def get_for_user(self, user_id: int, public_token: str) -> Order | None:
+        """Return the order behind this token if it belongs to the customer, else None."""
+        statement = (
+            select(Order)
+            .where(Order.public_token == public_token, Order.user_id == user_id)
+            .options(selectinload(Order.items).selectinload(OrderItem.options))
+        )
+        return self._session.scalar(statement)
+
+    def stats_for_users(self, user_ids: list[int]) -> dict[int, "CustomerOrderStats"]:
+        """Return how many orders each customer placed, what they spent and their last order."""
+        if not user_ids:
+            return {}
+        rows = self._session.execute(
+            select(
+                Order.user_id,
+                func.count(Order.id),
+                func.coalesce(func.sum(Order.total), 0),
+                func.max(Order.created_at),
+            )
+            .where(
+                Order.user_id.in_(user_ids),
+                Order.status.not_in([OrderStatus.CANCELLED, OrderStatus.AWAITING_PAYMENT]),
+            )
+            .group_by(Order.user_id)
+        )
+        return {
+            user_id: CustomerOrderStats(count, spent, last_at)
+            for user_id, count, spent, last_at in rows
+        }
+
+    def claim_guest_orders(self, phone: str, user_id: int) -> int:
+        """Attach the guest orders placed with this phone number to the customer's account."""
+        result = self._session.execute(
+            update(Order)
+            .where(Order.customer_phone == phone, Order.user_id.is_(None))
+            .values(user_id=user_id)
+        )
+        return result.rowcount or 0
 
     def get_detail(self, order_id: int) -> Order | None:
         """Return one order with its lines, options and status history loaded."""

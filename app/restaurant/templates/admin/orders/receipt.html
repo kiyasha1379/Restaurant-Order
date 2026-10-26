@@ -34,7 +34,7 @@
     </dl>
     <p>{{ order.customer_name }} · <bdi dir="ltr">{{ order.customer_phone }}</bdi></p>
     {% if order.delivery_address %}<p>{{ order.delivery_address }}</p>{% endif %}
-    <p>{{ t("admin.orders.payment." ~ order.payment_method.value) }}</p>
+    <p>{{ t("admin.orders.payment." ~ order.payment_method.value) }} · {{ t("admin.orders.pay_chip.paid") if order.is_paid else t("admin.orders.payment_status.pending") }}</p>
     {% endif %}
     <button class="slip__print" type="button" data-print>{{ t("admin.orders.print") }}</button>
   </main>

@@ -2,11 +2,22 @@
     Parameter: order. The kitchen (no 'money' permission) sees items and the note only. -#}
 {% import "admin/macros.html" as ui with context %}
 
+{#- A small badge for money matters: paid, or cash still to collect. Test payments say so. -#}
+{% macro pay_chip(order) %}
+{% set payment = order.latest_payment %}
+{% if payment %}
+  {% if order.is_paid %}<span class="badge badge--ok">{{ t("admin.orders.pay_chip.paid") }}{% if payment.is_test %} · {{ t("admin.orders.test_badge") }}{% endif %}</span>
+  {% elif order.payment_method.value == "cash_on_site" and order.status.value != "cancelled" %}<span class="badge">{{ t("admin.orders.pay_chip.cash_due") }}</span>
+  {% elif order.status.value == "awaiting_payment" %}<span class="badge badge--accent">{{ t("admin.orders.pay_chip.online_waiting") }}</span>{% endif %}
+{% endif %}
+{% endmacro %}
+
 {% macro order_card(order, with_actions=True) %}
 <article class="order-card" data-order-id="{{ order.id }}">
   <header class="order-card__head">
     <a class="order-card__number" href="{{ url_for('admin.order_detail', order_id=order.id) }}">#<bdi>{{ order.number|number }}</bdi></a>
     <span class="badge badge--{{ 'accent' if order.fulfillment.value == 'delivery' else 'ok' }}">{{ t("admin.orders." ~ order.fulfillment.value) }}</span>
+    {{ pay_chip(order) }}
     <time class="order-card__time" datetime="{{ order.created_at.isoformat() }}">{{ order.created_at|jtime }}</time>
   </header>
   <ul class="order-card__items">

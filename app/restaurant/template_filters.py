@@ -23,6 +23,11 @@ def price_filter(value: int) -> str:
     return formatting.format_price(value, _code())
 
 
+def digits_filter(value: object) -> str:
+    """{{ "A3"|digits }} -> A۳ in Persian, A3 in English (labels that may hold letters)."""
+    return formatting.localize_digits(str(value), _code())
+
+
 def jdate_filter(value: date | datetime, with_weekday: bool = False) -> str:
     """{{ day|jdate }} -> ۴ آبان ۱۴۰۵ (or with the weekday in front)."""
     return formatting.format_jalali_date(value, _code(), with_weekday=with_weekday)
@@ -46,6 +51,7 @@ def jdatetime_filter(value: datetime) -> str:
 def register_template_filters(app: Flask) -> None:
     """Make the filters available in every template."""
     app.add_template_filter(number_filter, "number")
+    app.add_template_filter(digits_filter, "digits")
     app.add_template_filter(price_filter, "price")
     app.add_template_filter(jdate_filter, "jdate")
     app.add_template_filter(jdate_numeric_filter, "jdate_numeric")

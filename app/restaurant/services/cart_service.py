@@ -95,6 +95,25 @@ class CartService:
         )
         self._store(list(lines.values()))
 
+    def merge_saved(self, raw_lines: list[dict]) -> None:
+        """Add the lines saved with an account to this cart (used when a customer signs in).
+
+        The same line adds up (up to the quantity cap); lines beyond the cart limit are dropped.
+        """
+        lines = {line.line_id: line for line in self.lines()}
+        for raw in raw_lines:
+            saved = self._parse(raw)
+            if saved is None:
+                continue
+            existing = lines.get(saved.line_id)
+            if existing is None and len(lines) >= MAX_CART_LINES:
+                continue
+            total = (existing.quantity if existing else 0) + saved.quantity
+            lines[saved.line_id] = CartLine(
+                saved.line_id, saved.dish_id, min(total, MAX_DISH_QUANTITY), saved.custom
+            )
+        self._store(list(lines.values()))
+
     def set_quantity(self, line_id: str, quantity: int) -> None:
         """Set a line's quantity; zero removes the line."""
         self._check_quantity(quantity, minimum=0)

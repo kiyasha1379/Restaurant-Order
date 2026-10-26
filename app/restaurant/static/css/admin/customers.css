@@ -1,0 +1,38 @@
+/* Admin messages: one card per contact-form message. */
+
+.message {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.message--new {
+  border-inline-start: 3px solid var(--color-accent);
+}
+
+.message__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.message__body {
+  white-space: pre-line;
+  line-height: 1.9;
+}
+
+/* Short lists on the customer page (orders, bookings, addresses). */
+.plain-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plain-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}

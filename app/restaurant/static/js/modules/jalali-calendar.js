@@ -205,6 +205,69 @@ export class JalaliCalendar {
     return day + ' ' + MONTH_NAMES[language][jalaliDate.month - 1] + ' ' + year;
   }
 
+  /** "سه‌شنبه، ۴ آبان ۱۴۰۵" or "Tuesday, 4 Aban 1405": the same text the server writes. */
+  static formatFull(jalaliDate, language = 'fa') {
+    const weekday = WEEKDAY_FULL[language][JalaliCalendar.weekdayIndex(jalaliDate)];
+    const separator = language === 'fa' ? '،' : ',';
+    return weekday + separator + ' ' + JalaliCalendar.formatDate(jalaliDate, language);
+  }
+
+  /** Parses a Gregorian ISO date (YYYY-MM-DD). Returns null when invalid. */
+  static fromIso(text) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(text));
+    if (!match) { return null; }
+    const [year, month, day] = match.slice(1).map(Number);
+    const date = new Date(year, month - 1, day, 12);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) { return null; }
+    return JalaliCalendar.fromDate(date);
+  }
+
+  /**
+   * Everything needed to draw one month of a date picker.
+   *
+   * options.year / month : the month on screen
+   * options.selected     : the chosen date or null
+   * options.min / max    : first and last selectable day (optional, Jalali dates)
+   * options.isClosed(d)  : optional, true for days that cannot be chosen
+   * options.language     : "fa" or "en"
+   */
+  static monthView(options) {
+    const { year, month, selected = null, min = null, max = null, isClosed = null, language = 'fa' } = options;
+    const today = JalaliCalendar.today();
+    const leadingBlanks = JalaliCalendar.weekdayIndex({ year, month, day: 1 });
+    const cells = [];
+    for (let i = 0; i < leadingBlanks; i += 1) { cells.push({ kind: 'blank' }); }
+    const dayCount = JalaliCalendar.daysInMonth(year, month);
+    for (let day = 1; day <= dayCount; day += 1) {
+      const date = { year, month, day };
+      const isOff = Boolean((min && JalaliCalendar.compare(date, min) < 0)
+        || (max && JalaliCalendar.compare(date, max) > 0)
+        || (isClosed && isClosed(date)));
+      cells.push({
+        kind: 'day',
+        date,
+        label: JalaliCalendar.localizeDigits(day, language),
+        isOff,
+        isToday: JalaliCalendar.isSame(date, today),
+        isSelected: JalaliCalendar.isSame(date, selected),
+        isFriday: JalaliCalendar.weekdayIndex(date) === FRIDAY_INDEX,
+        aria: JalaliCalendar.formatLong(date, language),
+      });
+    }
+    const previous = JalaliCalendar.addMonths({ year, month }, -1);
+    const next = JalaliCalendar.addMonths({ year, month }, 1);
+    const lastOfPrevious = { ...previous, day: JalaliCalendar.daysInMonth(previous.year, previous.month) };
+    return {
+      title: MONTH_NAMES[language][month - 1] + ' ' + JalaliCalendar.localizeDigits(year, language),
+      weekdays: WEEKDAY_SHORT[language],
+      cells,
+      previous,
+      next,
+      hasPrevious: !min || JalaliCalendar.compare(lastOfPrevious, min) >= 0,
+      hasNext: !max || JalaliCalendar.compare({ ...next, day: 1 }, max) <= 0,
+    };
+  }
+
   /** "1405/08/04" with Latin digits, used for storage inside forms. */
   static toKey(jalaliDate) {
     const pad = (n) => String(n).padStart(2, '0');

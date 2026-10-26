@@ -1,0 +1,17 @@
+{% extends "account/auth_base.html" %}
+{% import "macros/ui.html" as ui %}
+
+{% block title %}{{ t("contact.title") }} · {{ brand_name }}{% endblock %}
+{% block auth_title %}{{ t("contact.title") }}{% endblock %}
+{% block auth_subtitle %}{{ t("contact.subtitle") }}{% endblock %}
+
+{#- Parameters: `form` (ContactForm). -#}
+{% block auth_body %}
+<form class="auth__form" method="post" novalidate>
+  {{ form.csrf_token }}
+  {{ ui.input(form.customer_name, t("contact.name"), autocomplete="name") }}
+  {{ ui.input(form.contact, t("contact.contact"), autocomplete="email", hint=t("contact.contact_hint"), ltr=true) }}
+  {{ ui.textarea(form.body, t("contact.body"), rows=5) }}
+  <button class="btn btn--primary auth__submit" type="submit">{{ t("contact.submit") }}</button>
+</form>
+{% endblock %}

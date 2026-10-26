@@ -2,12 +2,12 @@
     Blocks: title, page_styles, content, page_scripts. -#}
 {% set shared_styles = [
     "css/fonts.css", "css/tokens.css", "css/base.css",
-    "css/components/button.css", "css/components/demo-bar.css",
+    "css/components/button.css", "css/components/demo-bar.css", "css/components/pause-bar.css",
     "css/components/site-header.css", "css/components/lang-switch.css",
     "css/components/bg.css", "css/components/dish-card.css",
     "css/components/tab-bar.css", "css/components/site-footer.css",
     "css/components/toast.css", "css/components/cart-panel.css",
-    "css/components/order-summary.css",
+    "css/components/order-summary.css", "css/components/field.css", "css/components/chip.css",
 ] %}
 <!doctype html>
 <html lang="{{ language.code }}" dir="{{ language.direction }}">
@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename=stylesheet) }}">
   {% endfor %}
   {% block page_styles %}{% endblock %}
+  {% include "partials/theme_style.html" %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
   {% include "partials/demo_bar.html" %}

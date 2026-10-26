@@ -61,6 +61,34 @@
     </section>
 
     <section class="card">
+      <h2 class="card__title">{{ t("admin.orders.payments") }}</h2>
+      {% if order.payments %}
+      <ul class="payments">
+        {% for payment in order.payments %}
+        <li class="payments__item">
+          <div>
+            <strong>{{ t("admin.orders.payment." ~ payment.method.value) }}</strong>
+            <span class="badge badge--{{ 'ok' if payment.status.value == 'paid' else ('danger' if payment.status.value in ('failed', 'cancelled') else 'accent') }}">{{ t("admin.orders.payment_status." ~ payment.status.value) }}</span>
+            {% if payment.is_test %}<span class="badge">{{ t("admin.orders.test_badge") }}</span>{% endif %}
+            <span class="muted">{{ payment.created_at|jdatetime }}</span>
+            {% if payment.transaction_id %}<span class="muted">{{ t("admin.orders.transaction") }}: <bdi dir="ltr">{{ payment.transaction_id }}</bdi></span>{% endif %}
+            {% if payment.paid_at %}<span class="muted">{{ t("admin.orders.paid_at") }}: {{ payment.paid_at|jdatetime }}</span>{% endif %}
+          </div>
+          {% if show_money %}<span class="price"><bdi>{{ payment.amount|number }}</bdi> <small>{{ t("price.currency") }}</small></span>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">{{ t("admin.orders.payments_empty") }}</p>
+      {% endif %}
+      {% if can_edit_orders and can_mark_paid(order) %}
+      <div class="form__actions">
+        {{ ui.post_button(url_for('admin.order_mark_paid', order_id=order.id), t("admin.orders.mark_paid"), variant="primary", small=False, confirm=t("admin.orders.mark_paid_confirm")) }}
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="card">
       <h2 class="card__title">{{ t("admin.orders.history") }}</h2>
       <ol class="timeline">
         {% for entry in order.status_log %}

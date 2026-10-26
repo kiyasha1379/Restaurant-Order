@@ -1,19 +1,36 @@
 """The checkout form: who is ordering, how they get it and how they pay."""
 
+from flask import current_app
 from flask_wtf import FlaskForm
-from wtforms import RadioField, StringField, TextAreaField
+from wtforms import BooleanField, RadioField, StringField, TextAreaField
 from wtforms.fields.choices import SelectChoice
 from wtforms.validators import ValidationError
 
 from restaurant.constants import FulfillmentType, PaymentMethod
 from restaurant.language_context import get_translator
 from restaurant.phone import normalize_mobile
+from restaurant.service_factory import make_site_settings_service
 
 MIN_NAME_LENGTH = 2
 MAX_NAME_LENGTH = 120
 MIN_ADDRESS_LENGTH = 10
 MAX_ADDRESS_LENGTH = 500
 MAX_NOTE_LENGTH = 500
+
+
+def available_payment_methods() -> list[PaymentMethod]:
+    """Return the payment methods on offer now: what the settings allow and the gateway can do.
+
+    Online payment needs a configured gateway as well as its switch. Should the settings leave
+    nothing on offer, pay on arrival stays, so an order can always be placed.
+    """
+    settings = make_site_settings_service().get_ordering_settings()
+    methods = []
+    if settings.cash_payment:
+        methods.append(PaymentMethod.CASH_ON_SITE)
+    if settings.online_payment and current_app.config["PAYMENT_GATEWAY"]:
+        methods.append(PaymentMethod.ONLINE)
+    return methods or [PaymentMethod.CASH_ON_SITE]
 
 
 class CheckoutForm(FlaskForm):
@@ -26,9 +43,10 @@ class CheckoutForm(FlaskForm):
         default=FulfillmentType.TAKEAWAY.value,
     )
     delivery_address = TextAreaField()
+    save_address = BooleanField()
     note = TextAreaField()
     payment_method = RadioField(
-        choices=[SelectChoice(PaymentMethod.CASH_ON_SITE.value, PaymentMethod.CASH_ON_SITE.value)],
+        choices=[SelectChoice(member.value, member.value) for member in PaymentMethod],
         default=PaymentMethod.CASH_ON_SITE.value,
     )
 
@@ -52,6 +70,11 @@ class CheckoutForm(FlaskForm):
             return
         if not MIN_ADDRESS_LENGTH <= len(field.data) <= MAX_ADDRESS_LENGTH:
             raise ValidationError(get_translator()("checkout.error.address"))
+
+    def validate_payment_method(self, field: RadioField) -> None:
+        """Refuse a payment method that is not on offer right now."""
+        if field.data not in [method.value for method in available_payment_methods()]:
+            raise ValidationError(get_translator()("checkout.error.online_unavailable"))
 
     def validate_note(self, field: TextAreaField) -> None:
         """Keep the note short."""

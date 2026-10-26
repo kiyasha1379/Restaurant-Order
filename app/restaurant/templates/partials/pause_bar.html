@@ -1,0 +1,7 @@
+{#- Site-wide notice while online ordering is paused (a setting in the admin panel). No parameters. -#}
+{% if ordering_paused %}
+<div class="pause-bar" role="status">
+  <span class="pause-bar__badge">{{ t("ordering.paused_badge") }}</span>
+  <span class="pause-bar__text">{{ t("ordering.paused_message") }}</span>
+</div>
+{% endif %}

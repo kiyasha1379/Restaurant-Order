@@ -25,13 +25,19 @@ class BaseConfig:
     # Uploaded media (backgrounds, dish photos) is kept inside static/ so
     # it is served like any other asset.
     UPLOAD_FOLDER = PROJECT_ROOT / "restaurant" / "static" / "uploads"
-    MAX_CONTENT_LENGTH = 8 * 1024 * 1024
+    MAX_CONTENT_LENGTH = 13 * 1024 * 1024
     # Staff sessions: the cookie is not readable by scripts and not sent from other sites.
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
     # Limits for the sign-in form (per visitor address).
     RATELIMIT_STORAGE_URI = "memory://"
     LOGIN_RATE_LIMIT = "10 per minute"
+    CONTACT_RATE_LIMIT = "5 per minute"
+    # The class that handles online payments. "mock" is a test page; empty switches online
+    # payment off. A real gateway is added in `services/payment_gateway.py`.
+    PAYMENT_GATEWAY = "mock"
+    # Demo mode (and the tests) accept this code instead of sending an SMS.
+    DEMO_VERIFICATION_CODE = "12345"
     # Live order status: how often the stream looks at the database, and how long one stream lives.
     ORDER_STREAM_POLL_SECONDS = 2
     ORDER_STREAM_MAX_SECONDS = 600

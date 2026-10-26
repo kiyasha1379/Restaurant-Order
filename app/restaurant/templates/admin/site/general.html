@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.SITE %}
+{% set editable = access.can_edit(keys.SITE) %}
+
+{% block title %}{{ t("admin.nav.site") }}{% endblock %}
+{% block heading %}{{ t("admin.nav.site") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/site.css') }}">{% endblock %}
+
+{#- Parameters: form (BrandForm), logo (address of the stored logo or None). -#}
+{% block content %}
+{% with active = "general" %}{% include "admin/site/_tabs.html" %}{% endwith %}
+<form class="form" method="post" action="{{ url_for('admin.site_save') }}" enctype="multipart/form-data" novalidate>
+  {{ ui.csrf() }}
+  <fieldset class="fieldset-reset stack" {% if not editable %}disabled{% endif %}>
+    <section class="card stack">
+      <h2 class="card__title">{{ t("admin.site.brand") }}</h2>
+      {{ ui.form_field(form.brand_name, t("admin.site.brand_name"), maxlength=60) }}
+    </section>
+
+    <section class="card stack">
+      <h2 class="card__title">{{ t("admin.site.accent") }}</h2>
+      <p class="muted">{{ t("admin.site.accent_hint") }}</p>
+      <div class="field{% if form.accent_color.errors %} field--invalid{% endif %}">
+        <label class="field__label" for="accent_color">{{ t("admin.site.accent_color") }}</label>
+        {{ form.accent_color(class="color-input", type="color") }}
+        {% for error in form.accent_color.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+      </div>
+      {{ ui.checkbox(form.use_default_color, t("admin.site.default_color")) }}
+    </section>
+
+    <section class="card stack">
+      <h2 class="card__title">{{ t("admin.site.logo") }}</h2>
+      <p class="muted">{{ t("admin.site.logo_hint") }}</p>
+      {% if logo %}<img class="logo-preview" src="{{ url_for('static', filename=logo) }}" alt="{{ t('admin.site.logo') }}">{% endif %}
+      <div class="field{% if form.logo.errors %} field--invalid{% endif %}">
+        <label class="field__label" for="logo">{{ t("admin.site.logo_upload") }}</label>
+        {{ form.logo(class="field__control", accept="image/png,image/jpeg,image/webp") }}
+        {% for error in form.logo.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+      </div>
+      {% if logo %}{{ ui.checkbox(form.remove_logo, t("admin.site.remove_logo")) }}{% endif %}
+    </section>
+  </fieldset>
+  {% if editable %}<div class="form__actions"><button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button></div>{% endif %}
+</form>
+{% endblock %}

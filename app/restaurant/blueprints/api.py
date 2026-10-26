@@ -3,7 +3,8 @@
 from flask import Blueprint, Response, abort, current_app, jsonify, request, stream_with_context
 from sqlalchemy.exc import SQLAlchemyError
 
-from restaurant.cart_web import cart_to_dict, load_priced_cart
+from restaurant.booking_web import BookingChoice, availability_payload, parse_day, parse_start
+from restaurant.cart_web import cart_to_dict, is_ordering_paused, load_priced_cart
 from restaurant.constants import MAX_DISH_QUANTITY, FulfillmentType, OrderStatus
 from restaurant.extensions import db
 from restaurant.language_context import (
@@ -15,6 +16,7 @@ from restaurant.language_context import (
 )
 from restaurant.order_stream import OrderStatusStream
 from restaurant.service_factory import (
+    make_booking_service,
     make_builder_service,
     make_cart_service,
     make_menu_service,
@@ -27,6 +29,7 @@ from restaurant.services import (
     OrderStatusMachine,
     SelectionProblem,
 )
+from restaurant.timeutils import now_tehran
 
 api_blueprint = Blueprint("api", __name__, url_prefix="/api")
 
@@ -64,6 +67,8 @@ def get_cart() -> Response:
 @api_blueprint.post("/cart/add")
 def add_to_cart() -> Response | tuple[Response, int]:
     """Add a dish to the cart: {"dish_id": 3, "quantity": 1}."""
+    if is_ordering_paused():
+        return json_error("ordering.paused", 409)
     body = request.get_json(silent=True) or {}
     dish_id, quantity = body.get("dish_id"), body.get("quantity", 1)
     if not isinstance(dish_id, int) or isinstance(dish_id, bool) or dish_id < 1:
@@ -133,6 +138,8 @@ def build_quote(key: str) -> Response | tuple[Response, int]:
 @api_blueprint.post("/cart/add-custom")
 def add_custom_to_cart() -> Response | tuple[Response, int]:
     """Add a build: {"builder": "pizza", "option_ids": [3, 7], "quantity": 1}."""
+    if is_ordering_paused():
+        return json_error("ordering.paused", 409)
     parsed = read_build_body()
     builder_key = (request.get_json(silent=True) or {}).get("builder")
     if parsed is None or not isinstance(builder_key, str):
@@ -214,3 +221,25 @@ def order_stream(public_token: str) -> Response:
     response.headers["Cache-Control"] = "no-cache"
     response.headers["X-Accel-Buffering"] = "no"  # tell nginx not to hold the stream back
     return response
+
+
+@api_blueprint.get("/availability")
+def availability() -> Response | tuple[Response, int]:
+    """Return the start times of a day and, with `time`, the state of every table.
+
+    Query: `date=2026-10-27`, `guests=2` and optionally `time=19:30`.
+    """
+    day = parse_day(request.args.get("date", ""))
+    if day is None:
+        return json_error("reserve.error.bad_date", 400)
+    service = make_booking_service()
+    guests_text = request.args.get("guests", "2")
+    guests = int(guests_text) if guests_text.isdecimal() else 0
+    if not 1 <= guests <= service.max_guests():
+        return json_error("reserve.error.bad_guests", 400)
+    time_text = request.args.get("time", "")
+    start = parse_start(time_text)
+    if time_text and start is None:
+        return json_error("reserve.error.bad_time", 400)
+    choice = BookingChoice(day=day, guests=guests, start=start)
+    return jsonify(availability_payload(service, choice, now_tehran(), get_active_language().code))

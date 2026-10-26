@@ -1,0 +1,5 @@
+{#- Customers / messages tabs. Parameters: active ("customers" or "messages") and `unread`. -#}
+<nav class="chips" aria-label="{{ t('admin.nav.customers') }}">
+  <a class="chip" href="{{ url_for('admin.customers') }}"{% if active == "customers" %} aria-current="true"{% endif %}>{{ t("admin.customers.tab_customers") }}</a>
+  <a class="chip" href="{{ url_for('admin.messages') }}"{% if active == "messages" %} aria-current="true"{% endif %}>{{ t("admin.customers.tab_messages") }}{% if unread %} <span class="badge badge--pending">{{ unread|number }}</span>{% endif %}</a>
+</nav>

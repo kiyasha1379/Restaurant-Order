@@ -1,10 +1,13 @@
-{#- Sticky top bar: brand, main links, language switcher, cart pill, sign-in link. No parameters. -#}
+{#- Sticky top bar: pause notice, brand, main links, language switcher, cart pill, sign-in link.
+    No parameters. The pause notice lives inside the sticky header so the home page's snapping
+    never scrolls it out of sight. -#}
 {% import "macros/icons.html" as icons %}
 {% set items = navigation_items() %}
 <header class="site-header" data-site-header>
+  {% include "partials/pause_bar.html" %}
   <div class="site-header__inner">
     <a class="site-header__brand" href="{{ url_for('public.home') }}">
-      {{ icons.icon("logo", 34) }}
+      {% if site_logo %}<img class="brand-logo" src="{{ url_for('static', filename=site_logo) }}" alt="">{% else %}{{ icons.icon("logo", 34) }}{% endif %}
       <span class="site-header__brand-name">{{ brand_name }}</span>
     </a>
     <nav class="site-header__nav" aria-label="{{ t('nav.label') }}">
@@ -20,7 +23,11 @@
         <span class="site-header__cart-count" data-cart-count><bdi>{{ cart_count|number }}</bdi></span>
       </a>
       {% if has_page("public.account") %}
-      <a class="site-header__login" href="{{ url_for('public.account') }}">{{ icons.icon("user", 20) }}<span>{{ t("header.login") }}</span></a>
+      {% if current_user.is_authenticated %}
+      <a class="site-header__login" href="{{ url_for('public.account') }}">{{ icons.icon("user", 20) }}<span>{{ t("header.account") }}</span></a>
+      {% else %}
+      <a class="site-header__login" href="{{ url_for('public.login') }}">{{ icons.icon("user", 20) }}<span>{{ t("header.login") }}</span></a>
+      {% endif %}
       {% endif %}
     </div>
   </div>

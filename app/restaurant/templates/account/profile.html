@@ -1,0 +1,35 @@
+{% extends "account/account_base.html" %}
+{% import "macros/ui.html" as ui %}
+
+{% block title %}{{ t("account.profile.title") }} · {{ brand_name }}{% endblock %}
+{% block account_title %}{{ t("account.profile.title") }}{% endblock %}
+
+{#- Parameters: `profile_form` (ProfileForm), `password_form` (PasswordForm). -#}
+{% block account_body %}
+<div class="account__grid account__grid--wide">
+  <section class="panel">
+    <form class="account-form" method="post" action="{{ url_for('public.account_profile') }}" novalidate>
+      {{ profile_form.csrf_token }}
+      {{ ui.input(profile_form.customer_name, t("account.profile.name"), autocomplete="name") }}
+      {{ ui.input(profile_form.email, t("account.profile.email"), type="email", autocomplete="email", ltr=true) }}
+      <div class="field">
+        <span class="field__label">{{ t("account.profile.phone") }}</span>
+        <p class="field__static" dir="ltr">{{ current_user.phone }}</p>
+        <p class="field__hint">{{ t("account.profile.phone_fixed") }}</p>
+      </div>
+      <button class="btn btn--primary" type="submit">{{ t("account.profile.save") }}</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2 class="panel__title">{{ t("account.password.title") }}</h2>
+    <form class="account-form" method="post" action="{{ url_for('public.account_password') }}" novalidate>
+      {{ password_form.csrf_token }}
+      {{ ui.input(password_form.current_password, t("account.password.current"), type="password", autocomplete="current-password") }}
+      {{ ui.input(password_form.new_password, t("account.password.new"), type="password", autocomplete="new-password", hint=t("account.register.password_hint")) }}
+      {{ ui.input(password_form.new_password_again, t("account.password.again"), type="password", autocomplete="new-password") }}
+      <button class="btn btn--primary" type="submit">{{ t("account.password.submit") }}</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

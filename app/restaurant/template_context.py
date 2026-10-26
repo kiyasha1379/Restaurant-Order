@@ -18,7 +18,8 @@ from restaurant.service_factory import (
     make_language_service,
     make_site_settings_service,
 )
-from restaurant.services import FALLBACK_LANGUAGE, BackgroundView, LanguageInfo
+from restaurant.services import FALLBACK_LANGUAGE, BackgroundView, LanguageInfo, SiteLook
+from restaurant.theme import accent_css
 
 
 def build_language_switch_links() -> list[dict[str, str]]:
@@ -81,6 +82,7 @@ SCRIPT_TEXT_KEYS = (
     "cart.error",
     "cart.added",
     "cart.removed_unavailable",
+    "ordering.paused",
     "cart.item_count",
     "cart.item_count_one",
     "cart.view",
@@ -99,6 +101,25 @@ SCRIPT_TEXT_KEYS = (
     "builder.error.unavailable",
     "builder.error.too_many",
     "builder.error.missing",
+    "datepicker.choose",
+    "datepicker.prev",
+    "datepicker.next",
+    "datepicker.current_month",
+    "datepicker.hint",
+    "datepicker.unavailable",
+    "reserve.other_day",
+    "reserve.no_slots",
+    "reserve.closed_day",
+    "reserve.guests_unit",
+    "reserve.guests_unit_one",
+    "reserve.table_label",
+    "reserve.table_aria",
+    "reserve.seats",
+    "reserve.table.busy",
+    "reserve.table.too_small",
+    "reserve.table_none",
+    "reserve.summary.none",
+    "reserve.error.generic",
 )
 
 
@@ -122,6 +143,7 @@ def build_site_config() -> dict[str, Any]:
             "orderStatus": url_for("api.order_status", public_token="TOKEN"),
             "orderStream": url_for("api.order_stream", public_token="TOKEN"),
             "cartPage": url_for("public.cart"),
+            "availability": url_for("api.availability"),
         },
         "texts": {key: translate(key) for key in SCRIPT_TEXT_KEYS},
     }
@@ -135,16 +157,22 @@ def build_template_context() -> dict[str, Any]:
     back to Persian, the default texts and the default brand name.
     """
     try:
-        brand_name = make_site_settings_service().get_brand_name()
+        settings_service = make_site_settings_service()
+        look = settings_service.get_site_look()
+        ordering_paused = settings_service.is_ordering_paused()
     except SQLAlchemyError:
-        current_app.logger.exception("Could not read settings; using the default brand name")
+        current_app.logger.exception("Could not read settings; using the default look")
         reset_session_after_error()
-        brand_name = DEFAULT_BRAND_NAME
+        look = SiteLook(brand_name=DEFAULT_BRAND_NAME)
+        ordering_paused = False
 
     return {
         "language": get_active_language(),
         "t": get_translator(),
-        "brand_name": brand_name,
+        "brand_name": look.brand_name,
+        "site_logo": look.logo_path,
+        "accent_css": accent_css(look.accent_color),
+        "ordering_paused": ordering_paused,
         "demo_mode": current_app.config["DEMO_MODE"],
         "language_switch_links": build_language_switch_links,
         "find_background": find_background,

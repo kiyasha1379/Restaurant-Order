@@ -1,0 +1,45 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.TABLES %}
+
+{% block title %}{{ t("reservation.number", number=booking.number|number) }}{% endblock %}
+{% block heading %}{{ t("reservation.number", number=booking.number|number) }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/reservations.css') }}">{% endblock %}
+
+{#- Parameters: `booking`, `alternatives` (tables that could take it). -#}
+{% block content %}
+<div class="toolbar">
+  <a class="btn btn--ghost btn--small" href="{{ url_for('admin.reservations') }}">{{ t("admin.back") }}</a>
+  <span class="toolbar__spacer"></span>
+  <span class="badge badge--{{ booking.status.value }}">{{ t("reservation.status." ~ booking.status.value) }}</span>
+  {% if access.can_edit(keys.TABLES) and booking.status.value == "pending" %}{{ ui.post_button(url_for('admin.reservation_confirm', reservation_id=booking.id), t("admin.reservations.confirm"), "primary", small=False) }}{% endif %}
+  {% if access.can_edit(keys.TABLES) and booking.status.value != "cancelled" %}{{ ui.post_button(url_for('admin.reservation_cancel', reservation_id=booking.id), t("admin.reservations.cancel"), "danger", confirm=t("admin.reservations.cancel_confirm"), small=False) }}{% endif %}
+</div>
+
+<section class="card">
+  <dl class="facts">
+    <div><dt>{{ t("reservation.facts.day") }}</dt><dd>{{ booking.starts_at|jdate(true) }}</dd></div>
+    <div><dt>{{ t("reservation.facts.time") }}</dt><dd><bdi>{{ booking.starts_at|jtime }} – {{ booking.ends_at|jtime }}</bdi></dd></div>
+    <div><dt>{{ t("reservation.facts.guests") }}</dt><dd>{{ booking.guests|number }}</dd></div>
+    <div><dt>{{ t("reservation.facts.table") }}</dt><dd>{{ booking.table_label|digits }}</dd></div>
+    <div><dt>{{ t("reservation.facts.name") }}</dt><dd>{{ booking.customer_name }}</dd></div>
+    <div><dt>{{ t("reservation.facts.phone") }}</dt><dd><bdi dir="ltr">{{ booking.customer_phone }}</bdi></dd></div>
+    <div><dt>{{ t("admin.reservations.created") }}</dt><dd>{{ booking.created_at|jdatetime }}</dd></div>
+    {% if booking.note %}<div class="facts__wide"><dt>{{ t("reservation.facts.note") }}</dt><dd>{{ booking.note }}</dd></div>{% endif %}
+  </dl>
+</section>
+
+{% if booking.status.value != "cancelled" and access.can_edit(keys.TABLES) %}
+<section class="card">
+  <h2 class="card__title">{{ t("admin.reservations.move_title") }}</h2>
+  {% if alternatives %}
+  <p class="card__hint">{{ t("admin.reservations.move_hint") }}</p>
+  <div class="alternatives">
+    {% for table in alternatives %}
+    {{ ui.post_button(url_for('admin.reservation_table', reservation_id=booking.id), t("admin.reservations.move_here", label=table.label|digits) ~ " (" ~ table.capacity|number ~ ")", "ghost", fields={"table_id": table.id}, small=False) }}
+    {% endfor %}
+  </div>
+  {% else %}<p class="empty">{{ t("admin.reservations.move_none") }}</p>{% endif %}
+</section>
+{% endif %}
+{% endblock %}

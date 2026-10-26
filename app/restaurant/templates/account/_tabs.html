@@ -1,0 +1,11 @@
+{#- The sections of the account area. Parameter: `active` (overview, orders, reservations,
+    addresses or profile). -#}
+<nav class="account-tabs" aria-label="{{ t('account.nav.label') }}">
+  {% for key, endpoint in [("overview", "public.account"), ("orders", "public.account_orders"), ("reservations", "public.account_reservations"), ("addresses", "public.account_addresses"), ("profile", "public.account_profile")] %}
+  <a class="account-tabs__link" href="{{ url_for(endpoint) }}"{% if active == key %} aria-current="page"{% endif %}>{{ t("account.nav." ~ key) }}</a>
+  {% endfor %}
+  <form class="account-tabs__logout" method="post" action="{{ url_for('public.logout') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="account-tabs__link" type="submit">{{ t("account.logout") }}</button>
+  </form>
+</nav>

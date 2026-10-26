@@ -65,6 +65,10 @@ class DashboardData:
         )
 
 
+# Orders that are not sales: cancelled, or an online order whose payment has not arrived.
+NOT_SOLD_STATUSES = frozenset({OrderStatus.CANCELLED, OrderStatus.AWAITING_PAYMENT})
+
+
 class DashboardService:
     """Collects the dashboard numbers for the current day (Tehran time)."""
 
@@ -82,10 +86,10 @@ class DashboardService:
         self._clock = clock
 
     def today(self) -> DashboardData:
-        """Return the dashboard numbers. Cancelled orders do not count as sales."""
+        """Return the dashboard numbers. Cancelled and unpaid online orders are not sales."""
         start = self._clock().replace(hour=0, minute=0, second=0, microsecond=0)
         orders = self._orders.list_between(start, start + timedelta(days=1))
-        sold = [order for order in orders if order.status is not OrderStatus.CANCELLED]
+        sold = [order for order in orders if order.status not in NOT_SOLD_STATUSES]
         sales = sum(order.total for order in sold)
         hours = [0] * HOURS_IN_DAY
         for order in sold:

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% import "macros/ui.html" as ui %}
+
+{% block title %}{{ t("reservation.number", number=booking.number|number) }} · {{ brand_name }}{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/order.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reservation.css') }}">
+{% endblock %}
+
+{% block body_class %}page-reservation{% endblock %}
+
+{#- Parameters: `booking` (Reservation), `can_cancel`. -#}
+{% block content %}
+{% set status = booking.status.value %}
+<div class="order-page reservation-page" data-status="{{ status }}">
+  <p class="order-page__kicker" data-reveal>{{ t("reservation.thanks") }}</p>
+  <h1 class="order-page__title" data-reveal>{{ t("reservation.number", number=booking.number|number) }}</h1>
+  <p class="reservation-page__status reservation-page__status--{{ status }}">{{ t("reservation.status." ~ status) }}</p>
+  <p class="order-page__live">{{ t("reservation.status_text." ~ status) }}</p>
+
+  <div class="order-card">
+    <dl class="order-card__facts">
+      <div><dt>{{ t("reservation.facts.day") }}</dt><dd>{{ booking.starts_at|jdate(true) }}</dd></div>
+      <div><dt>{{ t("reservation.facts.time") }}</dt><dd>{{ booking.starts_at|jtime }} – {{ booking.ends_at|jtime }}</dd></div>
+      <div><dt>{{ t("reservation.facts.guests") }}</dt><dd>{{ booking.guests|number }}</dd></div>
+      <div><dt>{{ t("reservation.facts.table") }}</dt><dd>{{ booking.table_label|digits }}</dd></div>
+      <div><dt>{{ t("reservation.facts.name") }}</dt><dd>{{ booking.customer_name }}</dd></div>
+      <div><dt>{{ t("reservation.facts.phone") }}</dt><dd dir="ltr">{{ booking.customer_phone }}</dd></div>
+      {% if booking.note %}<div><dt>{{ t("reservation.facts.note") }}</dt><dd>{{ booking.note }}</dd></div>{% endif %}
+    </dl>
+  </div>
+
+  <div class="order-page__actions">
+    {{ ui.button_link(url_for("public.reserve"), t("reservation.book_again"), "ghost") }}
+    {{ ui.button_link(url_for("public.home"), t("reservation.back_home"), "ghost") }}
+    {% if can_cancel %}
+    <form method="post" action="{{ url_for('public.cancel_reservation', public_token=booking.public_token) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn--ghost" type="submit">{{ t("reservation.cancel") }}</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

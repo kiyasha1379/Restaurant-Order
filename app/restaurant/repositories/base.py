@@ -41,3 +41,7 @@ class BaseRepository(Generic[ModelT]):
     def refresh(self, entity: ModelT) -> None:
         """Reload the row from the database, discarding what the session remembers."""
         self._session.refresh(entity)
+
+    def flush(self) -> None:
+        """Send staged changes to the database without committing (gives new rows their ids)."""
+        self._session.flush()

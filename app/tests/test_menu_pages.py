@@ -86,12 +86,17 @@ def test_home_in_english(client, seeded):
     assert "Chef&#39;s picks" in html or "Chef's picks" in html
 
 
-def test_pages_that_do_not_exist_yet_are_not_linked(client):
+def test_the_account_pages_are_linked_from_the_menus(client):
     html = client.get("/fa/").get_data(as_text=True)
     assert "/fa/menu" in html
-    assert "/fa/reserve" not in html
-    assert "/fa/builder" not in html
-    assert 'id="reserve"' not in html
+    assert 'href="/fa/login"' in html
+    assert 'href="/fa/account"' in html
+    assert 'href="/fa/contact"' in html
+
+
+def test_the_reservation_page_is_linked_from_the_menus_and_the_home_page(client):
+    html = client.get("/fa/").get_data(as_text=True)
+    assert 'href="/fa/reserve"' in html and 'id="reserve"' in html
 
 
 def test_current_page_is_marked_in_the_navigation(client):

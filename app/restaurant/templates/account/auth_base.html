@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{#- Shared frame of the sign-in, registration and code pages.
+    Blocks: auth_title, auth_subtitle, auth_body. -#}
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/account.css') }}">
+{% endblock %}
+
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<div class="auth">
+  <section class="auth__card" data-reveal>
+    <h1 class="auth__title">{% block auth_title %}{% endblock %}</h1>
+    <p class="auth__subtitle">{% block auth_subtitle %}{% endblock %}</p>
+    {% block auth_body %}{% endblock %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.TABLES %}
+
+{% block title %}{{ t("admin.reservations.new") }}{% endblock %}
+{% block heading %}{{ t("admin.reservations.new") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/reservations.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.reservations') }}">{{ t("admin.back") }}</a></div>
+<form class="form" method="post" action="{{ url_for('admin.reservation_new') }}" novalidate>
+  {{ form.hidden_tag() }}
+  <section class="card form">
+    <p class="card__hint">{{ t("admin.reservations.form_hint") }}</p>
+    <div class="form__row">
+      <div class="field{% if form.date.errors %} field--invalid{% endif %}">
+        <span class="field__label">{{ t("admin.reservations.day") }}</span>
+        {{ ui.date_field("date", chosen_date, t("admin.reservations.pick_day")) }}
+        {% for error in form.date.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+      </div>
+      <div class="field{% if form.time.errors %} field--invalid{% endif %}">
+        <label class="field__label" for="time">{{ t("admin.reservations.form_time") }}</label>
+        <input class="field__control" id="time" name="time" type="time" step="900" dir="ltr" value="{{ form.time.data or '' }}">
+        {% for error in form.time.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+      </div>
+    </div>
+    <div class="form__row">
+      {{ ui.form_field(form.guests, t("admin.reservations.guests"), inputmode="numeric") }}
+      {{ ui.form_field(form.table_id, t("admin.reservations.table")) }}
+      <div class="field">
+        <label class="field__label" for="status">{{ t("admin.reservations.form_status") }}</label>
+        <select class="field__control" id="status" name="status">
+          {% for choice in form.status.choices %}<option value="{{ choice.value }}"{% if form.status.data == choice.value %} selected{% endif %}>{{ t("reservation.status." ~ choice.value) }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="form__row">
+      {{ ui.form_field(form.customer_name, t("reservation.facts.name"), autocomplete="off") }}
+      {{ ui.form_field(form.customer_phone, t("reservation.facts.phone"), dir="ltr", inputmode="tel", autocomplete="off") }}
+    </div>
+    {{ ui.form_field(form.note, t("admin.reservations.note"), rows=2) }}
+  </section>
+  <div class="form__actions">
+    <button class="btn btn--primary" type="submit">{{ t("admin.reservations.save") }}</button>
+    <a class="btn btn--ghost" href="{{ url_for('admin.reservations') }}">{{ t("admin.cancel") }}</a>
+  </div>
+</form>
+{% endblock %}

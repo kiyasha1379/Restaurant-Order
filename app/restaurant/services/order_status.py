@@ -1,7 +1,9 @@
 """Order statuses and the moves between them (the State pattern, in one class).
 
 A takeaway order is handed over when it is ready; a delivery order goes out
-first. Cancelling is possible until the order is completed.
+first. Cancelling is possible until the order is completed. An order that waits for
+its online payment can only be cancelled: it enters the kitchen's queue through a
+verified payment (`OrderService.confirm_payment`), never through a status button.
 """
 
 from restaurant.constants import FulfillmentType, OrderStatus

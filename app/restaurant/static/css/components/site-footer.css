@@ -64,3 +64,7 @@
     padding-inline: var(--space-4);
   }
 }
+
+.site-footer__contact a {
+  color: var(--color-accent);
+}

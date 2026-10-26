@@ -1,0 +1,6 @@
+{#- Site appearance tabs. Parameter: active ("general", "backgrounds" or "home"). -#}
+<nav class="chips" aria-label="{{ t('admin.nav.site') }}">
+  <a class="chip" href="{{ url_for('admin.site') }}"{% if active == "general" %} aria-current="true"{% endif %}>{{ t("admin.site.tab_general") }}</a>
+  <a class="chip" href="{{ url_for('admin.site_backgrounds') }}"{% if active == "backgrounds" %} aria-current="true"{% endif %}>{{ t("admin.site.tab_backgrounds") }}</a>
+  <a class="chip" href="{{ url_for('admin.site_home') }}"{% if active == "home" %} aria-current="true"{% endif %}>{{ t("admin.site.tab_home") }}</a>
+</nav>

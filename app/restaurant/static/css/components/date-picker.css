@@ -1,0 +1,168 @@
+/*
+ * The shared Jalali date picker (.dp) and the field that opens it (.date-field).
+ * A page can re-theme the picker by setting the --dp-* variables on a parent.
+ */
+
+.date-field {
+  display: contents;
+}
+
+.date-field__panel {
+  flex: 1 0 100%;
+}
+
+.date-field__panel[hidden] {
+  display: none;
+}
+
+.dp {
+  --dp-accent: var(--color-accent);
+  --dp-on-accent: var(--color-on-accent);
+  --dp-ink: var(--color-text);
+  --dp-muted: var(--color-muted);
+  --dp-weekend: var(--color-ember);
+  --dp-surface: var(--color-surface);
+  --dp-line: var(--color-line);
+
+  inline-size: min(100%, 22rem);
+  padding: var(--space-4);
+  border: 1px solid var(--dp-line);
+  border-radius: var(--radius-lg);
+  background: var(--dp-surface);
+  color: var(--dp-ink);
+  box-shadow: var(--shadow-lift);
+}
+
+.dp__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-block-end: var(--space-3);
+}
+
+.dp__title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.dp__nav {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--tap-target);
+  block-size: var(--tap-target);
+  padding: 0;
+  border: 1px solid var(--dp-line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dp-ink);
+  cursor: pointer;
+  transition: background-color var(--motion-quick);
+}
+
+.dp__nav:hover {
+  background: rgb(243 233 220 / 8%);
+}
+
+.dp__nav--off {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.dp__nav--off:hover {
+  background: transparent;
+}
+
+/* The arrows are drawn for right-to-left pages; flip them for left-to-right ones. */
+html[dir="ltr"] .dp__nav svg {
+  transform: scaleX(-1);
+}
+
+.dp__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.dp__weekday {
+  padding-block: var(--space-1);
+  color: var(--dp-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.dp__day {
+  display: inline-grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-block-size: 40px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--dp-ink);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-quick),
+    border-color var(--motion-quick),
+    transform var(--motion-quick);
+}
+
+.dp__day:hover {
+  background: rgb(243 233 220 / 8%);
+}
+
+.dp__day:active {
+  transform: scale(0.94);
+}
+
+.dp__day--friday {
+  color: var(--dp-weekend);
+}
+
+.dp__day--today {
+  border-color: var(--dp-accent);
+}
+
+.dp__day--selected,
+.dp__day--selected:hover {
+  border-color: var(--dp-accent);
+  background: var(--dp-accent);
+  color: var(--dp-on-accent);
+  font-weight: 700;
+}
+
+.dp__day--off {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.dp__day--off:hover {
+  background: transparent;
+}
+
+.dp__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-start: var(--space-3);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--dp-line);
+  color: var(--dp-muted);
+  font-size: 0.78rem;
+}
+
+.dp__link {
+  padding: var(--space-2) var(--space-1);
+  border: 0;
+  background: transparent;
+  color: var(--dp-accent);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}

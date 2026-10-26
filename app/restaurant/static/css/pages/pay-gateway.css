@@ -1,0 +1,89 @@
+/* The test payment gateway page: plain and bank-like, clearly marked as a test. */
+
+.page-gateway {
+  display: grid;
+  min-block-size: 100dvh;
+  padding: var(--space-5);
+  place-items: center;
+  background: var(--color-page);
+}
+
+.gateway {
+  inline-size: min(100%, 30rem);
+  padding: var(--space-6);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.gateway__badge {
+  display: inline-block;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+}
+
+.gateway__title {
+  margin-block: var(--space-3);
+  font-size: 1.75rem;
+  line-height: 1.5;
+}
+
+.gateway__notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.gateway__facts {
+  display: grid;
+  gap: var(--space-3);
+  margin-block: var(--space-5);
+}
+
+.gateway__facts > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.gateway__facts dt {
+  color: var(--color-muted);
+}
+
+.gateway__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.gateway__amount dd {
+  color: var(--color-accent);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.gateway__actions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.gateway .btn--danger {
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.gateway .btn--danger:hover {
+  background: color-mix(in srgb, var(--color-danger-soft), var(--color-danger) 20%);
+}
+
+.gateway__footnote {
+  margin-block-start: var(--space-4);
+  color: var(--color-muted);
+  font-size: var(--font-size-small);
+}

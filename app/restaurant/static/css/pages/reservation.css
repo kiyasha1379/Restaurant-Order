@@ -1,0 +1,25 @@
+/* Reservation confirmation: the status headline above the shared order-card layout. */
+
+.reservation-page__status {
+  margin-block-start: var(--space-3);
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.reservation-page__status--confirmed {
+  color: var(--color-ok);
+}
+
+.reservation-page__status--pending {
+  color: var(--color-accent);
+}
+
+.reservation-page__status--cancelled {
+  color: var(--color-danger);
+}
+
+.reservation-page .order-card {
+  margin-block-start: var(--space-5);
+}

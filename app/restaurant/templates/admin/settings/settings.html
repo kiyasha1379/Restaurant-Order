@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.SETTINGS %}
+{% set editable = access.can_edit(keys.SETTINGS) %}
+
+{% block title %}{{ t("admin.settings.title") }}{% endblock %}
+{% block heading %}{{ t("admin.settings.title") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/settings.css') }}">{% endblock %}
+
+{#- Parameter: `form` (SettingsForm). -#}
+{% block content %}
+<form class="form" method="post" action="{{ url_for('admin.settings_save') }}" novalidate>
+  {{ form.hidden_tag() }}
+  <fieldset class="fieldset-reset stack" {% if not editable %}disabled{% endif %}>
+
+    <section class="card stack">
+      <h2 class="card__title">{{ t("admin.settings.ordering") }}</h2>
+      <label class="check">{{ form.ordering_paused() }} <span>{{ t("admin.settings.pause") }}</span></label>
+      <p class="muted">{{ t("admin.settings.pause_hint") }}</p>
+      <div class="grid grid--two">
+        {{ ui.form_field(form.pause_message_fa, t("admin.settings.pause_message") ~ " (" ~ t("admin.settings.fa") ~ ")", rows=2, maxlength=200) }}
+        {{ ui.form_field(form.pause_message_en, t("admin.settings.pause_message") ~ " (" ~ t("admin.settings.en") ~ ")", rows=2, maxlength=200, dir="ltr") }}
+      </div>
+      {{ ui.form_field(form.delivery_fee, t("admin.settings.delivery_fee"), t("admin.settings.delivery_fee_hint"), inputmode="numeric") }}
+    </section>
+
+    <section class="card stack">
+      <h2 class="card__title">{{ t("admin.settings.payments") }}</h2>
+      <label class="check">{{ form.cash_payment() }} <span>{{ t("admin.settings.cash_payment") }}</span></label>
+      <label class="check">{{ form.online_payment() }} <span>{{ t("admin.settings.online_payment") }}</span></label>
+      <p class="muted">{{ t("admin.settings.payments_hint") }}</p>
+      {% for error in form.cash_payment.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+    </section>
+
+    <section class="card stack">
+      <h2 class="card__title">{{ t("admin.settings.contact") }}</h2>
+      <p class="muted">{{ t("admin.settings.contact_hint") }}</p>
+      {{ ui.form_field(form.phone, t("admin.settings.phone"), dir="ltr", inputmode="tel", maxlength=40) }}
+      <div class="grid grid--two">
+        {{ ui.form_field(form.address_fa, t("admin.settings.address") ~ " (" ~ t("admin.settings.fa") ~ ")", maxlength=200) }}
+        {{ ui.form_field(form.address_en, t("admin.settings.address") ~ " (" ~ t("admin.settings.en") ~ ")", maxlength=200, dir="ltr") }}
+        {{ ui.form_field(form.hours_fa, t("admin.settings.hours") ~ " (" ~ t("admin.settings.fa") ~ ")", maxlength=120) }}
+        {{ ui.form_field(form.hours_en, t("admin.settings.hours") ~ " (" ~ t("admin.settings.en") ~ ")", maxlength=120, dir="ltr") }}
+      </div>
+    </section>
+  </fieldset>
+  {% if editable %}<div class="form__actions"><button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button></div>{% endif %}
+</form>
+
+<section class="card stack">
+  <h2 class="card__title">{{ t("admin.settings.booking") }}</h2>
+  <p class="muted">{{ t("admin.settings.booking_hint") }}</p>
+  {% if access.allows(keys.TABLES) %}<p><a class="btn btn--ghost" href="{{ url_for('admin.schedule') }}">{{ t("admin.settings.booking_link") }}</a></p>{% endif %}
+</section>
+{% endblock %}

@@ -1,5 +1,9 @@
 /* Admin panel behaviour: the phone drawer and confirm-before-submit forms. */
 
+import { startDateFields } from "../modules/date-picker.js";
+
+startDateFields();
+
 const shell = document.querySelector("[data-admin-shell]");
 
 function setDrawer(open) {

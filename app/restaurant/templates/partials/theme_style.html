@@ -1,0 +1,4 @@
+{#- The accent colour chosen in the panel, as a few CSS variables. Empty for the built-in colour.
+    The value is a validated "#rrggbb" colour, never free text. While ordering is paused the
+    header is taller by the pause notice, which the home page's scroll offsets need to know. -#}
+{% if accent_css or ordering_paused %}<style>{{ accent_css|safe }}{% if ordering_paused %}:root{--header-height:7rem}{% endif %}</style>{% endif %}

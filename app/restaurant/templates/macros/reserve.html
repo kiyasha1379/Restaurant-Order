@@ -1,0 +1,26 @@
+{#- Pieces of the reservation page. Import with: {% import "macros/reserve.html" as reserve_ui with context %} -#}
+
+{#- Number of chairs drawn around a table of this capacity: 2, 4 or 6. -#}
+{% macro chair_count(capacity) %}{{ 2 if capacity <= 2 else (4 if capacity <= 4 else 6) }}{% endmacro %}
+
+{#- One table on the floor plan. It is a radio button, so the form sends the chosen table
+    without any script. Parameters: table, state ("free", "busy", "too_small" or "idle"),
+    checked (bool). The page script keeps `data-state`, `disabled` and the label in step with
+    the availability API. -#}
+{% macro plan_table(table, state, checked) %}
+{% set chairs = chair_count(table.capacity)|int %}
+{% set note = t("reserve.table.busy") if state == "busy" else (t("reserve.table.too_small") if state == "too_small" else "") %}
+<label class="plan-table plan-table--seats-{{ chairs }}" data-plan-table data-state="{{ state }}" data-capacity="{{ table.capacity }}" data-label="{{ table.label }}">
+  <input class="plan-table__input" type="radio" name="table_id" value="{{ table.id }}"
+    {%- if checked %} checked{% endif %}
+    {%- if state != "free" %} disabled{% endif %}
+    aria-label="{{ t('reserve.table_aria', label=table.label|digits, seats=t('reserve.seats', count=table.capacity|number), note=note) }}">
+  <span class="plan-table__scene" aria-hidden="true">
+    {% for index in range(chairs) %}<span class="plan-chair plan-chair--{{ index + 1 }}"></span>{% endfor %}
+    <span class="plan-table__top">
+      <span class="plan-table__id">{{ table.label|digits }}</span>
+      <span class="plan-table__seats">{{ t("reserve.seats", count=table.capacity|number) }}</span>
+    </span>
+  </span>
+</label>
+{% endmacro %}

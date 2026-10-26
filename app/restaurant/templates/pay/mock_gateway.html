@@ -1,0 +1,37 @@
+{#- The test payment gateway: it stands in for a bank's page. It has no card form and moves no
+    money; the three buttons send the customer back to the shop exactly as a gateway would.
+    Parameters: `order`, `payment` and `answers` (the callback address of each outcome). -#}
+<!doctype html>
+<html lang="{{ language.code }}" dir="{{ language.direction }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="noindex">
+  <title>{{ t("pay.mock.title") }}</title>
+  {% for stylesheet in ["css/fonts.css", "css/tokens.css", "css/base.css", "css/components/button.css", "css/pages/pay-gateway.css"] %}
+  <link rel="stylesheet" href="{{ url_for('static', filename=stylesheet) }}">
+  {% endfor %}
+</head>
+<body class="page-gateway">
+  <main class="gateway">
+    <p class="gateway__badge">{{ t("pay.mock.badge") }}</p>
+    <h1 class="gateway__title">{{ t("pay.mock.title") }}</h1>
+    <p class="gateway__notice" role="note">{{ t("pay.mock.notice") }}</p>
+
+    <dl class="gateway__facts">
+      <div><dt>{{ t("pay.mock.shop") }}</dt><dd>{{ brand_name }}</dd></div>
+      <div><dt>{{ t("pay.mock.order") }}</dt><dd><bdi>{{ order.number|number }}</bdi></dd></div>
+      <div class="gateway__amount"><dt>{{ t("pay.mock.amount") }}</dt><dd><bdi>{{ payment.amount|number }}</bdi> <small>{{ t("price.currency") }}</small></dd></div>
+      <div><dt>{{ t("pay.mock.reference") }}</dt><dd><bdi dir="ltr">{{ payment.authority }}</bdi></dd></div>
+    </dl>
+
+    <div class="gateway__actions">
+      <a class="btn btn--primary" href="{{ answers.success }}" data-outcome="success">{{ t("pay.mock.success") }}</a>
+      <a class="btn btn--danger" href="{{ answers.failure }}" data-outcome="failure">{{ t("pay.mock.failure") }}</a>
+      <a class="btn btn--ghost" href="{{ answers.cancel }}" data-outcome="cancel">{{ t("pay.mock.cancel") }}</a>
+    </div>
+    <p class="gateway__footnote">{{ t("pay.mock.footnote") }}</p>
+  </main>
+</body>
+</html>

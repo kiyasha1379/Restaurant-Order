@@ -1,0 +1,16 @@
+{#- One home page section. Parameter: dishes (the chef's picks). -#}
+{% import "macros/ui.html" as ui %}
+{% import "macros/icons.html" as icons %}
+{% import "macros/background.html" as backgrounds with context %}
+{% if has_page("public.reserve") %}
+<section class="screen" id="reserve" data-section>
+  {{ backgrounds.backdrop("home-reserve") }}
+  <div class="screen__inner">
+    <div class="glass-card" data-scroll-reveal>
+      <h2 class="glass-card__title">{{ t("home.reserve.title") }}</h2>
+      <p class="glass-card__text">{{ t("home.reserve.text") }}</p>
+      {{ ui.button_link(url_for("public.reserve"), t("home.reserve.button")) }}
+    </div>
+  </div>
+</section>
+{% endif %}

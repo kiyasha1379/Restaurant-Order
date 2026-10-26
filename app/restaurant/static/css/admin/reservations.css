@@ -1,0 +1,94 @@
+/* Tables and reservations: lists, the date field popover, weekly hours and the booking card. */
+
+.date-field--admin {
+  position: relative;
+  display: inline-block;
+}
+
+.date-field--admin .date-field__panel {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-2));
+  inset-inline-start: 0;
+  z-index: 30;
+  inline-size: min(22rem, 90vw);
+}
+
+.date-field--admin .date-field__trigger[aria-pressed="true"] {
+  border-color: var(--color-accent);
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.filter-bar__note {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.badge--pending {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.badge--confirmed {
+  border-color: var(--color-ok);
+  background: var(--color-ok-soft);
+  color: var(--color-ok);
+}
+
+.alternatives {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.hours-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 1fr) auto minmax(6.5rem, 9rem) minmax(6.5rem, 9rem);
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--color-line);
+}
+
+.hours-row__time {
+  direction: ltr;
+  text-align: start;
+}
+
+.hours-row--head {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-4);
+}
+
+.closure-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.closure-form .field {
+  flex: 1 1 14rem;
+}
+
+@media (max-width: 40rem) {
+  .hours-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hours-row--head {
+    display: none;
+  }
+}

@@ -23,7 +23,11 @@ ADMIN_SECTIONS: tuple[AdminSection, ...] = (
     AdminSection(PermissionKey.DASH, "admin.dashboard", "dash", "admin.nav.dash"),
     AdminSection(PermissionKey.ORDERS, "admin.orders", "orders", "admin.nav.orders"),
     AdminSection(PermissionKey.MENU, "admin.menu", "menu", "admin.nav.menu"),
+    AdminSection(PermissionKey.TABLES, "admin.reservations", "reserve", "admin.nav.tables"),
+    AdminSection(PermissionKey.CUSTOMERS, "admin.customers", "account", "admin.nav.customers"),
     AdminSection(PermissionKey.BUILDERS, "admin.builders", "builder", "admin.nav.builders"),
     AdminSection(PermissionKey.LANGUAGES, "admin.languages", "languages", "admin.nav.languages"),
+    AdminSection(PermissionKey.SITE, "admin.site", "site", "admin.nav.site"),
+    AdminSection(PermissionKey.SETTINGS, "admin.settings", "settings", "admin.nav.settings"),
     AdminSection(PermissionKey.USERS, "admin.users", "users", "admin.nav.users"),
 )

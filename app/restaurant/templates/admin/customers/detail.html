@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.CUSTOMERS %}
+
+{% block title %}{{ detail.user.display_name }}{% endblock %}
+{% block heading %}{{ detail.user.display_name }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/customers.css') }}">{% endblock %}
+
+{#- Parameters: `detail` (CustomerDetail), `show_money`. -#}
+{% block content %}
+{% set user = detail.user %}
+<div class="toolbar">
+  <a class="btn btn--ghost btn--small" href="{{ url_for('admin.customers') }}">{{ t("admin.customers.back") }}</a>
+  <span class="toolbar__spacer"></span>
+  {% if user.is_active %}<span class="badge badge--confirmed">{{ t("admin.customers.active") }}</span>{% else %}<span class="badge badge--cancelled">{{ t("admin.customers.blocked") }}</span>{% endif %}
+  {% if access.can_edit(keys.CUSTOMERS) %}
+    {% if user.is_active %}{{ ui.post_button(url_for('admin.customer_active', user_id=user.id), t("admin.customers.block"), "danger", confirm=t("admin.customers.block_confirm"), small=False, fields={"active": "0"}) }}
+    {% else %}{{ ui.post_button(url_for('admin.customer_active', user_id=user.id), t("admin.customers.unblock"), "primary", small=False, fields={"active": "1"}) }}{% endif %}
+  {% endif %}
+</div>
+
+<section class="card">
+  <dl class="facts">
+    <div><dt>{{ t("admin.customers.name") }}</dt><dd>{{ user.display_name }}</dd></div>
+    <div><dt>{{ t("admin.customers.phone") }}</dt><dd><bdi dir="ltr">{{ user.phone or "—" }}</bdi></dd></div>
+    <div><dt>{{ t("admin.customers.email") }}</dt><dd><bdi dir="ltr">{{ user.email or "—" }}</bdi></dd></div>
+    <div><dt>{{ t("admin.customers.joined") }}</dt><dd>{{ user.created_at|jdate }}</dd></div>
+    <div><dt>{{ t("admin.customers.orders") }}</dt><dd>{{ detail.stats.order_count|number }}</dd></div>
+    {% if show_money %}<div><dt>{{ t("admin.customers.spent") }}</dt><dd><bdi>{{ detail.stats.total_spent|number }}</bdi> {{ t("price.currency") }}</dd></div>{% endif %}
+  </dl>
+</section>
+
+<section class="card">
+  <h2 class="card__title">{{ t("admin.customers.recent_orders") }}</h2>
+  {% if detail.orders %}
+  <ul class="plain-list">
+    {% for order in detail.orders %}
+    <li class="plain-list__item">
+      <a href="{{ url_for('admin.order_detail', order_id=order.id) }}">{{ t("admin.customers.order_number", number=order.number|number) }}</a>
+      <span class="muted">{{ order.created_at|jdatetime }}</span>
+      {{ ui.status_badge(order.status) }}
+      {% if show_money %}<span><bdi>{{ order.total|number }}</bdi> {{ t("price.currency") }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="empty">{{ t("admin.customers.no_orders") }}</p>{% endif %}
+</section>
+
+<section class="card">
+  <h2 class="card__title">{{ t("admin.customers.reservations") }}</h2>
+  {% if detail.reservations %}
+  <ul class="plain-list">
+    {% for booking in detail.reservations %}
+    <li class="plain-list__item">
+      <a href="{{ url_for('admin.reservation_detail', reservation_id=booking.id) }}">{{ booking.starts_at|jdate(true) }} · <bdi>{{ booking.starts_at|jtime }}</bdi></a>
+      <span class="muted">{{ t("reservation.facts.table") }} {{ booking.table_label|digits }} · {{ booking.guests|number }}</span>
+      <span class="badge badge--{{ booking.status.value }}">{{ t("reservation.status." ~ booking.status.value) }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="empty">{{ t("admin.customers.no_reservations") }}</p>{% endif %}
+</section>
+
+<section class="card">
+  <h2 class="card__title">{{ t("admin.customers.addresses") }}</h2>
+  {% if detail.addresses %}
+  <ul class="plain-list">
+    {% for address in detail.addresses %}
+    <li class="plain-list__item">{% if address.label %}<strong>{{ address.label }}</strong>{% endif %} {{ address.text }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="empty">{{ t("admin.customers.no_addresses") }}</p>{% endif %}
+</section>
+{% endblock %}

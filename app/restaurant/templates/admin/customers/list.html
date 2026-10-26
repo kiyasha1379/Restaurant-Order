@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.CUSTOMERS %}
+
+{% block title %}{{ t("admin.customers.title") }}{% endblock %}
+{% block heading %}{{ t("admin.nav.customers") }}{% endblock %}
+
+{#- Parameters: `rows` (CustomerRow list), `total`, `text`, `page`, `pages`, `show_money`, `unread`. -#}
+{% block content %}
+{% with active = "customers" %}{% include "admin/customers/_tabs.html" %}{% endwith %}
+
+<section class="card">
+  <form class="filter-bar" method="get" action="{{ url_for('admin.customers') }}">
+    <input class="field__control" type="search" name="q" value="{{ text }}" placeholder="{{ t('admin.customers.search') }}" aria-label="{{ t('admin.customers.search') }}">
+    <button class="btn btn--ghost btn--small" type="submit">{{ t("admin.customers.search_button") }}</button>
+    {% if text %}<a class="btn btn--ghost btn--small" href="{{ url_for('admin.customers') }}">{{ t("admin.customers.clear") }}</a>{% endif %}
+  </form>
+</section>
+
+<section class="card">
+  {% if rows %}
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead><tr>
+        <th>{{ t("admin.customers.name") }}</th><th>{{ t("admin.customers.phone") }}</th>
+        <th>{{ t("admin.customers.orders") }}</th>{% if show_money %}<th>{{ t("admin.customers.spent") }}</th>{% endif %}
+        <th>{{ t("admin.customers.last_order") }}</th><th>{{ t("admin.customers.bookings") }}</th>
+        <th>{{ t("admin.customers.status") }}</th><th></th>
+      </tr></thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td data-label="{{ t('admin.customers.name') }}"><strong>{{ row.user.display_name }}</strong>{% if row.user.email %}<br><bdi dir="ltr" class="muted">{{ row.user.email }}</bdi>{% endif %}</td>
+          <td data-label="{{ t('admin.customers.phone') }}"><bdi dir="ltr">{{ row.user.phone or "" }}</bdi></td>
+          <td data-label="{{ t('admin.customers.orders') }}">{{ row.stats.order_count|number }}</td>
+          {% if show_money %}<td data-label="{{ t('admin.customers.spent') }}" class="table__num"><bdi>{{ row.stats.total_spent|number }}</bdi> {{ t("price.currency") }}</td>{% endif %}
+          <td data-label="{{ t('admin.customers.last_order') }}">{% if row.stats.last_order_at %}{{ row.stats.last_order_at|jdate }}{% else %}—{% endif %}</td>
+          <td data-label="{{ t('admin.customers.bookings') }}">{{ row.reservation_count|number }}</td>
+          <td data-label="{{ t('admin.customers.status') }}">{% if row.user.is_active %}<span class="badge badge--confirmed">{{ t("admin.customers.active") }}</span>{% else %}<span class="badge badge--cancelled">{{ t("admin.customers.blocked") }}</span>{% endif %}</td>
+          <td><div class="table__actions"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.customer_detail', user_id=row.user.id) }}">{{ t("admin.customers.view") }}</a></div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ ui.pagination(page, pages, 'admin.customers', {'q': text or None}) }}
+  {% else %}
+  <p class="empty">{{ t("admin.customers.no_match") if text else t("admin.customers.empty") }}</p>
+  {% endif %}
+</section>
+{% endblock %}

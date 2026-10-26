@@ -66,6 +66,12 @@ DEMO_BACKGROUNDS = (
         dim=0.58,
     ),
     DemoBackground(
+        key="reserve-page",
+        video_path="media/backgrounds/home-reserve.mp4",
+        poster_path="media/backgrounds/home-reserve.webp",
+        dim=0.55,
+    ),
+    DemoBackground(
         key="menu-page",
         video_path="media/backgrounds/home-dishes.mp4",
         poster_path="media/backgrounds/home-dishes.webp",
@@ -216,3 +222,7 @@ DEMO_CATEGORIES = (
         ),
     ),
 )
+
+
+# The demo hall: the capacity of each table in floor-plan order (the design's 12 tables).
+DEMO_TABLE_CAPACITIES = (2, 2, 4, 4, 2, 4, 6, 4, 2, 6, 4, 2)

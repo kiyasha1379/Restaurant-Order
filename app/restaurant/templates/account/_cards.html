@@ -1,0 +1,44 @@
+{#- Small cards shared by the account pages. -#}
+
+{#- One past order. Parameters: order, with_actions (show the track and order-again buttons). -#}
+{% macro order_card(order, with_actions=true) %}
+<article class="record">
+  <div class="record__main">
+    <h3 class="record__title">{{ t("account.orders.number", number=order.number|number) }}</h3>
+    <p class="record__meta">{{ order.created_at|jdatetime }}</p>
+    <p class="record__lines">
+      {%- for item in order.items[:3] %}{{ item.name_in(language.code) }}{% if not loop.last %}، {% endif %}{% endfor -%}
+      {%- if order.items|length > 3 %} …{% endif %}
+    </p>
+  </div>
+  <div class="record__side">
+    <span class="pill pill--{{ order.status.value }}">{{ t("order.status." ~ order.status.value) }}</span>
+    <strong class="record__amount"><bdi>{{ order.total|number }}</bdi> <small>{{ t("price.currency") }}</small></strong>
+  </div>
+  {% if with_actions %}
+  <div class="record__actions">
+    <a class="btn btn--ghost btn--small" href="{{ url_for('public.order_tracking', public_token=order.public_token) }}">{{ t("account.orders.track") }}</a>
+    <form method="post" action="{{ url_for('public.reorder', public_token=order.public_token) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn--primary btn--small" type="submit">{{ t("account.orders.reorder") }}</button>
+    </form>
+  </div>
+  {% endif %}
+</article>
+{% endmacro %}
+
+{#- One booking. Parameter: booking. -#}
+{% macro booking_card(booking) %}
+<article class="record">
+  <div class="record__main">
+    <h3 class="record__title">{{ booking.starts_at|jdate(true) }} · <bdi>{{ booking.starts_at|jtime }}</bdi></h3>
+    <p class="record__meta">{{ t("account.reservations.table", label=booking.table_label|digits) }} · {{ t("account.reservations.guests", count=booking.guests|number) }}</p>
+  </div>
+  <div class="record__side">
+    <span class="pill pill--{{ booking.status.value }}">{{ t("reservation.status." ~ booking.status.value) }}</span>
+  </div>
+  <div class="record__actions">
+    <a class="btn btn--ghost btn--small" href="{{ url_for('public.reservation', public_token=booking.public_token) }}">{{ t("account.reservations.view") }}</a>
+  </div>
+</article>
+{% endmacro %}

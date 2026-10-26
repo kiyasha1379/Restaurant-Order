@@ -26,6 +26,13 @@ export function startCheckout() {
     }
   }
 
+  const addressBox = page.querySelector("#delivery_address");
+  page.querySelectorAll("[data-fill-address]").forEach((button) => {
+    button.addEventListener("click", () => {
+      addressBox.value = button.dataset.fillAddress;
+    });
+  });
+
   page.querySelectorAll("[data-fulfillment]").forEach((radio) => {
     radio.addEventListener("change", () => refreshQuote(radio.value));
   });

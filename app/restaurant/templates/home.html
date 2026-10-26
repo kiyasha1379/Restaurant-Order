@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% import "macros/ui.html" as ui %}
-{% import "macros/icons.html" as icons %}
 {% import "macros/background.html" as backgrounds with context %}
-{% import "macros/dish.html" as dish_cards with context %}
 
 {% block page_styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/home.css') }}">
@@ -11,19 +9,18 @@
 {% block body_class %}page-home{% endblock %}
 {% block page_class %} page--full{% endblock %}
 
-{#- Sections in order. The reserve section appears once the reservation page exists. -#}
-{% set sections = [
-    ("top", "home.section.top", true),
-    ("modes", "home.section.modes", true),
-    ("dishes", "home.section.dishes", dishes|length > 0),
-    ("how", "home.section.how", true),
-    ("reserve", "home.section.reserve", has_page("public.reserve")),
-    ("contact", "home.section.contact", true),
-] %}
+{#- The hero comes first and the footer last; the sections between follow the order the owner
+    chose (site_sections). A section with nothing to show (no chef's picks, no reservation page)
+    is left out here and from the dots. -#}
+{% set shown = namespace(items=[("top", "home.section.top")]) %}
+{% for key in layout if (key != "dishes" or dishes) and (key != "reserve" or has_page("public.reserve")) %}
+  {% set shown.items = shown.items + [(key, "home.section." ~ key)] %}
+{% endfor %}
+{% set shown.items = shown.items + [("contact", "home.section.contact")] %}
 
 {% block content %}
 <nav class="section-dots" aria-label="{{ t('home.sections_label') }}">
-  {% for anchor, text_key, shown in sections if shown %}
+  {% for anchor, text_key in shown.items %}
   <a class="section-dots__dot" href="#{{ anchor }}" data-section-link="{{ anchor }}" aria-label="{{ t(text_key) }}"></a>
   {% endfor %}
 </nav>
@@ -54,76 +51,7 @@
   </div>
 </section>
 
-<section class="screen" id="modes" data-section>
-  {{ backgrounds.backdrop("home-modes") }}
-  <div class="screen__inner">
-    <h2 class="screen__title" data-scroll-reveal>{{ t("home.modes.title") }}</h2>
-    <div class="modes">
-      {% for mode, endpoint in [("order", "public.menu"), ("reserve", "public.reserve"), ("takeaway", "public.menu"), ("builder", "public.builder")] if has_page(endpoint) %}
-      <div class="dish-card mode-card" data-dish-card data-scroll-reveal>
-        <button type="button" class="dish-card__flip" aria-pressed="false" aria-label="{{ t('home.mode.' ~ mode ~ '.title') }}. {{ t('home.mode.flip_hint') }}">
-          <span class="dish-card__inner">
-            <span class="dish-card__face mode-card__front">
-              {{ icons.icon({"order": "menu", "reserve": "reserve", "takeaway": "cart", "builder": "builder"}[mode], 44) }}
-              <span class="mode-card__title">{{ t("home.mode." ~ mode ~ ".title") }}</span>
-              <span class="dish-card__hint">{{ icons.icon("flip", 16) }}</span>
-            </span>
-            <span class="dish-card__face dish-card__back">
-              <span class="dish-card__back-title">{{ t("home.mode." ~ mode ~ ".title") }}</span>
-              <span class="dish-card__back-text">{{ t("home.mode." ~ mode ~ ".text") }}</span>
-              <a class="mode-card__go" href="{{ url_for(endpoint) }}">{{ t("home.mode.start") }} {{ icons.icon("arrow", 16) }}</a>
-            </span>
-          </span>
-        </button>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-{% if dishes %}
-<section class="screen" id="dishes" data-section>
-  {{ backgrounds.backdrop("home-dishes") }}
-  <div class="screen__inner">
-    <h2 class="screen__title" data-scroll-reveal>{{ t("home.dishes.title") }}</h2>
-    <div class="dish-grid dish-grid--picks">
-      {% for dish in dishes %}
-      <div data-scroll-reveal>{{ dish_cards.dish_card(dish, loop.index0) }}</div>
-      {% endfor %}
-    </div>
-    <p class="screen__more" data-scroll-reveal>{{ ui.button_link(url_for("public.menu"), t("home.dishes.all"), "ghost") }}</p>
-  </div>
-</section>
-{% endif %}
-
-<section class="screen" id="how" data-section>
-  {{ backgrounds.backdrop("home-how") }}
-  <div class="screen__inner">
-    <h2 class="screen__title" data-scroll-reveal>{{ t("home.how.title") }}</h2>
-    <ol class="steps">
-      {% for number in (1, 2, 3) %}
-      <li class="steps__item" data-scroll-reveal>
-        <span class="steps__number"><bdi>{{ number|number }}</bdi></span>
-        <h3 class="steps__title">{{ t("home.how." ~ number ~ ".title") }}</h3>
-        <p class="steps__text">{{ t("home.how." ~ number ~ ".text") }}</p>
-      </li>
-      {% endfor %}
-    </ol>
-  </div>
-</section>
-
-{% if has_page("public.reserve") %}
-<section class="screen" id="reserve" data-section>
-  {{ backgrounds.backdrop("home-reserve") }}
-  <div class="screen__inner">
-    <div class="glass-card" data-scroll-reveal>
-      <h2 class="glass-card__title">{{ t("home.reserve.title") }}</h2>
-      <p class="glass-card__text">{{ t("home.reserve.text") }}</p>
-      {{ ui.button_link(url_for("public.reserve"), t("home.reserve.button")) }}
-    </div>
-  </div>
-</section>
-{% endif %}
+{% for key in layout %}{% include "home/_" ~ key ~ ".html" %}{% endfor %}
 {% endblock %}
 
 {% block footer %}

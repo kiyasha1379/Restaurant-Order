@@ -7,4 +7,10 @@ from restaurant.blueprints.language_routing import LANGUAGE_PARAMETER, attach_la
 public_blueprint = Blueprint("public", __name__, url_prefix=f"/<{LANGUAGE_PARAMETER}>")
 attach_language_routing(public_blueprint)
 
-from restaurant.blueprints.public import builder_routes, routes  # noqa: E402,F401
+from restaurant.blueprints.public import (  # noqa: E402,F401
+    account_routes,
+    builder_routes,
+    pay_routes,
+    reserve_routes,
+    routes,
+)

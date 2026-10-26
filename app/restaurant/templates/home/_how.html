@@ -1,0 +1,19 @@
+{#- One home page section. Parameter: dishes (the chef's picks). -#}
+{% import "macros/ui.html" as ui %}
+{% import "macros/icons.html" as icons %}
+{% import "macros/background.html" as backgrounds with context %}
+<section class="screen" id="how" data-section>
+  {{ backgrounds.backdrop("home-how") }}
+  <div class="screen__inner">
+    <h2 class="screen__title" data-scroll-reveal>{{ t("home.how.title") }}</h2>
+    <ol class="steps">
+      {% for number in (1, 2, 3) %}
+      <li class="steps__item" data-scroll-reveal>
+        <span class="steps__number"><bdi>{{ number|number }}</bdi></span>
+        <h3 class="steps__title">{{ t("home.how." ~ number ~ ".title") }}</h3>
+        <p class="steps__text">{{ t("home.how." ~ number ~ ".text") }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>

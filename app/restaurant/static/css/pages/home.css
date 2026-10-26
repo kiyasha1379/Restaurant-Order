@@ -133,19 +133,39 @@ html[lang="en"] .hero__title {
   line-height: 1.4;
 }
 
+/* The back face leaves room at the bottom for the link, which floats over it once flipped. */
+.mode-card__back {
+  padding-block-end: 32%;
+}
+
 .mode-card__go {
-  display: inline-flex;
+  position: absolute;
+  inset-block-end: 16%;
+  inset-inline: 0;
+  z-index: 2;
+  display: flex;
   align-items: center;
   gap: var(--space-2);
+  inline-size: max-content;
   min-block-size: var(--tap-target);
-  margin-block-start: var(--space-1);
+  margin-inline: auto;
   padding-inline: var(--space-4);
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.3s ease var(--flip-duration),
+    visibility 0s linear var(--flip-duration);
   border-radius: var(--radius-pill);
   background: var(--color-accent);
   color: var(--color-ink);
   font-size: 0.875rem;
   font-weight: 700;
   text-decoration: none;
+}
+
+.mode-card.is-flipped .mode-card__go {
+  visibility: visible;
+  opacity: 1;
 }
 
 /* The arrow points the way the text reads. */

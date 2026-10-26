@@ -6,7 +6,7 @@
 {% macro dish_card(dish, position=0) %}
 <div class="dish-card" data-dish-card data-category="{{ dish.category_slug }}">
   <button type="button" class="dish-card__flip" aria-pressed="false" aria-label="{{ t('dish.details', name=dish.name) }}">
-    <span class="dish-card__inner">
+    <span class="dish-card__inner" aria-hidden="true">
       <span class="dish-card__face dish-card__front" style="--dish-fallback: var(--dish-gradient-{{ position % 4 + 1 }})">
         {% if dish.image_path %}
         <img class="dish-card__photo" src="{{ url_for('static', filename=dish.image_path) }}" alt="" loading="lazy" decoding="async">
@@ -23,6 +23,8 @@
       </span>
     </span>
   </button>
+  {#- The card faces are decoration for screen readers; the details are read from here. -#}
+  <span class="u-visually-hidden">{{ dish.name }}{% if dish.description %}. {{ dish.description }}{% endif %}{% if dish.ingredients %}. {{ t("dish.ingredients") }} {{ dish.ingredients }}{% endif %}{% if dish.serving_note %}. {{ dish.serving_note }}{% endif %}</span>
   <span class="dish-card__name" aria-hidden="true">{{ dish.name }}</span>
   <span class="dish-card__buy">
     <span class="dish-card__price"><bdi>{{ dish.price|number }}</bdi> <small>{{ t("price.currency") }}</small></span>

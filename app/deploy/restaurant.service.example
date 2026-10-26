@@ -1,0 +1,18 @@
+# systemd unit: /etc/systemd/system/restaurant.service
+[Unit]
+Description=Restaurant website
+After=network.target
+
+[Service]
+User=restaurant
+WorkingDirectory=/srv/restaurant/app
+Environment=APP_CONFIG=prod
+EnvironmentFile=/etc/restaurant.env   # contains SECRET_KEY=...
+ExecStart=/srv/restaurant/venv/bin/gunicorn -c deploy/gunicorn.conf.py wsgi:app
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+# Nightly backup, e.g. in /etc/cron.d/restaurant-backup:
+#   30 3 * * * restaurant cd /srv/restaurant/app && APP_CONFIG=prod /srv/restaurant/venv/bin/flask --app wsgi backup-db --keep 14

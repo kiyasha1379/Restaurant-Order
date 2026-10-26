@@ -85,7 +85,8 @@
 }
 
 .section-list__item--fixed {
-  opacity: 0.7;
+  border-style: dashed;
+  background: transparent;
 }
 
 .section-list__moves {

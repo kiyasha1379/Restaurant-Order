@@ -11,7 +11,11 @@ export function startCategoryFilter() {
 
   function select(slug) {
     chips.querySelectorAll("[data-filter]").forEach((chip) => {
-      chip.setAttribute("aria-pressed", String(chip.dataset.filter === slug));
+      if (chip.dataset.filter === slug) {
+        chip.setAttribute("aria-current", "true");
+      } else {
+        chip.removeAttribute("aria-current");
+      }
     });
     grid.querySelectorAll(".dish-grid__item").forEach((item) => {
       item.hidden = slug !== "" && item.dataset.category !== slug;

@@ -8,6 +8,8 @@ WTForms>=3.2,<4
 Flask-Login>=0.6.3,<1
 Flask-Limiter>=3.5,<5
 jdatetime>=5.0,<7
+# Checks and shrinks uploaded photos (restaurant/media.py).
+Pillow>=10.3
 # Windows ships no time zone database; zoneinfo needs this to know Asia/Tehran.
 tzdata>=2024.1
 # Lets `flask` read APP_CONFIG and SECRET_KEY from a local .env file.

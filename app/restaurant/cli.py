@@ -1,9 +1,16 @@
 """Command-line commands: `flask seed-demo` and `flask reset-demo`."""
 
-import click
-from flask import Flask
+from pathlib import Path
 
+import click
+from flask import Flask, current_app
+from sqlalchemy import inspect
+from sqlalchemy.engine import make_url
+
+from restaurant.backup import backup_database
+from restaurant.config import INSTANCE_DIR
 from restaurant.extensions import db
+from restaurant.seed.demo_reset import DemoWiper
 from restaurant.seed.demo_staff import DEMO_STAFF_PASSWORD
 from restaurant.service_factory import (
     make_access_service,
@@ -19,6 +26,7 @@ from restaurant.services import (
     StaffError,
     WeakPasswordError,
 )
+from restaurant.timeutils import now_tehran
 
 
 @click.command("sync-ui-strings")
@@ -29,9 +37,8 @@ def sync_ui_strings_command() -> None:
     click.echo(f"sync-ui-strings: added {report.added_keys} keys and {report.added_texts} texts.")
 
 
-@click.command("seed-demo")
-def seed_demo_command() -> None:
-    """Add the sample menu and backgrounds for the demo (never changes existing rows)."""
+def _seed_everything() -> None:
+    """Add the sample data (menu, builders, tables, staff, customer) that is missing."""
     report = make_demo_seed_service().seed()
     db.session.commit()
     click.echo(
@@ -54,6 +61,12 @@ def seed_demo_command() -> None:
             "seed-demo: added a sample customer (customer@example.com or 09120000000, "
             f"password {DEMO_STAFF_PASSWORD}) and sample contact messages."
         )
+
+
+@click.command("seed-demo")
+def seed_demo_command() -> None:
+    """Add the sample menu and backgrounds for the demo (never changes existing rows)."""
+    _seed_everything()
 
 
 @click.command("create-admin")
@@ -92,9 +105,42 @@ def advance_order_command(order_id: int) -> None:
 
 
 @click.command("reset-demo")
-def reset_demo_command() -> None:
-    """Return the demo to its starting state (filled in by later phases)."""
-    click.echo("reset-demo: there is nothing to reset yet. Later phases add it.")
+@click.option("--yes", is_flag=True, help="Do not ask for confirmation.")
+def reset_demo_command(yes: bool) -> None:
+    """Delete ALL data and uploads, then load the sample data again (demo installations only)."""
+    if not current_app.config["DEMO_MODE"]:
+        raise click.ClickException(
+            "reset-demo only runs with APP_CONFIG=demo; it deletes every order, customer "
+            "and setting."
+        )
+    existing = set(inspect(db.engine).get_table_names())
+    missing = {table.name for table in db.metadata.sorted_tables} - existing
+    if missing:
+        raise click.ClickException("The database is not set up yet. Run `flask db upgrade` first.")
+    if not yes:
+        click.confirm("This deletes ALL data and uploaded files. Continue?", abort=True)
+    wiper = DemoWiper(db.session, db.metadata.sorted_tables, current_app.config["UPLOAD_FOLDER"])
+    files = wiper.wipe()
+    db.session.commit()
+    click.echo(f"reset-demo: emptied the database and removed {files} uploaded files.")
+    make_access_service().ensure_defaults()
+    db.session.commit()
+    sync_ui_strings_command.callback()
+    _seed_everything()
+    click.echo("reset-demo: done. The demo is back to its starting state.")
+
+
+@click.command("backup-db")
+@click.option("--keep", default=14, show_default=True, help="How many backups to keep.")
+@click.option(
+    "--to", "target", default=None, help="Folder for the copies (default instance/backups)."
+)
+def backup_db_command(keep: int, target: str | None) -> None:
+    """Save a consistent copy of the database and delete the oldest copies."""
+    source = Path(make_url(current_app.config["SQLALCHEMY_DATABASE_URI"]).database or "")
+    folder = Path(target) if target else INSTANCE_DIR / "backups"
+    path = backup_database(source, folder, now_tehran(), keep)
+    click.echo(f"backup-db: saved {path} (keeping the newest {keep}).")
 
 
 def register_commands(app: Flask) -> None:
@@ -104,3 +150,4 @@ def register_commands(app: Flask) -> None:
     app.cli.add_command(create_admin_command)
     app.cli.add_command(advance_order_command)
     app.cli.add_command(reset_demo_command)
+    app.cli.add_command(backup_db_command)

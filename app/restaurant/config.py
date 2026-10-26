@@ -1,4 +1,4 @@
-"""Application configuration: Dev, Demo and Test (technical plan, section 11)."""
+"""Application configuration: Dev, Demo, Prod and Test (technical plan, section 11)."""
 
 import os
 from pathlib import Path
@@ -38,6 +38,10 @@ class BaseConfig:
     PAYMENT_GATEWAY = "mock"
     # Demo mode (and the tests) accept this code instead of sending an SMS.
     DEMO_VERIFICATION_CODE = "12345"
+    # How many reverse proxies to trust for the visitor address and scheme (see ProdConfig).
+    PROXY_HOPS = 0
+    # Seconds for the Strict-Transport-Security header; 0 sends none (only HTTPS installs set it).
+    HSTS_SECONDS = 0
     # Live order status: how often the stream looks at the database, and how long one stream lives.
     ORDER_STREAM_POLL_SECONDS = 2
     ORDER_STREAM_MAX_SECONDS = 600
@@ -54,6 +58,28 @@ class DemoConfig(BaseConfig):
     """Demonstration build: demo bar on, sample data allowed."""
 
     DEMO_MODE = True
+
+
+class ProdConfig(BaseConfig):
+    """A real installation behind a reverse proxy that speaks HTTPS.
+
+    A real SECRET_KEY is required, cookies are only sent over HTTPS, the test payment page
+    is refused, and the proxy's forwarding headers are trusted (one hop by default).
+    """
+
+    DEMO_MODE = False
+    SECRET_KEY = os.environ.get("SECRET_KEY", "")
+    SESSION_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_HTTPONLY = True
+    PREFERRED_URL_SCHEME = "https"
+    # Online payment stays off until a real gateway class is configured here.
+    PAYMENT_GATEWAY = os.environ.get("PAYMENT_GATEWAY", "")
+    # How many reverse proxies sit in front of the app (0 when none).
+    PROXY_HOPS = int(os.environ.get("PROXY_HOPS", "1"))
+    HSTS_SECONDS = 31_536_000
+    # The rate limiter must survive several worker processes; point this at Redis if you scale.
+    RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
 
 
 class TestConfig(BaseConfig):
@@ -73,6 +99,7 @@ class TestConfig(BaseConfig):
 CONFIG_BY_NAME: dict[str, type[BaseConfig]] = {
     "dev": DevConfig,
     "demo": DemoConfig,
+    "prod": ProdConfig,
     "test": TestConfig,
 }
 

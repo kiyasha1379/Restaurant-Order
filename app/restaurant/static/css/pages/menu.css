@@ -49,7 +49,7 @@ html[lang="en"] .menu-page__title {
   transform: translateY(-2px);
 }
 
-.chips__chip[aria-pressed="true"] {
+.chips__chip[aria-current="true"] {
   border-color: var(--color-accent);
   background: var(--color-accent);
   color: var(--color-ink);

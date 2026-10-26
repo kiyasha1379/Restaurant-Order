@@ -190,7 +190,7 @@ def site_home() -> str:
     service = make_site_appearance_service()
     return render_template(
         "admin/site/home.html",
-        sections=service.home_sections(),
+        home_sections=service.home_sections(),
         texts=service.load_home_texts(),
     )
 

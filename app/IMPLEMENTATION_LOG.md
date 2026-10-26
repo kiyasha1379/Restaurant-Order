@@ -17,7 +17,7 @@ A running report of what was built, in order. Each phase has its tasks, the deci
 | 8 | Customer account | Done (2026-10-26) |
 | 9 | Mock online payment | Done (2026-10-26) |
 | 10 | Site appearance and settings | Done (2026-10-26) |
-| 11 | Polish and demo readiness | Next |
+| 11 | Polish and demo readiness | In progress (saved unfinished, 2026-10-26) |
 
 ## Phase 0: Project setup (2026-10-26)
 
@@ -321,3 +321,22 @@ A running report of what was built, in order. Each phase has its tasks, the deci
 - Section order uses arrow buttons (work without JavaScript) instead of drag and drop.
 
 **Open for phase 11**: replace the sample videos that carry a watermark, realistic contact details in the demo data, a long brand name is cut with an ellipsis on phones.
+
+## Phase 11: Polish and demo readiness (in progress, saved unfinished on 2026-10-26)
+
+**Done so far (not yet re-tested as a whole)**
+
+- `Pillow` added to `requirements.txt` (a fresh install used to fail on photo upload).
+- `flask reset-demo [--yes]` is real: demo mode only, wipes all tables (except the two languages) and uploads, then reloads the sample data. Tested (`tests/test_production.py`) and run by hand.
+- `ProdConfig` (`APP_CONFIG=prod`): required 32+ character `SECRET_KEY`, secure cookies, mock gateway and demo mode refused, proxy headers trusted (`PROXY_HOPS`), HSTS. Security headers on every response (`restaurant/hardening.py`).
+- `flask backup-db [--keep N] [--to FOLDER]` (`restaurant/backup.py`), `requirements-prod.txt`, and `deploy/` with Gunicorn, nginx and systemd examples.
+- Accessibility pass with axe-core (`tests/browser/a11y_check.js`, needs `AXE_PATH` pointing at `axe.min.js`): found and fixed the broken admin sidebar on "Site appearance > Home page" (the template variable `sections` hid the sidebar's own list; now `home_sections`), menu category chips (`aria-current` instead of the invalid `aria-pressed` on links), round dish and mode cards (card faces hidden from screen readers with the text offered once, and the "Start" link moved out of the button).
+
+**Not done yet - continue here**
+
+1. Run the full test suite, `ruff` and `black` after the accessibility edits (`templates/macros/dish.html`, `templates/home/_modes.html`, `templates/menu.html`, `category-filter.js`, `menu.css`, `home.css`, `site.css`); re-run `a11y_check.js` (remaining known items were the three fixed above plus a contrast check on `/admin/site/home`); add a test that every admin page has a sidebar with non-empty links.
+2. Read the coverage report (`pytest --cov=restaurant`) and fill gaps in pricing, booking and payment tests.
+3. Reduced-motion check, focus order on the checkout and reservation pages.
+4. Media: the sample videos still carry a "MINIMAX / Hailuo AI" watermark; check sizes (4.9 MB in `static/media/backgrounds`).
+5. Demo data: realistic contact details, optional sample orders and reservations for the dashboard; a long brand name is cut with an ellipsis on phones.
+6. Fresh-install walkthrough from `requirements.txt` in a clean virtual environment, rewrite the README, make `docs/technical-plan.en.md` match the code (section 12 and the Prod configuration), final log entry.

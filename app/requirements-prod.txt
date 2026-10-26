@@ -1,0 +1,3 @@
+# Extra packages for a real Linux server (see deploy/).
+-r requirements.txt
+gunicorn>=22

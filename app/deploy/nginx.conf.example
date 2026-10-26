@@ -1,0 +1,41 @@
+# Example nginx site for the restaurant app (replace example.ir and the certificate paths).
+server {
+    listen 80;
+    server_name example.ir;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name example.ir;
+    ssl_certificate     /etc/letsencrypt/live/example.ir/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.ir/privkey.pem;
+
+    client_max_body_size 14m;  # background videos are up to 12 MB
+
+    # Static files and uploads straight from disk; a short cache because names are not hashed.
+    location /static/ {
+        alias /srv/restaurant/app/restaurant/static/;
+        expires 1h;
+        add_header Cache-Control "public";
+    }
+
+    # The live order status stream must not be buffered.
+    location ~ ^/(api/orders/.+|admin/orders)/stream$ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_buffering off;
+        proxy_read_timeout 660s;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+    }
+}

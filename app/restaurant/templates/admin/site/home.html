@@ -8,7 +8,7 @@
 {% block heading %}{{ t("admin.nav.site") }}{% endblock %}
 {% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/site.css') }}">{% endblock %}
 
-{#- Parameters: sections (SectionRow list in order) and texts ({key: {language: text}}). -#}
+{#- Parameters: home_sections (SectionRow list in order) and texts ({key: {language: text}}). -#}
 {% block content %}
 {% with active = "home" %}{% include "admin/site/_tabs.html" %}{% endwith %}
 
@@ -20,7 +20,7 @@
     <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
       <ol class="section-list">
         <li class="section-list__item section-list__item--fixed"><span>{{ t("admin.site.section.top") }}</span><span class="muted">{{ t("admin.site.fixed") }}</span></li>
-        {% for section in sections %}
+        {% for section in home_sections %}
         <li class="section-list__item">
           <input type="hidden" name="order" value="{{ section.key }}">
           <label class="check"><input type="checkbox" name="visible" value="{{ section.key }}"{% if section.is_visible %} checked{% endif %}> <span>{{ t("admin.site.section." ~ section.key) }}</span></label>

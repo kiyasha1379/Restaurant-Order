@@ -20,9 +20,9 @@
     <h1 class="menu-page__title" data-reveal>{{ t("menu.title") }}</h1>
     <p class="menu-page__subtitle" data-reveal>{{ t("menu.subtitle") }}</p>
     <div class="chips" role="group" aria-label="{{ t('menu.categories_label') }}" data-reveal data-category-filter>
-      <a class="chips__chip" href="{{ url_for('public.menu') }}" data-filter="" aria-pressed="{{ 'true' if not selected_slug else 'false' }}">{{ t("menu.all") }}</a>
+      <a class="chips__chip" href="{{ url_for('public.menu') }}" data-filter="" {% if not selected_slug %}aria-current="true"{% endif %}>{{ t("menu.all") }}</a>
       {% for category in categories %}
-      <a class="chips__chip" href="{{ url_for('public.menu', category=category.slug) }}" data-filter="{{ category.slug }}" aria-pressed="{{ 'true' if selected_slug == category.slug else 'false' }}">{{ category.name }}</a>
+      <a class="chips__chip" href="{{ url_for('public.menu', category=category.slug) }}" data-filter="{{ category.slug }}" {% if selected_slug == category.slug %}aria-current="true"{% endif %}>{{ category.name }}</a>
       {% endfor %}
     </div>
   </header>

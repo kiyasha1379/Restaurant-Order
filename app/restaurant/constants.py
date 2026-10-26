@@ -101,3 +101,49 @@ class SettingKey(StrEnum):
 
     BRAND_NAME = "brand_name"
     DELIVERY_FEE = "delivery_fee"
+
+
+class PreviewKind(StrEnum):
+    """Which picture a builder draws next to its steps. `plain` draws none."""
+
+    PIZZA = "pizza"
+    SANDWICH = "sandwich"
+    DRINK = "drink"
+    PLAIN = "plain"
+
+
+class PreviewRole(StrEnum):
+    """What a step does in the picture; each builder kind understands some of these."""
+
+    NONE = ""
+    CRUST = "crust"
+    SAUCE = "sauce"
+    CHEESE = "cheese"
+    TOPPING = "topping"
+    BREAD = "bread"
+    LAYER = "layer"
+    BASE = "base"
+    SIZE = "size"
+    FLAVOR = "flavor"
+    EXTRA = "extra"
+
+
+# The roles a step may have in each kind of picture (the admin form offers only these).
+PREVIEW_ROLES_BY_KIND: dict[PreviewKind, tuple[PreviewRole, ...]] = {
+    PreviewKind.PIZZA: (
+        PreviewRole.NONE,
+        PreviewRole.CRUST,
+        PreviewRole.SAUCE,
+        PreviewRole.CHEESE,
+        PreviewRole.TOPPING,
+    ),
+    PreviewKind.SANDWICH: (PreviewRole.NONE, PreviewRole.BREAD, PreviewRole.LAYER),
+    PreviewKind.DRINK: (
+        PreviewRole.NONE,
+        PreviewRole.BASE,
+        PreviewRole.SIZE,
+        PreviewRole.FLAVOR,
+        PreviewRole.EXTRA,
+    ),
+    PreviewKind.PLAIN: (PreviewRole.NONE,),
+}

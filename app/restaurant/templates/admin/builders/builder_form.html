@@ -1,0 +1,95 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.BUILDERS %}
+{% set editable = access.can_edit(keys.BUILDERS) %}
+{% set action = url_for('admin.builder_update', builder_id=builder.id) if builder else url_for('admin.builder_create') %}
+
+{% block title %}{{ t("admin.builders.builder") }}{% endblock %}
+{% block heading %}{{ t("admin.builders.edit") if builder else t("admin.builders.add") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/menu.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/admin/builders.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.builders') }}">{{ t("admin.back") }}</a></div>
+<form class="form" method="post" action="{{ action }}" novalidate>
+  {{ form.hidden_tag() }}
+  <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+    <div class="stack">
+      <section class="card form">
+        <h2 class="card__title">{{ t("admin.menu.general") }}</h2>
+        <div class="form__row">
+          {{ ui.form_field(form.key, t("admin.builders.key"), hint=t("admin.builders.key_hint"), dir="ltr") }}
+          <div class="field{% if form.preview_kind.errors %} field--invalid{% endif %}">
+            <label class="field__label" for="{{ form.preview_kind.id }}">{{ t("admin.builders.kind") }}</label>
+            <select class="field__control" id="{{ form.preview_kind.id }}" name="{{ form.preview_kind.name }}">
+              {% for choice in form.preview_kind.choices %}<option value="{{ choice.value }}"{% if form.preview_kind.data == choice.value %} selected{% endif %}>{{ t("admin.builders.kind." ~ choice.value) }}</option>{% endfor %}
+            </select>
+            <span class="muted">{{ t("admin.builders.kind_hint") }}</span>
+            {% for error in form.preview_kind.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+          </div>
+          {{ ui.form_field(form.sort_order, t("admin.menu.sort_order"), inputmode="numeric", dir="ltr") }}
+        </div>
+        {{ ui.checkbox(form.is_visible, t("admin.builders.visible")) }}
+      </section>
+      <div class="grid grid--two">
+        {% for code, direction in (("fa", "rtl"), ("en", "ltr")) %}
+        <section class="card form">
+          <h2 class="card__title">{{ t("admin.menu.texts_" ~ code) }}</h2>
+          {{ ui.form_field(form["name_" ~ code], t("admin.builders.name"), dir=direction, lang=code) }}
+          {{ ui.form_field(form["hint_" ~ code], t("admin.builders.hint"), dir=direction, lang=code) }}
+        </section>
+        {% endfor %}
+      </div>
+    </div>
+  </fieldset>
+  {% if editable %}
+  <div class="form__actions">
+    <button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button>
+    <a class="btn btn--ghost" href="{{ url_for('admin.builders') }}">{{ t("admin.cancel") }}</a>
+  </div>
+  {% endif %}
+</form>
+
+{% if builder %}
+<section class="card">
+  <div class="card__head">
+    <h2 class="card__title">{{ t("admin.builders.steps") }}</h2>
+    {% if editable %}<a class="btn btn--primary btn--small" href="{{ url_for('admin.step_new', builder_id=builder.id) }}"><span class="btn__icon">{{ icons.icon("plus", 16) }}</span>{{ t("admin.builders.add_step") }}</a>{% endif %}
+  </div>
+  {% if builder.steps %}
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead><tr><th>{{ t("admin.builders.step") }}</th><th>{{ t("admin.builders.key") }}</th><th>{{ t("admin.builders.options") }}</th><th>{{ t("admin.builders.rules") }}</th><th></th></tr></thead>
+      <tbody>
+        {% for step in builder.steps %}
+        <tr>
+          <td data-label="{{ t('admin.builders.step') }}"><strong>{{ text_of(step.translations, language.code, "title", step.key) }}</strong></td>
+          <td data-label="{{ t('admin.builders.key') }}"><bdi dir="ltr">{{ step.key }}</bdi></td>
+          <td data-label="{{ t('admin.builders.options') }}" class="table__num">{{ step.options|length|number }}</td>
+          <td data-label="{{ t('admin.builders.rules') }}">
+            <span class="badge">{{ t("admin.builders.multiple") if step.is_multiple else t("admin.builders.single") }}</span>
+            {% if step.is_required %}<span class="badge badge--accent">{{ t("admin.builders.required") }}</span>{% endif %}
+            {% if step.is_layered %}<span class="badge">{{ t("admin.builders.layered") }}</span>{% endif %}
+          </td>
+          <td><div class="table__actions">
+            {% if editable %}
+            {{ ui.post_button(url_for('admin.step_move', step_id=step.id), "", icon="up", fields={"direction": "up"}, aria=t("admin.menu.move_up")) }}
+            {{ ui.post_button(url_for('admin.step_move', step_id=step.id), "", icon="down", fields={"direction": "down"}, aria=t("admin.menu.move_down")) }}
+            {% endif %}
+            <a class="btn btn--ghost btn--small" href="{{ url_for('admin.step_edit', step_id=step.id) }}">{{ t("admin.edit") if editable else t("admin.orders.view") }}</a>
+          </div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">{{ t("admin.builders.no_steps") }}</p>{% endif %}
+</section>
+{% if editable %}
+<form class="form__actions" method="post" action="{{ url_for('admin.builder_delete', builder_id=builder.id) }}" data-confirm="{{ t('admin.builders.confirm_delete') }}">
+  {{ ui.csrf() }}
+  <button class="btn btn--danger btn--small" type="submit"><span class="btn__icon">{{ icons.icon("trash", 16) }}</span>{{ t("admin.delete") }}</button>
+</form>
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -34,6 +34,7 @@ def line_to_dict(line: PricedLine) -> dict:
         "line_id": line.line_id,
         "dish_id": line.dish_id,
         "name": line.name,
+        "summary": line.summary,
         "unit_price": line.unit_price,
         "quantity": line.quantity,
         "line_total": line.line_total,

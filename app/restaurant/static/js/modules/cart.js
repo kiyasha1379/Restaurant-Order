@@ -49,7 +49,14 @@ function makeLine(line) {
   const price = document.createElement("div");
   price.className = "cart-line__price";
   price.textContent = `${formatNumber(line.unit_price)} ${config.texts["price.currency"]}`;
-  info.append(name, price);
+  info.append(name);
+  if (line.summary) {
+    const summary = document.createElement("div");
+    summary.className = "cart-line__summary";
+    summary.textContent = line.summary;
+    info.append(summary);
+  }
+  info.append(price);
 
   const controls = document.createElement("div");
   controls.className = "cart-line__controls";
@@ -157,6 +164,20 @@ async function addDish(dishId, button) {
     }
   } catch (error) {
     showToast(error.message, true);
+  }
+}
+
+/** Add a custom build (see builder.js). Returns true when the cart accepted it. */
+export async function addCustomBuild(payload, button, name) {
+  try {
+    const [cart] = await Promise.all([requestJson(config.urls.cartAddCustom, payload), flyToCart(button)]);
+    render(cart);
+    popBadge();
+    showToast(fillText(config.texts["cart.added"], { name }));
+    return true;
+  } catch (error) {
+    showToast(error.message, true);
+    return false;
   }
 }
 

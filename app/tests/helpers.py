@@ -83,3 +83,100 @@ def make_image_bytes(
         buffer, format=image_format
     )
     return buffer.getvalue()
+
+
+def add_builder(key: str = "sandwich", kind: str = "sandwich", **fields):
+    """Create a small sandwich-like builder and return it (ids are available after the flush).
+
+    Steps: bread (one, required), layers (several, ordered, optional), sauce (one, required).
+    """
+    from restaurant.constants import PreviewKind
+    from restaurant.models import (
+        Builder,
+        BuilderOption,
+        BuilderOptionTranslation,
+        BuilderStep,
+        BuilderStepTranslation,
+        BuilderTranslation,
+    )
+
+    def option(option_key, fa, en, price, **extra):
+        return BuilderOption(
+            key=option_key,
+            price=price,
+            translations=[
+                BuilderOptionTranslation(language_id=language_id("fa"), name=fa),
+                BuilderOptionTranslation(language_id=language_id("en"), name=en),
+            ],
+            **extra,
+        )
+
+    def step(step_key, fa, en, options, **extra):
+        return BuilderStep(
+            key=step_key,
+            translations=[
+                BuilderStepTranslation(language_id=language_id("fa"), title=fa),
+                BuilderStepTranslation(language_id=language_id("en"), title=en),
+            ],
+            options=options,
+            **extra,
+        )
+
+    builder = Builder(
+        key=key,
+        preview_kind=PreviewKind(kind),
+        translations=[
+            BuilderTranslation(language_id=language_id("fa"), name="ساندویچ دلخواه"),
+            BuilderTranslation(language_id=language_id("en"), name="Custom sandwich"),
+        ],
+        steps=[
+            step(
+                "bread",
+                "نان",
+                "Bread",
+                [
+                    option("baguette", "باگت", "Baguette", 60_000, sort_order=0),
+                    option("toast", "نان تست", "Toast", 50_000, sort_order=1),
+                ],
+                sort_order=0,
+                is_base=True,
+                preview_role="bread",
+            ),
+            step(
+                "layers",
+                "لایه‌ها",
+                "Layers",
+                [
+                    option("cheese", "پنیر", "Cheese", 20_000, sort_order=0),
+                    option("tomato", "گوجه", "Tomato", 10_000, sort_order=1),
+                    option("lettuce", "کاهو", "Lettuce", 0, sort_order=2),
+                    option("steak", "استیک", "Steak", 45_000, sort_order=3),
+                ],
+                sort_order=1,
+                is_multiple=True,
+                is_required=False,
+                is_layered=True,
+                preview_role="layer",
+            ),
+            step(
+                "sauce",
+                "سس",
+                "Sauce",
+                [
+                    option("mayo", "مایونز", "Mayo", 0, sort_order=0),
+                    option("ketchup", "کچاپ", "Ketchup", 0, sort_order=1),
+                ],
+                sort_order=2,
+            ),
+        ],
+        **fields,
+    )
+    db.session.add(builder)
+    db.session.flush()
+    return builder
+
+
+def option_ids(builder, *keys: str) -> list[int]:
+    """Return the ids of the options with these keys, in the order the keys are given."""
+    found = {option.key: option.id for step in builder.steps for option in step.options}
+    return [found[key] for key in keys]

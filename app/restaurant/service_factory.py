@@ -11,6 +11,7 @@ from restaurant.extensions import db
 from restaurant.media import ImageStorage
 from restaurant.repositories import (
     BackgroundRepository,
+    BuilderRepository,
     CategoryRepository,
     DishRepository,
     LanguageRepository,
@@ -27,6 +28,9 @@ from restaurant.services import (
     AccessService,
     AuthService,
     BackgroundService,
+    BuilderAdminService,
+    BuilderService,
+    BuildResolver,
     CartService,
     DashboardService,
     FixedDeliveryFee,
@@ -75,6 +79,7 @@ def make_demo_seed_service() -> DemoSeedService:
         BackgroundRepository(db.session),
         CategoryRepository(db.session),
         DishRepository(db.session),
+        BuilderRepository(db.session),
     )
 
 
@@ -86,7 +91,17 @@ def make_cart_service() -> CartService:
 def make_pricing_service() -> PricingService:
     """Build a PricingService with the delivery fee from the settings."""
     fee = make_site_settings_service().get_delivery_fee()
-    return PricingService(DishRepository(db.session), FixedDeliveryFee(fee))
+    return PricingService(DishRepository(db.session), FixedDeliveryFee(fee), make_build_resolver())
+
+
+def make_build_resolver() -> BuildResolver:
+    """Build a BuildResolver on the current session."""
+    return BuildResolver(BuilderRepository(db.session))
+
+
+def make_builder_service() -> BuilderService:
+    """Build a BuilderService on the current session."""
+    return BuilderService(BuilderRepository(db.session), make_build_resolver())
 
 
 def make_order_service() -> OrderService:
@@ -145,9 +160,19 @@ def make_menu_admin_service() -> MenuAdminService:
     )
 
 
+def make_builder_admin_service() -> BuilderAdminService:
+    """Build a BuilderAdminService on the current session."""
+    return BuilderAdminService(BuilderRepository(db.session), LanguageRepository(db.session))
+
+
 def make_image_storage() -> ImageStorage:
     """Build the photo storage that keeps files in the configured upload folder."""
     return ImageStorage(current_app.config["UPLOAD_FOLDER"])
+
+
+def make_builder_image_storage() -> ImageStorage:
+    """Build the photo storage for builder option pictures (their own upload folder)."""
+    return ImageStorage(current_app.config["UPLOAD_FOLDER"], folder="builders")
 
 
 def make_language_admin_service() -> LanguageAdminService:

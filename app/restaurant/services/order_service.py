@@ -4,7 +4,7 @@ import secrets
 from dataclasses import dataclass
 
 from restaurant.constants import FulfillmentType, OrderStatus, PaymentMethod
-from restaurant.models import Order, OrderItem, OrderStatusLog
+from restaurant.models import Order, OrderItem, OrderItemOption, OrderStatusLog
 from restaurant.repositories import OrderRepository
 from restaurant.services.cart_service import CartLine
 from restaurant.services.order_status import OrderStatusMachine
@@ -134,6 +134,17 @@ class OrderService:
                     unit_price=line.unit_price,
                     quantity=line.quantity,
                     line_total=line.line_total,
+                    options=[
+                        OrderItemOption(
+                            order_index=option.order_index,
+                            name_fa=option.name_fa,
+                            name_en=option.name_en,
+                            group_fa=option.group_fa,
+                            group_en=option.group_en,
+                            price=option.price,
+                        )
+                        for option in line.options
+                    ],
                 )
                 for line in priced.lines
             ],

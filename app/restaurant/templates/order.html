@@ -34,7 +34,7 @@
     <ul class="summary-lines">
       {% for item in order.items %}
       <li class="summary-lines__item">
-        <span class="summary-lines__name">{{ item.name_in(language.code) }} <span class="summary-lines__qty">× <bdi>{{ item.quantity|number }}</bdi></span></span>
+        <span class="summary-lines__name">{{ item.name_in(language.code) }} <span class="summary-lines__qty">× <bdi>{{ item.quantity|number }}</bdi></span>{% if item.options %}<span class="summary-lines__options">{% for option in item.options %}{{ option.name_in(language.code) }}{% if not loop.last %}، {% endif %}{% endfor %}</span>{% endif %}</span>
         <span><bdi>{{ item.line_total|number }}</bdi></span>
       </li>
       {% endfor %}

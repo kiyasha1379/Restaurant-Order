@@ -7,6 +7,7 @@ database so the admin panel can list and edit them.
 """
 
 from restaurant.admin_texts import ADMIN_TEXTS
+from restaurant.builder_texts import BUILDER_TEXTS
 from restaurant.constants import LANGUAGE_CODE_ENGLISH as EN
 from restaurant.constants import LANGUAGE_CODE_PERSIAN as FA
 
@@ -229,3 +230,4 @@ DEFAULT_TEXTS: dict[str, dict[str, str]] = {
 }
 
 DEFAULT_TEXTS |= ADMIN_TEXTS
+DEFAULT_TEXTS |= BUILDER_TEXTS

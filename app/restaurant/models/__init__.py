@@ -2,6 +2,14 @@
 
 from restaurant.models.access import Permission, Role, RolePermission, User, user_roles
 from restaurant.models.background import Background
+from restaurant.models.builder import (
+    Builder,
+    BuilderOption,
+    BuilderOptionTranslation,
+    BuilderStep,
+    BuilderStepTranslation,
+    BuilderTranslation,
+)
 from restaurant.models.language import Language
 from restaurant.models.menu import (
     Category,
@@ -16,6 +24,12 @@ from restaurant.models.ui_string import UiString, UiStringTranslation
 
 __all__ = [
     "Background",
+    "Builder",
+    "BuilderOption",
+    "BuilderOptionTranslation",
+    "BuilderStep",
+    "BuilderStepTranslation",
+    "BuilderTranslation",
     "Category",
     "CategoryTranslation",
     "Dish",

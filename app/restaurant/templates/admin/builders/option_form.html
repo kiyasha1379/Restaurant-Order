@@ -1,0 +1,78 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.BUILDERS %}
+{% set editable = access.can_edit(keys.BUILDERS) %}
+{% set action = url_for('admin.option_update', option_id=option.id) if option else url_for('admin.option_create', step_id=step.id) %}
+{% set step_title = text_of(step.translations, language.code, "title", step.key) %}
+
+{% block title %}{{ t("admin.builders.option") }}{% endblock %}
+{% block heading %}{{ t("admin.builders.edit_option") if option else t("admin.builders.add_option") }} <span class="muted">· {{ step_title }}</span>{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/menu.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/admin/builders.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.step_edit', step_id=step.id) }}">{{ t("admin.back") }}</a></div>
+<form class="form" method="post" action="{{ action }}" enctype="multipart/form-data" novalidate>
+  {{ form.hidden_tag() }}
+  <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+    <div class="stack">
+      <section class="card form">
+        <h2 class="card__title">{{ t("admin.menu.general") }}</h2>
+        <div class="form__row">
+          {{ ui.form_field(form.key, t("admin.builders.key"), hint=t("admin.builders.key_hint"), dir="ltr") }}
+          {{ ui.form_field(form.price, t("admin.menu.price") ~ " (" ~ t("price.currency") ~ ")", inputmode="numeric", dir="ltr") }}
+          {{ ui.form_field(form.sort_order, t("admin.menu.sort_order"), inputmode="numeric", dir="ltr") }}
+        </div>
+        <div class="toolbar">
+          {{ ui.checkbox(form.is_in_stock, t("admin.menu.in_stock")) }}
+          {{ ui.checkbox(form.is_visible, t("admin.builders.option_visible")) }}
+        </div>
+      </section>
+
+      <section class="card form">
+        <h2 class="card__title">{{ t("admin.builders.look") }}</h2>
+        <p class="muted">{{ t("admin.builders.look_hint") }}</p>
+        <div class="form__row">
+          {{ ui.form_field(form.color, t("admin.builders.color"), hint=t("admin.builders.color_hint"), dir="ltr", placeholder="#C8391E", maxlength=7) }}
+          {{ ui.form_field(form.shape, t("admin.builders.shape"), hint=t("admin.builders.shape_hint"), dir="ltr", list="shape-suggestions", maxlength=20) }}
+          {{ ui.form_field(form.preview_amount, t("admin.builders.amount"), hint=t("admin.builders.amount_hint"), inputmode="numeric", dir="ltr") }}
+        </div>
+        <datalist id="shape-suggestions">{% for shape in shapes %}<option value="{{ shape }}">{% endfor %}</datalist>
+        <div class="photo">
+          <span class="photo__preview">{% if option and option.layer_image %}<img src="{{ url_for('static', filename=option.layer_image) }}" alt="" width="160" height="160">{% else %}{{ icons.icon("image", 40) }}{% endif %}</span>
+          <div class="stack">
+            <div class="field{% if form.photo.errors %} field--invalid{% endif %}">
+              <label class="field__label" for="{{ form.photo.id }}">{{ t("admin.builders.picture") }}</label>
+              {{ form.photo(class="field__control", accept="image/jpeg,image/png,image/webp") }}
+              <span class="muted">{{ t("admin.builders.picture_hint") }}</span>
+              {% for error in form.photo.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+            </div>
+            {% if option and option.layer_image %}{{ ui.checkbox(form.remove_photo, t("admin.menu.photo_remove")) }}{% endif %}
+          </div>
+        </div>
+      </section>
+
+      <div class="grid grid--two">
+        {% for code, direction in (("fa", "rtl"), ("en", "ltr")) %}
+        <section class="card form">
+          <h2 class="card__title">{{ t("admin.menu.texts_" ~ code) }}</h2>
+          {{ ui.form_field(form["name_" ~ code], t("admin.builders.option_name"), dir=direction, lang=code) }}
+        </section>
+        {% endfor %}
+      </div>
+    </div>
+  </fieldset>
+  {% if editable %}
+  <div class="form__actions">
+    <button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button>
+    <a class="btn btn--ghost" href="{{ url_for('admin.step_edit', step_id=step.id) }}">{{ t("admin.cancel") }}</a>
+  </div>
+  {% endif %}
+</form>
+{% if option and editable %}
+<form class="form__actions" method="post" action="{{ url_for('admin.option_delete', option_id=option.id) }}" data-confirm="{{ t('admin.confirm_delete') }}">
+  {{ ui.csrf() }}
+  <button class="btn btn--danger btn--small" type="submit"><span class="btn__icon">{{ icons.icon("trash", 16) }}</span>{{ t("admin.delete") }}</button>
+</form>
+{% endif %}
+{% endblock %}

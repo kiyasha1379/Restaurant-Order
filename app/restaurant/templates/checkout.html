@@ -84,7 +84,7 @@
       <ul class="summary-lines">
         {% for line in priced.lines %}
         <li class="summary-lines__item">
-          <span class="summary-lines__name">{{ line.name }} <span class="summary-lines__qty">× <bdi>{{ line.quantity|number }}</bdi></span></span>
+          <span class="summary-lines__name">{{ line.name }} <span class="summary-lines__qty">× <bdi>{{ line.quantity|number }}</bdi></span>{% if line.options %}<span class="summary-lines__options">{{ line.summary }}</span>{% endif %}</span>
           <span><bdi>{{ line.line_total|number }}</bdi></span>
         </li>
         {% endfor %}

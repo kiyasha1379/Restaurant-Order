@@ -60,6 +60,12 @@ DEMO_BACKGROUNDS = (
     _background("home-reserve", 0.25),
     _background("home-footer", 0.45),
     DemoBackground(
+        key="builder-page",
+        video_path="media/backgrounds/home-modes.mp4",
+        poster_path="media/backgrounds/home-modes.webp",
+        dim=0.58,
+    ),
+    DemoBackground(
         key="menu-page",
         video_path="media/backgrounds/home-dishes.mp4",
         poster_path="media/backgrounds/home-dishes.webp",

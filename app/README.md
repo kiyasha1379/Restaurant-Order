@@ -45,7 +45,7 @@ If PowerShell blocks the activation script, run `Set-ExecutionPolicy -Scope Curr
 
 Open `http://127.0.0.1:5000/admin/login`. After `flask seed-demo` these accounts exist, all with the password `demo-pass-1234`: `admin@example.com`, `manager@example.com`, `cashier@example.com`, `kitchen@example.com`, `viewer@example.com`. **They are for the demo only; never keep them on a real server.** On a real installation run `flask create-admin` instead. The roles and what each may do are edited in the panel under "Users and roles".
 
-Uploaded dish photos are stored under `restaurant/static/uploads` (not in git).
+Uploaded photos (dishes and builder options) are stored under `restaurant/static/uploads` (not in git). The "Custom builders" section edits the build-your-own pizza, sandwich and drink: steps, options, prices and pictures.
 
 Schema changes go only through migrations, never by editing the database by hand.
 

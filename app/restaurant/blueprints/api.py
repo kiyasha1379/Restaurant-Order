@@ -4,21 +4,29 @@ from flask import Blueprint, Response, abort, current_app, jsonify, request, str
 from sqlalchemy.exc import SQLAlchemyError
 
 from restaurant.cart_web import cart_to_dict, load_priced_cart
-from restaurant.constants import FulfillmentType, OrderStatus
+from restaurant.constants import MAX_DISH_QUANTITY, FulfillmentType, OrderStatus
 from restaurant.extensions import db
 from restaurant.language_context import (
     find_available_language,
+    get_active_language,
     get_translator,
     reset_session_after_error,
     set_active_language,
 )
 from restaurant.order_stream import OrderStatusStream
 from restaurant.service_factory import (
+    make_builder_service,
     make_cart_service,
     make_menu_service,
     make_order_service,
 )
-from restaurant.services import CartError, OrderStatusMachine
+from restaurant.services import (
+    CartError,
+    CustomBuild,
+    InvalidSelectionError,
+    OrderStatusMachine,
+    SelectionProblem,
+)
 
 api_blueprint = Blueprint("api", __name__, url_prefix="/api")
 
@@ -78,6 +86,66 @@ def update_cart() -> Response | tuple[Response, int]:
         return json_error("cart.error", 400)
     try:
         make_cart_service().set_quantity(line_id, quantity)
+    except CartError:
+        return json_error("cart.error", 400)
+    return cart_response()
+
+
+def read_build_body() -> tuple[list[int], int] | None:
+    """Read {"option_ids": [..], "quantity": n} from the request; None when it is malformed."""
+    body = request.get_json(silent=True) or {}
+    option_ids, quantity = body.get("option_ids"), body.get("quantity", 1)
+    valid_ids = isinstance(option_ids, list) and all(
+        isinstance(value, int) and not isinstance(value, bool) for value in option_ids
+    )
+    valid_quantity = (
+        isinstance(quantity, int)
+        and not isinstance(quantity, bool)
+        and 1 <= quantity <= MAX_DISH_QUANTITY
+    )
+    if not valid_ids or not valid_quantity:
+        return None
+    return option_ids, quantity
+
+
+def build_error(problem: SelectionProblem) -> tuple[Response, int]:
+    """Answer a refused build in the page language."""
+    status_code = 409 if problem is SelectionProblem.UNAVAILABLE else 400
+    return json_error(f"builder.error.{problem.value}", status_code)
+
+
+@api_blueprint.post("/builders/<key>/quote")
+def build_quote(key: str) -> Response | tuple[Response, int]:
+    """Price a build: {"option_ids": [3, 7], "quantity": 2}. The server's price is final."""
+    parsed = read_build_body()
+    if parsed is None:
+        return json_error("cart.error", 400)
+    option_ids, quantity = parsed
+    try:
+        quote = make_builder_service().quote(key, option_ids, quantity, get_active_language().code)
+    except InvalidSelectionError as error:
+        return build_error(error.problem)
+    if quote is None:
+        abort(404)
+    return jsonify(unit_price=quote.unit_price, quantity=quote.quantity, total=quote.total)
+
+
+@api_blueprint.post("/cart/add-custom")
+def add_custom_to_cart() -> Response | tuple[Response, int]:
+    """Add a build: {"builder": "pizza", "option_ids": [3, 7], "quantity": 1}."""
+    parsed = read_build_body()
+    builder_key = (request.get_json(silent=True) or {}).get("builder")
+    if parsed is None or not isinstance(builder_key, str):
+        return json_error("cart.error", 400)
+    option_ids, quantity = parsed
+    try:
+        build = make_builder_service().resolve(builder_key, option_ids, get_active_language().code)
+    except InvalidSelectionError as error:
+        return build_error(error.problem)
+    if build is None:
+        abort(404)
+    try:
+        make_cart_service().add_custom(CustomBuild(build.builder_id, build.option_ids), quantity)
     except CartError:
         return json_error("cart.error", 400)
     return cart_response()

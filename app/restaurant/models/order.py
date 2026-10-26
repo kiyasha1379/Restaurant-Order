@@ -89,6 +89,9 @@ class OrderItemOption(SnapshotNameMixin, db.Model):
     order_index: Mapped[int] = mapped_column(default=0)
     name_fa: Mapped[str] = mapped_column(String(160))
     name_en: Mapped[str] = mapped_column(String(160), default="")
+    # The step the option belongs to ("Size", "Sauce"...), so the kitchen reads "Size: Large".
+    group_fa: Mapped[str] = mapped_column(String(160), default="")
+    group_en: Mapped[str] = mapped_column(String(160), default="")
     price: Mapped[int] = mapped_column(default=0)
 
     item: Mapped[OrderItem] = relationship(back_populates="options")

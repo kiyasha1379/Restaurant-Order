@@ -1,0 +1,19 @@
+/* Builder management: the colour swatch beside each option. */
+
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  overflow: hidden;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 50%;
+  background: var(--swatch, transparent);
+}
+
+.swatch img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}

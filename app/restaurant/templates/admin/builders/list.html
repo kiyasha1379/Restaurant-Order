@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.BUILDERS %}
+
+{% block title %}{{ t("admin.builders.title") }}{% endblock %}
+{% block heading %}{{ t("admin.builders.title") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/menu.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/admin/builders.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <p class="muted">{{ t("admin.builders.intro") }}</p>
+  <span class="toolbar__spacer"></span>
+  {% if access.can_edit(keys.BUILDERS) %}<a class="btn btn--primary btn--small" href="{{ url_for('admin.builder_new') }}"><span class="btn__icon">{{ icons.icon("plus", 16) }}</span>{{ t("admin.builders.add") }}</a>{% endif %}
+</div>
+<section class="card">
+  {% if builders %}
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead><tr><th>{{ t("admin.builders.name") }}</th><th>{{ t("admin.builders.key") }}</th><th>{{ t("admin.builders.kind") }}</th><th>{{ t("admin.builders.steps") }}</th><th>{{ t("admin.orders.status") }}</th><th></th></tr></thead>
+      <tbody>
+        {% for builder in builders %}
+        <tr>
+          <td data-label="{{ t('admin.builders.name') }}"><strong>{{ text_of(builder.translations, language.code, "name", builder.key) }}</strong></td>
+          <td data-label="{{ t('admin.builders.key') }}"><bdi dir="ltr">{{ builder.key }}</bdi></td>
+          <td data-label="{{ t('admin.builders.kind') }}">{{ t("admin.builders.kind." ~ builder.preview_kind.value) }}</td>
+          <td data-label="{{ t('admin.builders.steps') }}" class="table__num">{{ builder.steps|length|number }}</td>
+          <td data-label="{{ t('admin.orders.status') }}">{% if builder.is_visible %}<span class="badge badge--ok">{{ t("admin.builders.visible") }}</span>{% else %}<span class="badge">{{ t("admin.menu.hidden") }}</span>{% endif %}</td>
+          <td><div class="table__actions">
+            {% if access.can_edit(keys.BUILDERS) %}
+            {{ ui.post_button(url_for('admin.builder_move', builder_id=builder.id), "", icon="up", fields={"direction": "up"}, aria=t("admin.menu.move_up")) }}
+            {{ ui.post_button(url_for('admin.builder_move', builder_id=builder.id), "", icon="down", fields={"direction": "down"}, aria=t("admin.menu.move_down")) }}
+            {% endif %}
+            <a class="btn btn--ghost btn--small" href="{{ url_for('admin.builder_edit', builder_id=builder.id) }}">{{ t("admin.edit") if access.can_edit(keys.BUILDERS) else t("admin.orders.view") }}</a>
+          </div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">{{ t("admin.builders.none") }}</p>{% endif %}
+</section>
+{% endblock %}

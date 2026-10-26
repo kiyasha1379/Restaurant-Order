@@ -8,7 +8,38 @@ from restaurant.services.auth_service import (
     WeakPasswordError,
 )
 from restaurant.services.background_service import BackgroundService, BackgroundView
-from restaurant.services.cart_service import CartError, CartLine, CartService, CartStorage
+from restaurant.services.build_resolver import (
+    BuildResolver,
+    InvalidSelectionError,
+    PricedOption,
+    ResolvedBuild,
+    SelectionProblem,
+)
+from restaurant.services.builder_admin_service import (
+    BuilderAdminError,
+    BuilderAdminService,
+    BuilderInput,
+    DuplicateKeyError,
+    InvalidAppearanceError,
+    InvalidKeyError,
+    InvalidPreviewRoleError,
+    OptionInput,
+    StepInput,
+)
+from restaurant.services.builder_service import (
+    BuilderService,
+    BuilderView,
+    OptionView,
+    Quote,
+    StepView,
+)
+from restaurant.services.cart_service import (
+    CartError,
+    CartLine,
+    CartService,
+    CartStorage,
+    CustomBuild,
+)
 from restaurant.services.dashboard_service import DashboardData, DashboardService
 from restaurant.services.language_admin_service import (
     DefaultMustBeEnabledError,
@@ -68,6 +99,26 @@ from restaurant.services.staff_service import (
 from restaurant.services.translation_service import SyncReport, TranslationService, Translator
 
 __all__ = [
+    "BuilderAdminError",
+    "BuilderAdminService",
+    "BuilderInput",
+    "DuplicateKeyError",
+    "InvalidAppearanceError",
+    "InvalidKeyError",
+    "InvalidPreviewRoleError",
+    "OptionInput",
+    "StepInput",
+    "BuildResolver",
+    "BuilderService",
+    "BuilderView",
+    "CustomBuild",
+    "InvalidSelectionError",
+    "OptionView",
+    "PricedOption",
+    "Quote",
+    "ResolvedBuild",
+    "SelectionProblem",
+    "StepView",
     "TextRow",
     "TextPage",
     "Progress",

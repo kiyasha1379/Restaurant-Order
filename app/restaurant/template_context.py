@@ -86,6 +86,19 @@ SCRIPT_TEXT_KEYS = (
     "cart.view",
     "price.currency",
     "checkout.error.choice",
+    "builder.free",
+    "builder.layers.top",
+    "builder.layers.bottom",
+    "builder.layers.fixed",
+    "builder.layers.up",
+    "builder.layers.down",
+    "builder.layers.empty",
+    "builder.summary.none",
+    "builder.missing_step",
+    "builder.error.unknown",
+    "builder.error.unavailable",
+    "builder.error.too_many",
+    "builder.error.missing",
 )
 
 
@@ -104,6 +117,8 @@ def build_site_config() -> dict[str, Any]:
             "cartAdd": url_for("api.add_to_cart"),
             "cartUpdate": url_for("api.update_cart"),
             "quote": url_for("api.quote"),
+            "cartAddCustom": url_for("api.add_custom_to_cart"),
+            "buildQuote": url_for("api.build_quote", key="KEY"),
             "orderStatus": url_for("api.order_status", public_token="TOKEN"),
             "orderStream": url_for("api.order_stream", public_token="TOKEN"),
             "cartPage": url_for("public.cart"),

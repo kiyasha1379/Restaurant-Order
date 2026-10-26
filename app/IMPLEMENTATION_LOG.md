@@ -12,8 +12,8 @@ A running report of what was built, in order. Each phase has its tasks, the deci
 | 3 | Menu and home page | Done (2026-10-26) |
 | 4 | Cart and checkout (pay on site) | Done (2026-10-26) |
 | 5 | Admin panel and roles | Done (2026-10-26) |
-| 6 | Builder | Next |
-| 7 | Table reservation | Not started |
+| 6 | Builder | Done (2026-10-26) |
+| 7 | Table reservation | Next |
 | 8 | Customer account | Not started |
 | 9 | Mock online payment | Not started |
 | 10 | Site appearance and settings | Not started |
@@ -183,3 +183,34 @@ A running report of what was built, in order. Each phase has its tasks, the deci
 - **Panel language** is stored in the session, not in the address: the plan's `/admin` has no language prefix.
 - **Observer pattern** is still not added: the board reads a change marker (order count plus the newest status-log id) from the database, which also works with several server processes.
 - Sections of later phases (builders, tables, customers, site, settings) are in the permission matrix already, but get a sidebar entry only when their pages exist.
+
+## Phase 6: Builder (2026-10-26)
+
+**Done**
+
+- **Generic data model**: `Builder` → `BuilderStep` → `BuilderOption`, each with a translation table (Persian and English). A new kind of build (a salad, a burger...) is data, not code. Steps carry `is_multiple`, `is_required`, `is_base` (full price instead of "+price"), `is_layered` (the customer orders the picks, as in a sandwich) and a `preview_role` (what the step draws). Options carry price, stock and visibility switches, and colour, shape and size for the picture; a photo (`layer_image`) replaces the placeholder. Migration `ba4dc9b2656e_builders.py`.
+- **`BuildResolver`** is the only place that checks and prices a build: unknown, hidden or foreign options are refused (`unknown`), hidden or sold-out ones are `unavailable`, two picks in a single-choice step are `too_many`, a required step with something orderable left but nothing picked is `missing`, duplicates and empty builds are refused. The browser's live price is only a preview. A required step whose options are all sold out does not block the order.
+- **Build order**: ordinary steps follow step order, layered options keep the customer's order; the order is stored (`order_index`) and shown to the kitchen.
+- **Cart and orders**: a custom line is `CustomBuild(builder_id, option_ids)`; the same build merges into one line, another layer order is another line. The cart keeps ids only (never prices). The order stores a snapshot of every option with its group name in both languages, so later edits or deletion of the builder never change a past order. Cart cap: 25 lines (cookie size).
+- **API**: `POST /api/builders/<key>/quote`, `POST /api/cart/add-custom` (CSRF-protected; unavailable → 409, other refusals → 400, unknown builder → 404).
+- **Public pages**: `/<lang>/build` (opens the first builder) and `/<lang>/build/<key>` with tabs for the three builders, a live picture (SVG pizza, stacked sandwich, glass of drink), a layer-order list with up/down buttons, price summary, quantity and add-to-cart. It also works without JavaScript (`POST /<lang>/build/<key>`). On a phone the picture stays pinned while the steps scroll.
+- **Admin "Custom builders"** (permission `builders`): list and order of builders; builder form (key, kind of picture, texts); steps (rules, role in the picture limited to the roles that fit the kind of picture, order up/down); options (names, price, in-stock/visible switches, colour, shape, size, photo upload to `uploads/builders`, order up/down). A changed picture kind clears step roles that no longer fit; a layered step is always multiple.
+- **Demo seed**: pizza, sandwich and drink builders with prices and colours from the design draft; idempotent.
+
+**Checked**
+
+- 426 automated tests pass (about 85 new): resolver rules, order, prices and language, cart merging and cap, order snapshots (options, order, group names, survival after edits and deletion), API (malformed bodies, CSRF, price cannot be set by the browser), public pages in both languages (hidden, sold-out, no-JavaScript form), checkout and order pages, admin permissions (none, view only, edit), CRUD, upload and file cleanup, ordering, seed idempotence.
+- Real browser, desktop 1366 px and phone 390 px: pizza, sandwich and drink build with correct totals (250,000 / 170,000 / 175,000), no overflow and no console errors; sandwich ordered through the cart and checkout, and the panel's order page lists the chosen options in order (`tests/browser/builder_screens.js`, `tests/browser/builder_flow.js`).
+
+**Bugs found and fixed while testing**
+
+- The page script read the wrong key for the picture kind, so the picture stayed empty.
+- The step card's legend overlapped the card border (fieldset legend layout).
+- A leftover stub in the build-order code; the "required step" rule was relaxed for steps with nothing left to pick.
+- WTForms 3.3 warns about tuple choices; the forms use `SelectChoice`.
+- Templates are cached in non-debug mode, so a dev server started before an edit showed an empty role list; restart it after code changes.
+
+**Differences from the plan, and why**
+
+- The admin form does not yet have a live price preview panel; the public page already shows the server price, and the quote API is covered by tests.
+- Pictures are SVG and CSS placeholders drawn from colour, shape and size; real photos upload per option and replace them. The plan's photo-based preview waits for the user's own images.

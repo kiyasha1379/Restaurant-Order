@@ -35,7 +35,8 @@ def seed_demo_command() -> None:
     db.session.commit()
     click.echo(
         f"seed-demo: added {report.backgrounds} backgrounds, "
-        f"{report.categories} categories and {report.dishes} dishes."
+        f"{report.categories} categories, {report.dishes} dishes and "
+        f"{report.builders} builders."
     )
     staff_added = make_demo_staff_seeder().seed()
     db.session.commit()

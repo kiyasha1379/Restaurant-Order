@@ -2,6 +2,7 @@
  * Site-wide script. Loaded as a module after GSAP on every page.
  * Page-specific behaviour lives in its own module and is started here.
  */
+import { startBuilder } from "./modules/builder.js";
 import { startCart } from "./modules/cart.js";
 import { startCategoryFilter } from "./modules/category-filter.js";
 import { startCheckout } from "./modules/checkout.js";
@@ -16,6 +17,7 @@ startLazyVideos();
 startDishCards();
 startCategoryFilter();
 startCart();
+startBuilder();
 startCheckout();
 startOrderTracker();
 revealOnLoad();

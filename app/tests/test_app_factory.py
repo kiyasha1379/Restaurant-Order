@@ -44,6 +44,8 @@ def test_unknown_config_name_is_rejected():
 def test_seed_and_reset_commands_exist(app):
     runner = app.test_cli_runner()
     assert "added" in runner.invoke(args=["sync-ui-strings"]).output
-    assert "added 8 backgrounds" in runner.invoke(args=["seed-demo"]).output
+    from restaurant.seed.demo_data import DEMO_BACKGROUNDS
+
+    assert f"added {len(DEMO_BACKGROUNDS)} backgrounds" in runner.invoke(args=["seed-demo"]).output
     assert "added 0 backgrounds" in runner.invoke(args=["seed-demo"]).output
     assert "nothing to reset" in runner.invoke(args=["reset-demo"]).output

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% import "macros/icons.html" as icons %}
+{% import "macros/background.html" as backgrounds with context %}
+
+{% block title %}{{ current.name }} · {{ brand_name }}{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/builder.css') }}">
+{% endblock %}
+
+{% block body_class %}page-builder{% endblock %}
+
+{% set layered_steps = current.steps|selectattr("is_layered")|list %}
+
+{% block content %}
+{{ backgrounds.backdrop("builder-page") }}
+<div class="builder" data-builder>
+  <header class="builder__top">
+    <h1 class="builder__title" data-reveal>{{ t("builder.title") }}</h1>
+    <p class="builder__subtitle" data-reveal>{{ current.hint or t("builder.subtitle") }}</p>
+    <nav class="builder-tabs" aria-label="{{ t('builder.tabs_label') }}" data-reveal>
+      {% for item in builders %}
+      <a class="builder-tabs__tab" href="{{ url_for('public.build', key=item.key) }}"{% if item.key == current.key %} aria-current="page"{% endif %}>{{ item.name }}</a>
+      {% endfor %}
+    </nav>
+  </header>
+
+  <form class="builder__body" method="post" action="{{ url_for('public.build_submit', key=current.key) }}" data-builder-form>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="builder__steps" role="group" aria-label="{{ t('builder.steps_label') }}">
+      {% for step in current.steps if step.options %}
+      {% set input_type = "checkbox" if step.is_multiple else "radio" %}
+      <fieldset class="step" data-step="{{ step.key }}">
+        <legend class="step__head">
+          <span class="step__num">{{ loop.index|number }}</span>
+          <span class="step__title">{{ step.title }}</span>
+          <span class="step__hint">{{ step.hint or (t("builder.hint.multiple") if step.is_multiple else (t("builder.hint.single") if step.is_required else t("builder.hint.optional"))) }}</span>
+        </legend>
+        {% set first_available = step.options|selectattr("is_in_stock")|first %}
+        <div class="step__options">
+          {% for option in step.options %}
+          <label class="pick{% if not option.is_in_stock %} pick--sold-out{% endif %}">
+            <input class="pick__input" type="{{ input_type }}" name="step-{{ step.key }}" value="{{ option.id }}"
+              {%- if not option.is_in_stock %} disabled{% endif %}
+              {%- if not step.is_multiple and step.is_required and first_available and option.id == first_available.id %} checked{% endif %}>
+            <span class="pick__face">
+              <span class="pick__check" aria-hidden="true">{{ icons.icon("check", 14) }}</span>
+              <span class="pick__name">{{ option.name }}</span>
+              <span class="pick__price" dir="ltr">
+                {%- if not option.is_in_stock %}{{ t("builder.sold_out") }}
+                {%- elif step.is_base %}<bdi>{{ option.price|number }}</bdi>
+                {%- elif option.price %}+<bdi>{{ option.price|number }}</bdi>
+                {%- elif step.is_multiple %}{{ t("builder.free") }}{% endif -%}
+              </span>
+            </span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% endfor %}
+
+      {% if layered_steps %}
+      <section class="step" data-layers hidden>
+        <div class="step__head">
+          <span class="step__num">{{ (current.steps|selectattr("options")|list|length + 1)|number }}</span>
+          <h2 class="step__title">{{ t("builder.layers.title") }}</h2>
+          <span class="step__hint">{{ t("builder.layers.hint") }}</span>
+        </div>
+        <p class="step__empty" data-layers-empty>{{ t("builder.layers.empty") }}</p>
+        <ol class="layer-list" data-layer-list></ol>
+      </section>
+      {% endif %}
+    </div>
+
+    <aside class="builder__side">
+      <div class="builder-preview" data-preview data-kind="{{ current.preview_kind.value }}" role="img" aria-label="{{ t('builder.preview_label', name=current.name) }}"></div>
+      <div class="build-summary">
+        <h2 class="build-summary__title">{{ t("builder.summary.title") }}</h2>
+        <dl class="build-summary__list" data-summary></dl>
+        <div class="build-summary__row">
+          <span>{{ t("builder.unit_price") }}</span>
+          <span><bdi data-unit-price>0</bdi> <small>{{ t("price.currency") }}</small></span>
+        </div>
+        <div class="build-summary__row">
+          <label for="build-quantity">{{ t("builder.quantity") }}</label>
+          <span class="qty">
+            <button class="qty__button" type="button" data-qty-step="-1" aria-label="{{ t('builder.quantity_down') }}" hidden>−</button>
+            <input class="qty__input" id="build-quantity" name="quantity" type="number" min="1" max="20" value="1" inputmode="numeric" data-qty>
+            <button class="qty__button" type="button" data-qty-step="1" aria-label="{{ t('builder.quantity_up') }}" hidden>+</button>
+          </span>
+        </div>
+        <div class="build-summary__row build-summary__row--total">
+          <span>{{ t("builder.total") }}</span>
+          <span><bdi data-total-price>0</bdi> <small>{{ t("price.currency") }}</small></span>
+        </div>
+        <button class="btn btn--primary build-summary__add" type="submit" data-add>{{ t("builder.add") }}</button>
+        <p class="build-summary__note" data-note role="status" aria-live="polite"></p>
+        <a class="btn btn--ghost build-summary__cart" href="{{ url_for('public.cart') }}" data-cart-link hidden>{{ t("builder.view_cart") }}</a>
+      </div>
+    </aside>
+  </form>
+</div>
+
+<script type="application/json" id="builder-data">{{ builder_data|tojson }}</script>
+{% endblock %}

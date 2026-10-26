@@ -1,0 +1,162 @@
+/* Cart panel: the list of lines, the total and the checkout button. Lines are drawn by cart.js. */
+
+.cart-panel {
+  display: flex;
+  flex: 1 1 21rem;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-inline-size: 26rem;
+  min-inline-size: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.cart-panel__head,
+.cart-panel__total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.cart-panel__title {
+  font-size: 1.75rem;
+  line-height: 1.5;
+}
+
+.cart-panel__count {
+  min-inline-size: 30px;
+  padding: 0 var(--space-2);
+  border-radius: 15px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.cart-panel__empty {
+  padding-block: var(--space-4);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.cart-panel__total {
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--color-line);
+  color: #d9cbb8;
+}
+
+.cart-panel__total span:last-child {
+  color: var(--color-accent);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.cart-panel__total small {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.cart-panel__lines {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cart-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+  border-block-end: 1px solid var(--color-line);
+}
+
+.cart-line__info {
+  min-inline-size: 0;
+}
+
+.cart-line__name {
+  font-weight: 500;
+}
+
+.cart-line__price {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.cart-line__controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.cart-line__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--tap-target);
+  block-size: var(--tap-target);
+  border: 1px solid var(--color-line-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--motion-quick);
+}
+
+.cart-line__button:hover {
+  background: var(--color-raised);
+}
+
+.cart-line__quantity {
+  min-inline-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.cart-panel__checkout {
+  min-block-size: 54px;
+  font-size: 1rem;
+}
+
+/* On phones the menu shows a bar with the count and total once something is in the cart. */
+.cart-bar {
+  display: none;
+}
+
+@media (width <= 45rem) {
+  .cart-bar:not([hidden]) {
+    position: fixed;
+    inset-inline: var(--space-3);
+    inset-block-end: calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px) + var(--space-3));
+    z-index: var(--z-cart-bar);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-block-size: 52px;
+    padding-inline: var(--space-5);
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: var(--color-ink);
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: var(--shadow-lift);
+  }
+
+  .cart-panel {
+    flex-basis: 100%;
+    max-inline-size: none;
+  }
+}

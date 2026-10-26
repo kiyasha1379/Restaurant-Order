@@ -1,0 +1,7 @@
+{#- Shared interface macros. Import with: {% import "macros/ui.html" as ui %} -#}
+
+{#- Link that looks like a button.
+    Parameters: href, label, variant ("primary" or "ghost", default "primary"). -#}
+{% macro button_link(href, label, variant="primary") %}
+<a class="btn btn--{{ variant }}" href="{{ href }}">{{ label }}</a>
+{% endmacro %}

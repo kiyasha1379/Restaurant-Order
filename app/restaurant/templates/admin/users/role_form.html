@@ -1,0 +1,70 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.USERS %}
+{% set locked = role and role.is_system %}
+{% set editable = access.can_edit(keys.USERS) and not locked %}
+{% set action = url_for('admin.role_update', role_id=role.id) if role else url_for('admin.role_create') %}
+
+{% block title %}{{ t("admin.users.role") }}{% endblock %}
+{% block heading %}{{ t("admin.users.edit_role") if role else t("admin.users.add_role") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/users.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.roles') }}">{{ t("admin.back") }}</a></div>
+{% if locked %}<p class="notice">{{ t("admin.users.system_note") }}</p>{% endif %}
+<form class="form" method="post" action="{{ action }}" novalidate>
+  {{ form.hidden_tag() }}
+  <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+    <section class="card form">
+      <div class="form__row">
+        {{ ui.form_field(form.name_fa, t("admin.users.role_name") ~ " (" ~ t("admin.menu.texts_fa") ~ ")", dir="rtl", lang="fa") }}
+        {{ ui.form_field(form.name_en, t("admin.users.role_name") ~ " (" ~ t("admin.menu.texts_en") ~ ")", dir="ltr", lang="en") }}
+      </div>
+    </section>
+    <section class="card">
+      <h2 class="card__title">{{ t("admin.users.matrix") }}</h2>
+      <p class="muted">{{ t("admin.users.matrix_hint") }}</p>
+      <div class="table-wrap">
+        <table class="table matrix">
+          <thead><tr><th>{{ t("admin.users.permission") }}</th><th>{{ t("admin.users.level.none") }}</th><th>{{ t("admin.users.level.view") }}</th><th>{{ t("admin.users.level.edit") }}</th></tr></thead>
+          <tbody>
+            {% for row in matrix %}
+            {% set current = role_levels.get(row.key, levels.NONE) %}
+            <tr>
+              <th scope="row">{{ t("admin.users.perm." ~ row.key.value) }}</th>
+              {% for level in [levels.NONE, levels.VIEW, levels.EDIT] %}
+              <td>
+                {% if level in row.levels %}
+                <label class="matrix__choice"><input type="radio" name="level:{{ row.key.value }}" value="{{ level.value }}"{% if current == level or (row.key == keys.MONEY and level == levels.VIEW and current == levels.EDIT) %} checked{% endif %}>
+                  <span class="u-visually-hidden">{{ t("admin.users.perm." ~ row.key.value) }} — </span><span class="matrix__text">{{ t("admin.users.level." ~ ("money" if row.key == keys.MONEY and level == levels.VIEW else level.value)) }}</span></label>
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </fieldset>
+  {% if editable %}
+  <div class="form__actions">
+    <button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button>
+    <a class="btn btn--ghost" href="{{ url_for('admin.roles') }}">{{ t("admin.cancel") }}</a>
+  </div>
+  {% endif %}
+</form>
+{% if role %}
+<section class="card">
+  <h2 class="card__title">{{ t("admin.users.people") }}</h2>
+  {% if members %}<p>{% for member in members %}<span class="badge">{{ member.display_name }}</span> {% endfor %}</p>{% else %}<p class="muted">{{ t("admin.users.nobody") }}</p>{% endif %}
+</section>
+{% endif %}
+{% if role and editable %}
+<form class="form__actions" method="post" action="{{ url_for('admin.role_delete', role_id=role.id) }}" data-confirm="{{ t('admin.confirm_delete') }}">
+  {{ ui.csrf() }}
+  <button class="btn btn--danger btn--small" type="submit"><span class="btn__icon">{{ icons.icon("trash", 16) }}</span>{{ t("admin.delete") }}</button>
+</form>
+{% endif %}
+{% endblock %}

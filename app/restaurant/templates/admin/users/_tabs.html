@@ -1,0 +1,5 @@
+{#- Staff / roles tabs. Parameter: active ("staff" or "roles"). -#}
+<nav class="chips" aria-label="{{ t('admin.nav.users') }}">
+  <a class="chip" href="{{ url_for('admin.users') }}"{% if active == "staff" %} aria-current="true"{% endif %}>{{ t("admin.users.tab_staff") }}</a>
+  <a class="chip" href="{{ url_for('admin.roles') }}"{% if active == "roles" %} aria-current="true"{% endif %}>{{ t("admin.users.tab_roles") }}</a>
+</nav>

@@ -1,0 +1,21 @@
+{#- Footer content: brand, contact details and language links. Contact values come from the texts
+    for now and move to the settings screen in phase 9. No parameters. -#}
+{% import "macros/icons.html" as icons %}
+<div class="site-footer__inner">
+    <div class="site-footer__brand">
+      {{ icons.icon("logo", 34) }}
+      <span class="site-footer__brand-name">{{ brand_name }}</span>
+    </div>
+    <p class="site-footer__note">{{ t("footer.note") }}</p>
+    <dl class="site-footer__details">
+      <div><dt>{{ t("footer.address") }}</dt><dd>{{ t("footer.address_value") }}</dd></div>
+      <div><dt>{{ t("footer.hours") }}</dt><dd>{{ t("footer.hours_value") }}</dd></div>
+      <div><dt>{{ t("footer.phone") }}</dt><dd><bdi>{{ t("footer.phone_value") }}</bdi></dd></div>
+    </dl>
+    <div class="site-footer__languages">
+      <span>{{ t("footer.languages") }}</span>
+      {% include "partials/language_switcher.html" %}
+    </div>
+    <p class="site-footer__rights">© {{ brand_name }}</p>
+  </div>
+

@@ -1,0 +1,66 @@
+/* Footer content: used by the plain footer and by the last home-page screen. */
+
+.site-footer {
+  border-block-start: 1px solid var(--color-line);
+  background: var(--color-footer);
+}
+
+.site-footer__inner {
+  display: grid;
+  gap: var(--space-4);
+  max-inline-size: var(--content-wide);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-5);
+  color: #a99882;
+  font-size: 0.875rem;
+}
+
+.site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text);
+}
+
+.site-footer__brand .icon {
+  color: var(--color-accent);
+}
+
+.site-footer__brand-name {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.site-footer__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-7);
+  margin: 0;
+}
+
+.site-footer__details dt {
+  color: var(--color-muted);
+  font-size: var(--font-size-small);
+}
+
+.site-footer__details dd {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.site-footer__languages {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.site-footer__rights {
+  font-size: var(--font-size-small);
+}
+
+@media (width <= 45rem) {
+  .site-footer__inner {
+    padding-inline: var(--space-4);
+  }
+}

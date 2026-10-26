@@ -1,0 +1,24 @@
+const { chromium } = require('playwright');
+(async () => {
+  const b = await chromium.launch();
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const p = await ctx.newPage();
+  const errors = [];
+  p.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  p.on('pageerror', e => errors.push(String(e)));
+  p.on('requestfailed', r => errors.push('FAILED ' + r.url()));
+  await p.goto('http://localhost:5055/en/menu', { waitUntil: 'networkidle' });
+  await p.locator('[data-add-dish]').nth(1).click();
+  await p.waitForTimeout(1300);
+  console.log('cart bar visible', await p.locator('[data-cart-bar]').isVisible(), (await p.locator('[data-cart-bar]').innerText()).replace(/\n/g, ' | '));
+  await p.screenshot({ path: '/tmp/shots/m-menu-cart.png' });
+  await p.goto('http://localhost:5055/en/cart', { waitUntil: 'networkidle' });
+  await p.waitForTimeout(500);
+  await p.screenshot({ path: '/tmp/shots/m-cart.png' });
+  await p.goto('http://localhost:5055/en/checkout', { waitUntil: 'networkidle' });
+  await p.locator('.checkout__submit').click();
+  await p.waitForTimeout(500);
+  await p.screenshot({ path: '/tmp/shots/m-checkout-errors.png', fullPage: true });
+  console.log('overflow', await p.evaluate(() => document.documentElement.scrollWidth - innerWidth), 'errors', JSON.stringify(errors));
+  await b.close();
+})();

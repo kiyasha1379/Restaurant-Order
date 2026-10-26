@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}
+
+{% block heading %}{{ t("admin.forbidden.title") }}{% endblock %}
+
+{% block content %}
+<section class="card stack">
+  <h2 class="card__title">{{ t("admin.forbidden.title") }}</h2>
+  <p>{{ t("admin.forbidden.text") }}</p>
+  <p><a class="btn btn--ghost" href="{{ url_for('admin.index') }}">{{ t("admin.back") }}</a></p>
+</section>
+{% endblock %}

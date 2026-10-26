@@ -1,0 +1,47 @@
+{#- Base layout. Direction and language come from the language record, never from the URL alone.
+    Blocks: title, page_styles, content, page_scripts. -#}
+{% set shared_styles = [
+    "css/fonts.css", "css/tokens.css", "css/base.css",
+    "css/components/button.css", "css/components/demo-bar.css",
+    "css/components/site-header.css", "css/components/lang-switch.css",
+    "css/components/bg.css", "css/components/dish-card.css",
+    "css/components/tab-bar.css", "css/components/site-footer.css",
+    "css/components/toast.css", "css/components/cart-panel.css",
+    "css/components/order-summary.css",
+] %}
+<!doctype html>
+<html lang="{{ language.code }}" dir="{{ language.direction }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}{{ brand_name }}{% endblock %}</title>
+  {% for stylesheet in shared_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename=stylesheet) }}">
+  {% endfor %}
+  {% block page_styles %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% include "partials/demo_bar.html" %}
+  {% include "partials/site_header.html" %}
+  {% with notices = get_flashed_messages(with_categories=true) %}
+  {% if notices %}
+  <div class="notices" role="status">
+    {% for category, message in notices %}<p class="notices__item notices__item--{{ category }}">{{ message }}</p>{% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+  <main class="page{% block page_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+  {% block footer %}{% include "partials/site_footer.html" %}{% endblock %}
+  {% include "partials/tab_bar.html" %}
+  <div class="toasts" data-toasts role="status" aria-live="polite"></div>
+  <script type="application/json" id="site-config">{{ site_config()|tojson }}</script>
+  <script src="{{ url_for('static', filename='js/vendor/gsap.min.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/vendor/ScrollTrigger.min.js') }}" defer></script>
+  <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block page_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,32 @@
+{#- One order on the live board. Import with context: {% import "admin/orders/_card.html" as cards with context %}
+    Parameter: order. The kitchen (no 'money' permission) sees items and the note only. -#}
+{% import "admin/macros.html" as ui with context %}
+
+{% macro order_card(order, with_actions=True) %}
+<article class="order-card" data-order-id="{{ order.id }}">
+  <header class="order-card__head">
+    <a class="order-card__number" href="{{ url_for('admin.order_detail', order_id=order.id) }}">#<bdi>{{ order.number|number }}</bdi></a>
+    <span class="badge badge--{{ 'accent' if order.fulfillment.value == 'delivery' else 'ok' }}">{{ t("admin.orders." ~ order.fulfillment.value) }}</span>
+    <time class="order-card__time" datetime="{{ order.created_at.isoformat() }}">{{ order.created_at|jtime }}</time>
+  </header>
+  <ul class="order-card__items">
+    {% for item in order.items %}
+    <li>
+      <span class="order-card__qty"><bdi>{{ item.quantity|number }}</bdi>×</span> {{ item.name_in(language.code) }}
+      {% if item.options %}<span class="order-card__options">{% for option in item.options %}{{ option.name_in(language.code) }}{% if not loop.last %}، {% endif %}{% endfor %}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% if order.note %}<p class="order-card__note">{{ order.note }}</p>{% endif %}
+  {% if show_money %}
+  <p class="order-card__customer"><span>{{ order.customer_name }}</span><strong class="price"><bdi>{{ order.total|number }}</bdi> <small>{{ t("price.currency") }}</small></strong></p>
+  {% endif %}
+  {% if with_actions and can_edit_orders %}
+  {% set target = next_status(order) %}
+  <footer class="order-card__actions">
+    {% if target %}{{ ui.post_button(url_for('admin.order_advance', order_id=order.id), t("admin.orders.action." ~ target.value), variant="primary", fields={"next": url_for('admin.orders')}) }}{% endif %}
+    {% if can_cancel(order) %}{{ ui.post_button(url_for('admin.order_cancel', order_id=order.id), t("admin.orders.cancel"), variant="danger", confirm=t("admin.orders.cancel_confirm"), fields={"next": url_for('admin.orders')}) }}{% endif %}
+  </footer>
+  {% endif %}
+</article>
+{% endmacro %}

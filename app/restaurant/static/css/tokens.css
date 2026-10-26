@@ -1,0 +1,117 @@
+/*
+ * Design tokens: every colour, space, radius, shadow, font and motion value
+ * is defined here once. Other stylesheets use var(--token) and never repeat
+ * raw numbers (technical plan, section 9).
+ */
+:root {
+  /* Colours (design reference, section 10) */
+  --color-page: #14100d;
+  --color-surface: #1e1814;
+  --color-raised: #241c16;
+  --color-text: #f3e9dc;
+  --color-muted: #bcaa95;
+  --color-accent: #e3a64b;
+  --color-on-accent: #1a120a;
+  --color-ember: #d9683a;
+  --color-line: rgb(243 233 220 / 14%);
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 5rem;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-soft: 0 10px 30px rgb(0 0 0 / 35%);
+  --shadow-lift: 0 24px 60px rgb(0 0 0 / 45%);
+
+  /* Font families. The heading font depends on the page language, see below. */
+  --font-text: "Vazirmatn", system-ui, sans-serif;
+  --font-heading-fa: "B Nazanin", "Nazanin", "Noto Naskh Arabic", serif;
+  --font-heading-en: "Cormorant Garamond", "Times New Roman", serif;
+  --font-heading: var(--font-heading-fa);
+
+  /* Font sizes */
+  --font-size-small: 0.8125rem;
+  --font-size-body: 1rem;
+  --font-size-large: 1.25rem;
+  --font-size-title: clamp(2.5rem, 8vw, 5rem);
+  --line-height-body: 1.7;
+
+  /* Layout */
+  --content-width: 72rem;
+  --tap-target: 44px;
+
+  /* Motion (design reference: rise 24 px over 0.9 s, 100 ms stagger) */
+  --motion-rise: 24px;
+  --motion-duration: 0.9s;
+  --motion-stagger: 0.1s;
+  --motion-quick: 0.2s;
+  --motion-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+html[lang="en"] {
+  --font-heading: var(--font-heading-en);
+}
+
+/* Additions for the full site (phase 3) */
+:root {
+  --color-cream: #f3e9dc;
+  --color-ink: #1a120a;
+  --color-glass: rgb(20 16 13 / 62%);
+  --color-glass-strong: rgb(20 16 13 / 92%);
+  --color-line-strong: rgb(243 233 220 / 25%);
+  --color-accent-soft: rgb(227 166 75 / 15%);
+  --color-footer: #100c09;
+
+  /* Placeholder backgrounds for dishes that have no photo yet */
+  --dish-gradient-1:
+    repeating-linear-gradient(135deg, rgb(243 233 220 / 5%) 0 12px, transparent 12px 24px),
+    radial-gradient(circle at 30% 30%, #6b4a2c, #2a1f16 72%);
+  --dish-gradient-2:
+    repeating-linear-gradient(135deg, rgb(243 233 220 / 5%) 0 12px, transparent 12px 24px),
+    radial-gradient(circle at 70% 30%, #7a3f26, #2a1812 72%);
+  --dish-gradient-3:
+    repeating-linear-gradient(135deg, rgb(243 233 220 / 5%) 0 12px, transparent 12px 24px),
+    radial-gradient(circle at 40% 70%, #4d5a2c, #1d2113 72%);
+  --dish-gradient-4:
+    repeating-linear-gradient(135deg, rgb(243 233 220 / 5%) 0 12px, transparent 12px 24px),
+    radial-gradient(circle at 60% 60%, #6b3b2f, #261612 72%);
+
+  /* Layers */
+  --z-header: 30;
+  --z-cart-bar: 35;
+  --z-tab-bar: 40;
+
+  /* Sizes */
+  --header-height: 4.5rem;
+  --tab-bar-height: 3.9rem;
+  --content-wide: 75rem;
+  --flip-duration: 0.75s;
+}
+
+/* Additions for the admin panel (phase 5) */
+:root {
+  --color-ok: #8fbf7a;
+  --color-ok-soft: rgb(143 191 122 / 16%);
+  --color-warn-soft: rgb(227 166 75 / 16%);
+  --color-danger: #e88a62;
+  --color-danger-soft: rgb(217 104 58 / 16%);
+  --color-sidebar: #100c09;
+  --color-field: #17120e;
+  --admin-sidebar-width: 17rem;
+  --admin-topbar-height: 4.25rem;
+  --z-admin-sidebar: 60;
+  --z-admin-scrim: 55;
+  --z-admin-topbar: 20;
+}

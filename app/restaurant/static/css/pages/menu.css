@@ -1,0 +1,95 @@
+/* Menu page: category chips, dish grid and the cart panel. */
+
+.menu-page {
+  max-inline-size: var(--content-wide);
+  margin-inline: auto;
+}
+
+.menu-page__top {
+  padding-block: var(--space-7) var(--space-5);
+}
+
+.menu-page__title {
+  font-size: clamp(2.4rem, 5vw, 3.75rem);
+  line-height: 1.5;
+}
+
+html[lang="en"] .menu-page__title {
+  line-height: 1.1;
+}
+
+.menu-page__subtitle {
+  margin-block: var(--space-2) var(--space-6);
+  color: var(--color-muted);
+  font-size: 1.05rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.chips__chip {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 48px;
+  padding-inline: var(--space-5);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    transform var(--motion-quick),
+    background-color var(--motion-quick);
+}
+
+.chips__chip:hover {
+  transform: translateY(-2px);
+}
+
+.chips__chip[aria-pressed="true"] {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-ink);
+}
+
+.menu-page__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-6);
+  padding-block-end: var(--space-8);
+}
+
+.menu-page__body > .dish-grid {
+  flex: 999 1 37rem;
+  min-inline-size: 0;
+}
+
+.menu-page__empty {
+  grid-column: 1 / -1;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+@media (width <= 45rem) {
+  .menu-page__top {
+    padding-block: var(--space-6) var(--space-4);
+  }
+
+  /* Chips scroll sideways on a phone instead of wrapping into many rows. */
+  .chips {
+    flex-wrap: nowrap;
+    margin-inline: calc(var(--space-4) * -1);
+    padding: 2px var(--space-4) var(--space-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .chips__chip {
+    flex: none;
+  }
+
+}

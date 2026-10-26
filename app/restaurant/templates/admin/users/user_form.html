@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.USERS %}
+{% set editable = access.can_edit(keys.USERS) %}
+{% set action = url_for('admin.user_update', user_id=member.id) if member else url_for('admin.user_create') %}
+
+{% block title %}{{ t("admin.users.staff") }}{% endblock %}
+{% block heading %}{{ t("admin.users.edit_staff") if member else t("admin.users.add_staff") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/users.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.users') }}">{{ t("admin.back") }}</a></div>
+<form class="form" method="post" action="{{ action }}" novalidate>
+  {{ form.hidden_tag() }}
+  <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+    <section class="card form">
+      <div class="form__row">
+        {% if member %}
+        <div class="field"><span class="field__label">{{ t("admin.users.email") }}</span><bdi dir="ltr" class="field__static">{{ member.email }}</bdi></div>
+        {% else %}
+        {{ ui.form_field(form.email, t("admin.users.email"), dir="ltr", inputmode="email", autocomplete="off") }}
+        {% endif %}
+        {{ ui.form_field(form.display_name, t("admin.users.name")) }}
+      </div>
+      {{ ui.form_field(form.password, t("admin.users.password"), hint=(t("admin.users.password_keep") if member else t("admin.users.password_hint")), dir="ltr", autocomplete="new-password") }}
+      <div class="field{% if form.role_ids.errors %} field--invalid{% endif %}">
+        <span class="field__label">{{ t("admin.users.roles") }}</span>
+        <div class="role-checks">
+          {% for choice in form.role_ids %}<label class="check">{{ choice() }} <span>{{ choice.label.text }}</span></label>{% endfor %}
+        </div>
+        {% for error in form.role_ids.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+      </div>
+      {{ ui.checkbox(form.is_active, t("admin.users.active")) }}
+      {% for error in form.is_active.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+    </section>
+  </fieldset>
+  {% if editable %}
+  <div class="form__actions">
+    <button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button>
+    <a class="btn btn--ghost" href="{{ url_for('admin.users') }}">{{ t("admin.cancel") }}</a>
+  </div>
+  {% endif %}
+</form>
+{% endblock %}

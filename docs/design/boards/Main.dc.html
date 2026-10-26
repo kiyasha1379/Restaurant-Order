@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>صفحه اصلی رستوران</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap">
+<style>
+body{margin:0;background:#14100D}
+input::placeholder{color:#A99882;opacity:1}
+.rise{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.spin{animation:spin 60s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pzglow{position:absolute;inset:-12% -22%;z-index:0;background:radial-gradient(closest-side,rgba(227,166,75,.22),rgba(227,166,75,0) 72%);filter:blur(12px);pointer-events:none}
+.pzframe{position:absolute;inset:0;z-index:1;padding:7px;border-radius:38px;box-sizing:border-box;background:linear-gradient(150deg,rgba(255,214,140,.85) 0%,rgba(227,166,75,.18) 32%,rgba(243,233,220,.06) 60%,rgba(227,166,75,.5) 100%);box-shadow:0 50px 90px rgba(0,0,0,.6),0 0 0 1px rgba(243,233,220,.06),inset 0 1px 0 rgba(255,255,255,.18)}
+.pzin{position:relative;width:100%;height:100%;border-radius:31px;overflow:hidden;background:#14100D;box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}
+.pzshade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.10) 0,rgba(255,255,255,0) 14%),linear-gradient(0deg,rgba(20,16,13,.55) 0,rgba(20,16,13,0) 24%)}
+.pz .chip-a,.pz .chip-b{z-index:2;background:rgba(36,28,22,.72)!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.float{animation:float 5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.pulse{animation:pulse 4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+.lift{transition:transform .4s cubic-bezier(.2,.7,.2,1),border-color .4s}
+.lift:hover{transform:translateY(-8px);border-color:rgba(227,166,75,.55)}
+.btn{transition:transform .25s,background .25s,border-color .25s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:scale(.96)}
+.story{height:auto}
+.stick{position:relative;z-index:1;height:auto;overflow:visible;width:100%}
+.bgv{position:absolute;inset:0;overflow:hidden;z-index:0;pointer-events:none;background-size:cover;background-position:center}
+.bgv video{display:block;width:100%;height:100%;object-fit:cover}
+.bgv i{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(20,16,13,0) 35%,rgba(20,16,13,.6) 100%),rgba(20,16,13,var(--dim,.35))}
+/* ===== dynamic theme: one full screen per section ===== */
+html{scroll-padding-top:var(--hh,0px)}
+html.fp-snap{scroll-snap-type:y mandatory}
+.fp{box-sizing:border-box;min-height:calc(clamp(620px,100vh,900px) - var(--hh,90px));display:flex;flex-direction:column;justify-content:center;scroll-snap-align:start;scroll-snap-stop:always}
+html:not(.fp-snap) .fp{scroll-snap-stop:normal}
+.fp-end{scroll-snap-align:end}
+@media (max-width:700px),(max-height:620px){html.fp-snap{scroll-snap-type:y proximity}.fp{scroll-snap-stop:normal}}
+@keyframes rv{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:none}}
+[data-active="1"] [data-s="1"] .rv,[data-active="2"] [data-s="2"] .rv,[data-active="3"] [data-s="3"] .rv,[data-active="4"] [data-s="4"] .rv,[data-active="5"] [data-s="5"] .rv{animation:rv .8s cubic-bezier(.2,.7,.2,1) backwards;animation-delay:calc(var(--i,0) * 90ms + 60ms)}
+[data-dyn="off"] .rv{animation:none!important}
+.hdr{position:sticky;top:0;z-index:30;background:rgba(20,16,13,.86);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.hint{position:fixed;z-index:25;left:50%;bottom:18px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:#BCAA95;opacity:0;transition:opacity .35s;pointer-events:none}
+[data-active="0"] .hint{opacity:1}
+.hint svg{animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(5px)}}
+.dot{width:24px;height:24px;padding:0;border:0;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.dot:focus-visible,.tog:focus-visible{outline:2px solid #E3A64B;outline-offset:3px;border-radius:999px}
+.dot i{display:block;border-radius:50%;transition:all .3s}
+.tog{display:inline-flex;align-items:center;gap:10px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid rgba(243,233,220,.18);background:rgba(20,16,13,.8);color:#F3E9DC;font:inherit;font-size:13px;cursor:pointer}
+
+/* ===== round dish cards (flip for details) ===== */
+.dcard{position:relative;width:min(100%,270px);aspect-ratio:1;margin-inline:auto}
+.dflip{position:absolute;inset:0;padding:0;margin:0;border:0;background:none;border-radius:50%;cursor:pointer;color:inherit;font:inherit;perspective:1100px;display:block}
+.dflip:focus-visible{outline:2px solid #E3A64B;outline-offset:6px}
+.dinner{position:absolute;inset:0;display:block;border-radius:50%;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.3,.7,.2,1),box-shadow .4s;box-shadow:0 26px 50px rgba(0,0,0,.5),0 0 0 1px rgba(243,233,220,.14)}
+.dcard:hover .dinner{box-shadow:0 30px 56px rgba(0,0,0,.55),0 0 0 2px rgba(227,166,75,.6),0 0 0 10px rgba(227,166,75,.08)}
+.dcard.on .dinner{transform:rotateY(180deg)}
+.dface{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.dchip{font-size:12px;color:#D9CBB8;background:rgba(20,16,13,.62);padding:4px 14px;border-radius:999px}
+.dhint{position:absolute;left:50%;margin-left:-15px;top:9%;width:30px;height:30px;border-radius:50%;background:rgba(20,16,13,.55);display:flex;align-items:center;justify-content:center;transition:transform .5s}
+.dcard:hover .dhint{transform:rotate(180deg)}
+.dback{transform:rotateY(180deg);background:radial-gradient(circle at 30% 22%,#2c2118,#17110d 75%);box-shadow:inset 0 0 0 2px rgba(227,166,75,.4);padding:15% 14% 17%;gap:7px;text-align:center}
+.dback-t{font-size:17px;font-weight:700;line-height:1.5;color:#F3E9DC}
+.dback-d{font-size:12.5px;line-height:1.75;color:#BCAA95}
+.dback-i{font-size:12px;line-height:1.7;color:#E3A64B}
+.dback-i b{font-weight:700}
+.dback-m{font-size:11.5px;color:#A99882}
+.dname{position:absolute;z-index:2;top:-12px;right:-6px;max-width:76%;box-sizing:border-box;padding:7px 16px;border-radius:18px 18px 4px 18px;background:#F3E9DC;color:#1A120A;font-size:14px;font-weight:700;line-height:1.5;text-align:center;box-shadow:0 10px 24px rgba(0,0,0,.4);transition:opacity .3s,transform .5s cubic-bezier(.3,.7,.2,1);transform-origin:100% 100%;pointer-events:none}
+.dname::after{content:"";position:absolute;bottom:-5px;right:14px;width:11px;height:11px;background:#F3E9DC;transform:rotate(45deg);border-radius:0 0 3px 0}
+.dcard.on .dname{opacity:0;transform:scale(.8) translateY(8px)}
+.dbuy{position:absolute;z-index:2;left:50%;bottom:-26px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:6px 6px 6px 18px;border-radius:999px;background:#241C16;border:1px solid rgba(243,233,220,.16);box-shadow:0 14px 30px rgba(0,0,0,.45);white-space:nowrap}
+.dprice{font-weight:700;color:#E3A64B;font-size:17px;font-variant-numeric:tabular-nums}
+.dprice small{font-size:11.5px;font-weight:400;color:#BCAA95}
+.dadd{width:42px;height:42px;border-radius:50%;background:#E3A64B;display:flex;align-items:center;justify-content:center;text-decoration:none;flex:none}
+.mfront{background:radial-gradient(circle at 50% 36%,rgba(227,166,75,.2),rgba(30,24,20,.96) 66%),#1E1814}
+.mico{width:34%;aspect-ratio:1;border-radius:50%;background:rgba(227,166,75,.12);border:1px solid rgba(227,166,75,.35);display:flex;align-items:center;justify-content:center;margin-bottom:6%}
+.mring{position:absolute;inset:7%;border-radius:50%;border:1px dashed rgba(227,166,75,.32);animation:spin 60s linear infinite}
+.mgo{text-decoration:none;color:#F3E9DC;padding:6px 6px 6px 18px}
+.mgo:hover .dadd{transform:translateX(-3px)}
+.dadd{transition:transform .3s}
+@media (prefers-reduced-motion: reduce){.dinner,.dname,.dhint{transition:none}.mring{animation:none}}
+@media (prefers-reduced-motion: reduce){.rise,.spin,.float,.pulse,.hint svg{animation:none!important}.rv{animation:none!important}.lift,.btn{transition:none}}
+
+/* ===== mobile chrome: compact header + bottom tab bar ===== */
+.tabbar{display:none}
+@media (max-width:720px){
+  body{padding-bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+  header.hdr{position:sticky;top:0;z-index:30;background:rgba(20,16,13,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+  .hdr-in{flex-wrap:nowrap!important;padding:8px 14px!important;gap:8px!important}
+  .hdr-brand{gap:8px!important;flex:1 1 auto;min-width:0}
+  .hdr-brand svg{width:28px;height:28px;flex:none}
+  .hdr-brand span{font-size:19px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hdr-nav,.hdr-acct{display:none!important}
+  .hdr-act{flex-wrap:nowrap!important;gap:6px!important;flex:none}
+  .hdr-act .hl{display:none}
+  .hdr-cart{min-height:44px!important;padding:0 12px!important;gap:6px!important}
+  .tabbar{display:flex;position:fixed;z-index:40;left:0;right:0;bottom:0;height:calc(62px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;background:rgba(20,16,13,.95);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid rgba(243,233,220,.12)}
+  .tb{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#A99882;text-decoration:none;font-size:11px;line-height:1.3;padding:0 2px;text-align:center}
+  .tb span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tb[aria-current="page"]{color:#E3A64B;font-weight:700}
+  .pg-top{padding:28px 16px 16px!important}
+  .pg-body{padding:8px 16px 40px!important;gap:24px!important}
+  .pg-foot{padding:22px 16px!important}
+}
+
+@media (max-width:720px){
+  .fp{min-height:calc(100svh - var(--hh,58px) - 62px)!important}
+  .hint,.fpctl{display:none!important}
+  .dots{inset-inline-end:0!important}
+  .dots .dot{width:20px;height:22px}
+  .lang{padding:3px!important;gap:2px!important}
+  .lang button{min-height:34px!important;padding:0 8px!important;font-size:12px!important}
+  .lang a{display:none!important}
+  .hero-in{padding:20px 16px 36px!important;gap:30px!important}
+  .pz{height:min(430px,60svh)!important}
+  .chip-a{inset-inline-start:-4px!important;font-size:12.5px!important;padding:7px 13px!important}
+  .chip-b{inset-inline-end:-4px!important;font-size:12.5px!important;padding:7px 13px!important}
+  .sec-in{padding:28px 16px 44px!important}
+  .foot-in{padding:36px 16px 24px!important}
+  .rescard{padding:22px!important;gap:24px!important;border-radius:22px!important}
+  .mgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:54px 14px!important;padding-bottom:26px!important}
+  .mgrid .dname{font-size:12px;padding:4px 11px;top:-14px;right:-2px;max-width:84%}
+  .mgrid .dbuy{padding:4px 4px 4px 12px;gap:8px;bottom:-21px}
+  .mgrid .dadd{width:36px;height:36px}
+  .mgrid .dprice{font-size:14px}
+  .mgrid .dhint{width:26px;height:26px;margin-left:-13px}
+  .mgrid .mico svg{width:62%;height:62%}
+  .mgrid .dback{padding:15% 10% 19%;gap:3px}
+  .mgrid .dback-t{font-size:13px}
+  .mgrid .dback-d{font-size:11px!important;line-height:1.6}
+  .dgrid{grid-template-columns:minmax(0,1fr)!important;gap:58px!important}
+  .dcard{width:min(100%,260px)}
+}
+</style>
+</helmet>
+<div dir="{{dir}}" data-active="{{active}}" data-dyn="{{dynAttr}}" style="min-height: 100%; background: #14100D; color: #F3E9DC; font-family: 'Vazirmatn', system-ui, sans-serif; line-height: 1.7; overflow-x: clip">
+
+<nav class="dots" aria-label="{{tx.dotsLabel}}" style="position: fixed; z-index: 25; inset-inline-end: 12px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{dots}}" as="d" hint-placeholder-count="6">
+<button type="button" class="dot" title="{{d.label}}" aria-label="{{d.label}}" aria-current="{{d.cur}}" onClick="{{d.go}}"><i style="width: {{d.sz}}; height: {{d.sz}}; background: {{d.bg}}"></i></button>
+</sc-for>
+</nav>
+
+
+<div class="hint" aria-hidden="true"><span>{{tx.scrollHint}}</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#BCAA95" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l5 5 5-5"/></svg></div>
+
+<header class="hdr" style="border-bottom: 1px solid rgba(243,233,220,.08)">
+<div class="hdr-in" style="max-width: 1200px; margin: 0 auto; padding: 18px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="Main.dc.html" class="hdr-brand" style="display: flex; align-items: center; gap: 12px; color: #F3E9DC; text-decoration: none">
+<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#E3A64B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21"/></svg>
+<span style="font-family: {{dispFont}}; font-size: 28px; font-weight: 700; line-height: 1.3">{{tx.brand}}</span>
+</a>
+<nav aria-label="{{tx.navLabel}}" class="hdr-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 26px">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="5">
+<a href="{{n.href}}" style="color: #D9CBB8; text-decoration: none; font-size: 15px; padding: 10px 0">{{n.label}}</a>
+</sc-for>
+</nav>
+<div class="hdr-act" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+<div class="lang" role="group" aria-label="{{tx.langLabel}}" style="display: flex; align-items: center; gap: 4px; padding: 4px; border: 1px solid rgba(243,233,220,.18); border-radius: 999px">
+<button type="button" onClick="{{setFa}}" style="min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; font: inherit; font-size: 14px; cursor: pointer; background: {{faBg}}; color: {{faFg}}">فارسی</button>
+<button type="button" dir="ltr" onClick="{{setEn}}" style="min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; font: inherit; font-size: 14px; cursor: pointer; background: {{enBg}}; color: {{enFg}}">English</button>
+</div>
+<a href="Menu.dc.html" class="btn hdr-cart" style="display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(243,233,220,.18); color: #F3E9DC; text-decoration: none; font-size: 14px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F3E9DC" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L19.5 8H6"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg>
+<span class="hl">{{tx.cart}}</span>
+<span style="min-width: 22px; height: 22px; border-radius: 11px; background: #E3A64B; color: #1A120A; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center">{{tx.cartCount}}</span>
+</a>
+<a href="Main.dc.html" class="btn hdr-acct" style="display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 999px; color: #E3A64B; text-decoration: none; font-size: 14px; font-weight: 500">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E3A64B" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg>
+{{tx.login}}
+</a>
+</div>
+</div>
+</header>
+
+<section class="story fp" data-s="0" data-story style="position: relative">
+<div class="bgv" aria-hidden="true" style="--dim: 0.4"><video data-bgv src="/_blob/fa9d4ff85eac48995cb18ed09a2bde40" poster="/_blob/6fe4b979301127ec3860018d56dbf99f" muted loop playsinline preload="auto"></video><i></i></div>
+<div class="stick" data-stick>
+<div class="pulse" style="position: absolute; inset-inline-end: -12%; top: -20%; width: 72%; height: 130%; background: radial-gradient(closest-side, rgba(227,166,75,.22), rgba(227,166,75,0)); pointer-events: none"></div>
+<div class="hero-in" style="position: relative; max-width: 1200px; height: 100%; box-sizing: border-box; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-wrap: wrap; align-items: center; gap: 48px">
+
+<div style="flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 24px">
+<span class="rise" style="display: inline-flex; align-items: center; gap: 10px; padding: 6px 16px; border-radius: 999px; border: 1px solid rgba(227,166,75,.4); color: #E3A64B; font-size: 14px"><span style="width: 6px; height: 6px; border-radius: 50%; background: #E3A64B"></span>{{tx.kicker}}</span>
+<h1 class="rise" style="margin: 0; font-family: {{dispFont}}; font-weight: {{h1Weight}}; font-size: {{h1Size}}; line-height: {{h1Lh}}; animation-delay: .1s">{{tx.h1}}</h1>
+<p class="rise" style="margin: 0; max-width: 520px; font-size: 18px; color: #BCAA95; animation-delay: .2s">{{tx.lead}}</p>
+<div class="rise" style="display: flex; flex-wrap: wrap; gap: 14px; animation-delay: .3s">
+<a href="Menu.dc.html" class="btn" style="display: inline-flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 30px; border-radius: 999px; background: #E3A64B; color: #1A120A; font-weight: 700; font-size: 16px; text-decoration: none">{{tx.cta1}}</a>
+<a href="Reserve.dc.html" class="btn" style="display: inline-flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 30px; border-radius: 999px; border: 1px solid rgba(243,233,220,.35); color: #F3E9DC; font-weight: 500; font-size: 16px; text-decoration: none">{{tx.cta2}}</a>
+</div>
+<ul class="rise" style="list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; color: #BCAA95; font-size: 14px; animation-delay: .4s">
+<sc-for list="{{tags}}" as="g" hint-placeholder-count="3">
+<li style="display: flex; align-items: center; gap: 8px"><span style="width: 5px; height: 5px; border-radius: 50%; background: #E3A64B"></span>{{g.label}}</li>
+</sc-for>
+</ul>
+</div>
+
+<div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 22px">
+<div class="pz" style="position: relative; height: min(548px, 78vh); aspect-ratio: 416 / 752; max-width: 100%">
+<div class="pzglow" aria-hidden="true"></div>
+<div class="pzframe">
+<div class="pzin">
+<video data-pizza src="/_blob/a9dc17ad5f393e01004e5034729a9cfd" poster="/_blob/3751fecf80cf93af75cb775ad2609620" muted playsinline preload="auto" aria-label="{{tx.pizzaLabel}}" style="display: block; width: 100%; height: 100%; object-fit: cover"></video>
+<i class="pzshade" aria-hidden="true"></i>
+</div>
+</div>
+<div class="float chip-a" style="position: absolute; inset-inline-start: -34px; top: 12%; display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-radius: 999px; background: #241C16; border: 1px solid rgba(243,233,220,.14); font-size: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.4)">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E3A64B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s6.5-5.6 6.5-11a6.5 6.5 0 0 0-13 0c0 5.4 6.5 11 6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>
+{{tx.chipA}}
+</div>
+<div class="float chip-b" style="position: absolute; inset-inline-end: -34px; bottom: 10%; display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-radius: 999px; background: #241C16; border: 1px solid rgba(243,233,220,.14); font-size: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.4); animation-delay: 1.6s">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E3A64B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+{{tx.chipB}}
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<section class="fp" data-s="1" style="position: relative">
+<div class="bgv" aria-hidden="true" style="--dim: 0.3"><video data-bgv src="/_blob/1220cec575608c1188dd76d5f9abd6b4" poster="/_blob/bc358e10a8f343725bdacd300be6bb95" muted loop playsinline preload="auto"></video><i></i></div>
+<div class="sec-in" style="position: relative; z-index: 1; width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: 40px 24px 56px">
+<h2 class="rv" style="margin: 0 0 36px; font-family: {{dispFont}}; font-weight: {{h1Weight}}; font-size: clamp(30px, 4vw, 44px); line-height: {{h2Lh}}">{{tx.modesTitle}}</h2>
+<div class="mgrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 64px 28px; padding-bottom: 30px">
+<div class="dcard lift rv {{m1Cls}}" style="--i: 1">
+<button type="button" class="dflip" aria-pressed="{{m1Pressed}}" aria-label="{{tx.m1t}}. {{tx.flipHint}}" onClick="{{m1Flip}}">
+<span class="dinner">
+<span class="dface dfront mfront">
+<span class="mring" aria-hidden="true"></span>
+<span class="mico"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#E3A64B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L19.5 8H6"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg></span>
+<span class="dhint" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F3E9DC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4.5h-4.5"/></svg></span>
+</span>
+<span class="dface dback">
+<span class="dback-t">{{tx.m1t}}</span>
+<span class="dback-d" style="font-size: 13.5px">{{tx.m1d}}</span>
+</span>
+</span>
+</button>
+<span class="dname" aria-hidden="true">{{tx.m1t}}</span>
+<a href="Menu.dc.html" class="dbuy mgo" aria-label="{{tx.go}}: {{tx.m1t}}">
+<span class="dprice" style="color: #F3E9DC">{{tx.go}}</span>
+<span class="dadd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A120A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tx.arrowPath}}"/></svg></span>
+</a>
+</div>
+<div class="dcard lift rv {{m2Cls}}" style="--i: 2">
+<button type="button" class="dflip" aria-pressed="{{m2Pressed}}" aria-label="{{tx.m2t}}. {{tx.flipHint}}" onClick="{{m2Flip}}">
+<span class="dinner">
+<span class="dface dfront mfront">
+<span class="mring" aria-hidden="true"></span>
+<span class="mico"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#E3A64B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span>
+<span class="dhint" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F3E9DC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4.5h-4.5"/></svg></span>
+</span>
+<span class="dface dback">
+<span class="dback-t">{{tx.m2t}}</span>
+<span class="dback-d" style="font-size: 13.5px">{{tx.m2d}}</span>
+</span>
+</span>
+</button>
+<span class="dname" aria-hidden="true">{{tx.m2t}}</span>
+<a href="Reserve.dc.html" class="dbuy mgo" aria-label="{{tx.go}}: {{tx.m2t}}">
+<span class="dprice" style="color: #F3E9DC">{{tx.go}}</span>
+<span class="dadd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A120A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tx.arrowPath}}"/></svg></span>
+</a>
+</div>
+<div class="dcard lift rv {{m3Cls}}" style="--i: 3">
+<button type="button" class="dflip" aria-pressed="{{m3Pressed}}" aria-label="{{tx.m3t}}. {{tx.flipHint}}" onClick="{{m3Flip}}">
+<span class="dinner">
+<span class="dface dfront mfront">
+<span class="mring" aria-hidden="true"></span>
+<span class="mico"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#E3A64B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s6.5-5.6 6.5-11a6.5 6.5 0 0 0-13 0c0 5.4 6.5 11 6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg></span>
+<span class="dhint" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F3E9DC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4.5h-4.5"/></svg></span>
+</span>
+<span class="dface dback">
+<span class="dback-t">{{tx.m3t}}</span>
+<span class="dback-d" style="font-size: 13.5px">{{tx.m3d}}</span>
+</span>
+</span>
+</button>
+<span class="dname" aria-hidden="true">{{tx.m3t}}</span>
+<a href="Menu.dc.html" class="dbuy mgo" aria-label="{{tx.go}}: {{tx.m3t}}">
+<span class="dprice" style="color: #F3E9DC">{{tx.go}}</span>
+<span class="dadd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A120A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tx.arrowPath}}"/></svg></span>
+</a>
+</div>
+<div class="dcard lift rv {{m4Cls}}" style="--i: 4">
+<button type="button" class="dflip" aria-pressed="{{m4Pressed}}" aria-label="{{tx.m4t}}. {{tx.flipHint}}" onClick="{{m4Flip}}">
+<span class="dinner">
+<span class="dface dfront mfront">
+<span class="mring" aria-hidden="true"></span>
+<span class="mico"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#E3A64B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5c6-3 12-3 18 0L12 21 3 5z"/><circle cx="10" cy="10" r="1.2"/><circle cx="14" cy="12" r="1.2"/></svg></span>
+<span class="dhint" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F3E9DC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4.5h-4.5"/></svg></span>
+</span>
+<span class="dface dback">
+<span class="dback-t">{{tx.m4t}}</span>
+<span class="dback-d" style="font-size: 13.5px">{{tx.m4d}}</span>
+</span>
+</span>
+</button>
+<span class="dname" aria-hidden="true">{{tx.m4t}}</span>
+<a href="Builder.dc.html" class="dbuy mgo" aria-label="{{tx.go}}: {{tx.m4t}}">
+<span class="dprice" style="color: #F3E9DC">{{tx.go}}</span>
+<span class="dadd"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A120A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{tx.arrowPath}}"/></svg></span>
+</a>
+</div>
+</div>
+</div>
+</section>
+
+<section class="fp" data-s="2" style="position: relative; background: #18130F; border-top: 1px solid rgba(243,233,220,.06); border-bottom: 1px solid rgba(243,233,220,.06)">
+<div class="bgv" aria-hidden="true" style="--dim: 0.38"><video data-bgv src="/_blob/852c2e2de179e8fec7a096496dd51059" poster="/_blob/6eca8da6a9894c822bca42e34bdbdbb5" muted loop playsinline preload="auto"></video><i></i></div>
+<div class="sec-in" style="position: relative; z-index: 1; width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: 40px 24px 56px">
+<div class="rv" style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 32px">
+<h2 style="margin: 0; font-family: {{dispFont}}; font-weight: {{h1Weight}}; font-size: clamp(30px, 4vw, 44px); line-height: {{h2Lh}}">{{tx.dishTitle}}</h2>
+<a href="Menu.dc.html" style="color: #E3A64B; text-decoration: none; font-weight: 500; padding: 10px 0">{{tx.dishAll}}</a>
+</div>
+<div class="dgrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 64px 28px; padding-bottom: 30px">
+<sc-for list="{{dishes}}" as="d" hint-placeholder-count="4">
+<div class="dcard lift rv {{d.cls}}" style="--i: {{d.i}}">
+<button type="button" class="dflip" aria-pressed="{{d.pressed}}" aria-label="{{d.name}}. {{tx.flipHint}}" onClick="{{d.toggle}}">
+<span class="dinner">
+<span class="dface dfront" style="background: {{d.bg}}">
+<span class="dchip">{{tx.dishImg}}</span>
+<span class="dhint" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F3E9DC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4.5h-4.5"/></svg></span>
+</span>
+<span class="dface dback">
+<span class="dback-t">{{d.name}}</span>
+<span class="dback-d">{{d.desc}}</span>
+<span class="dback-i"><b>{{tx.ingTitle}}</b> {{d.ing}}</span>
+<span class="dback-m">{{d.meta}}</span>
+</span>
+</span>
+</button>
+<span class="dname" aria-hidden="true">{{d.name}}</span>
+<span class="dbuy">
+<span class="dprice">{{d.price}} <small>{{tx.currency}}</small></span>
+<a href="Menu.dc.html" class="btn dadd" aria-label="{{tx.add}}: {{d.name}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A120A" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+</a>
+</span>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section id="how" class="fp" data-s="3" style="position: relative">
+<div class="bgv" aria-hidden="true" style="--dim: 0.5"><video data-bgv src="/_blob/abf70802f7365f569be354e3b77bcdc6" poster="/_blob/57e8ba5ec9485c0ad2b7ad7954762c68" muted loop playsinline preload="auto"></video><i></i></div>
+<div class="sec-in" style="position: relative; z-index: 1; width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: 40px 24px 56px">
+<h2 class="rv" style="margin: 0 0 48px; font-family: {{dispFont}}; font-weight: {{h1Weight}}; font-size: clamp(30px, 4vw, 44px); line-height: {{h2Lh}}">{{tx.howTitle}}</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 36px">
+<sc-for list="{{steps}}" as="s" hint-placeholder-count="3">
+<div class="rv" style="--i: {{s.i}}; display: flex; flex-direction: column; gap: 10px; padding-top: 22px; border-top: 1px solid rgba(227,166,75,.5)">
+<span style="font-family: {{dispFont}}; font-size: 56px; line-height: 1.2; color: #E3A64B">{{s.n}}</span>
+<h3 style="margin: 0; font-size: 20px">{{s.title}}</h3>
+<p style="margin: 0; color: #BCAA95; font-size: 15px">{{s.text}}</p>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section class="fp" data-s="4" style="position: relative">
+<div class="bgv" aria-hidden="true" style="--dim: 0.25"><video data-bgv src="/_blob/835df6547c431c00083dbeb03f3d32be" poster="/_blob/af23821077af09c4906a677316e5c553" muted loop playsinline preload="auto"></video><i></i></div>
+<div class="sec-in" style="position: relative; z-index: 1; width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: 40px 24px 56px">
+<div class="rv rescard" style="display: flex; flex-wrap: wrap; gap: 40px; padding: 44px; border-radius: 28px; background: rgba(30,24,20,.66); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(243,233,220,.16)">
+<div style="flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: {{dispFont}}; font-weight: {{h1Weight}}; font-size: clamp(28px, 3.4vw, 40px); line-height: {{h2Lh}}">{{tx.resTitle}}</h2>
+<p style="margin: 0; color: #BCAA95; font-size: 16px">{{tx.resText}}</p>
+</div>
+<div style="flex: 2 1 480px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 18px">
+<div class="resfields" style="width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px">
+<sc-for list="{{fields}}" as="f" hint-placeholder-count="3">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #BCAA95">{{f.label}}
+<input type="text" placeholder="{{f.ph}}" style="width: 100%; height: 50px; box-sizing: border-box; padding-inline: 16px; border-radius: 12px; border: 1px solid rgba(243,233,220,.18); background: #14100D; color: #F3E9DC; font: inherit; font-size: 15px">
+</label>
+</sc-for>
+</div>
+<a href="Reserve.dc.html" class="btn" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 30px; border-radius: 999px; background: #E3A64B; color: #1A120A; font-weight: 700; font-size: 16px; text-decoration: none">{{tx.resBtn}}</a>
+</div>
+</div>
+</div>
+</section>
+
+<footer id="contact" class="fp fp-end" data-s="5" style="position: relative; background: #100C09; border-top: 1px solid rgba(243,233,220,.08)">
+<div class="bgv" aria-hidden="true" style="--dim: 0.45"><video data-bgv src="/_blob/ab20edc634b9230f3c92d6708d221640" poster="/_blob/7b5ae7059adf8ef9afce231f1b858fcb" muted loop playsinline preload="auto"></video><i></i></div>
+<div class="foot-in" style="position: relative; z-index: 1; width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: 64px 24px 32px">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 36px">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<span style="font-family: {{dispFont}}; font-size: 30px; font-weight: 700; line-height: 1.4">{{tx.brand}}</span>
+<p style="margin: 0; color: #BCAA95; font-size: 14px; max-width: 280px">{{tx.footNote}}</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 14px; font-size: 15px">
+<div><div style="color: #BCAA95; font-size: 13px">{{tx.fAddr}}</div>{{tx.fAddrV}}</div>
+<div><div style="color: #BCAA95; font-size: 13px">{{tx.fHours}}</div>{{tx.fHoursV}}</div>
+<div><div style="color: #BCAA95; font-size: 13px">{{tx.fPhone}}</div>{{tx.fPhoneV}}</div>
+</div>
+<div id="langs" style="display: flex; flex-direction: column; gap: 14px">
+<span style="color: #BCAA95; font-size: 13px">{{tx.fLang}}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<sc-for list="{{langs}}" as="l" hint-placeholder-count="2">
+<span dir="{{l.dir}}" style="padding: 8px 18px; border-radius: 999px; border: 1px solid rgba(243,233,220,.18); font-size: 14px">{{l.label}}</span>
+</sc-for>
+</div>
+</div>
+</div>
+<div style="margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(243,233,220,.08); color: #A99882; font-size: 13px">{{tx.rights}}</div>
+</div>
+</footer>
+
+<nav class="tabbar" aria-label="{{tx.navLabel}}">
+<a href="Main.dc.html" class="tb" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>{{tx.t1}}</span></a>
+<a href="Menu.dc.html" class="tb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2 1-3.5 4-3.5 8h3.5"/></svg><span>{{tx.t2}}</span></a>
+<a href="Builder.dc.html" class="tb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5c6-3 12-3 18 0L12 21 3 5z"/><circle cx="10" cy="10" r="1.2"/><circle cx="14" cy="12" r="1.2"/></svg><span>{{tx.t3}}</span></a>
+<a href="Reserve.dc.html" class="tb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>{{tx.t4}}</span></a>
+<a href="Main.dc.html" class="tb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg><span>{{tx.t5}}</span></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3100}}'>
+class Component extends DCLogic {
+  initFullPage() {
+    const doc = document.documentElement;
+    const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const secs = () => Array.from(document.querySelectorAll('[data-s]'));
+    const header = document.querySelector('header.hdr');
+    const hh = () => (header ? header.getBoundingClientRect().height : 0);
+    const syncHH = () => doc.style.setProperty('--hh', Math.round(hh()) + 'px');
+    const dyn = () => (this.state || {}).dyn !== false;
+    const top = (i) => {
+      const list = secs();
+      const s = list[i];
+      if (!s) { return 0; }
+      if (i === list.length - 1) { return Math.max(0, doc.scrollHeight - window.innerHeight); }
+      return Math.max(0, Math.round(s.getBoundingClientRect().top + window.scrollY - hh()));
+    };
+    const nearest = () => {
+      const y = window.scrollY;
+      let best = 0, d = Infinity;
+      secs().forEach((_, i) => { const x = Math.abs(top(i) - y); if (x < d) { d = x; best = i; } });
+      return best;
+    };
+    let cur = 0, lock = false, timer = 0;
+    const setActive = (i) => { cur = i; if ((this.state || {}).active !== i) { this.setState({ active: i }); } };
+    const go = (i) => {
+      const n = secs().length;
+      i = Math.max(0, Math.min(n - 1, i));
+      window.scrollTo({ top: top(i), behavior: (mqReduce.matches || !dyn()) ? 'auto' : 'smooth' });
+      setActive(i);
+    };
+    const setDyn = (on) => {
+      doc.classList.toggle('fp-snap', on);
+      this.setState({ dyn: on });
+      try { localStorage.setItem('fp-dynamic', on ? '1' : '0'); } catch (e) {}
+      if (on) { go(nearest()); }
+    };
+    const inForm = (el) => !!(el && el.closest && el.closest('input,textarea,select,[contenteditable]'));
+    const onWheel = (e) => {
+      if (!dyn() || mqReduce.matches || e.ctrlKey || Math.abs(e.deltaY) < 8 || inForm(e.target)) { return; }
+      const s = secs()[cur];
+      if (s) {
+        const r = s.getBoundingClientRect();
+        // section taller than the window: let it scroll naturally until its edge is reached
+        if (e.deltaY > 0 && r.bottom > window.innerHeight + 8 && cur < secs().length - 1) { return; }
+        if (e.deltaY < 0 && r.top < hh() - 8) { return; }
+      }
+      e.preventDefault();
+      if (lock) { return; }
+      lock = true;
+      go(cur + (e.deltaY > 0 ? 1 : -1));
+      setTimeout(() => { lock = false; }, 850);
+    };
+    const onKey = (e) => {
+      if (!dyn() || inForm(e.target) || e.altKey || e.ctrlKey || e.metaKey) { return; }
+      const k = e.key;
+      if (k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { e.preventDefault(); go(cur + 1); }
+      else if (k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey)) { e.preventDefault(); go(cur - 1); }
+      else if (k === 'Home') { e.preventDefault(); go(0); }
+      else if (k === 'End') { e.preventDefault(); go(secs().length - 1); }
+    };
+    const onScroll = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => { const n = nearest(); if (n !== cur) { setActive(n); } }, 80);
+    };
+    const onClick = (e) => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a) { return; }
+      const target = document.getElementById(a.getAttribute('href').slice(1));
+      const sec = target && target.closest('[data-s]');
+      if (!sec) { return; }
+      e.preventDefault();
+      go(secs().indexOf(sec));
+    };
+    const on = true;
+    doc.classList.toggle('fp-snap', on);
+    if (!on) { this.setState({ dyn: false }); }
+    syncHH();
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', syncHH);
+    document.addEventListener('click', onClick);
+    this._fp = {
+      go, setDyn,
+      stop: () => {
+        window.removeEventListener('wheel', onWheel);
+        window.removeEventListener('keydown', onKey);
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', syncHH);
+        document.removeEventListener('click', onClick);
+        doc.classList.remove('fp-snap');
+      }
+    };
+  }
+  initSectionBackgrounds() {
+    const vids = Array.from(document.querySelectorAll('video[data-bgv]'));
+    if (!vids.length) { return; }
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    vids.forEach((v) => { v.muted = true; v.loop = true; v.setAttribute('playsinline', ''); });
+    // Keep every background running. Visibility based pausing is left out of this
+    // prototype because the board lives in a frame and the browser may report the
+    // lower sections as hidden, which left them frozen on the poster.
+    const kick = () => {
+      if (mq.matches) { vids.forEach((v) => v.pause()); return; }
+      vids.forEach((v) => {
+        if (v.paused) { const p = v.play(); if (p && p.catch) { p.catch(() => {}); } }
+      });
+    };
+    vids.forEach((v) => {
+      v.addEventListener('loadeddata', kick);
+      v.addEventListener('canplay', kick);
+    });
+    const gestures = ['pointerdown', 'touchstart', 'wheel', 'keydown', 'scroll'];
+    gestures.forEach((g) => window.addEventListener(g, kick, { passive: true }));
+    const timer = setInterval(kick, 1500);
+    kick();
+    this._bg = {
+      stop: () => {
+        clearInterval(timer);
+        gestures.forEach((g) => window.removeEventListener(g, kick));
+      }
+    };
+  }
+  componentDidMount() {
+    this.initFullPage();
+    this.initSectionBackgrounds();
+    const video = document.querySelector('video[data-pizza]');
+    const story = document.querySelector('[data-story]');
+    if (!video || !story) { return; }
+    video.muted = true;
+    video.loop = true;
+    video.setAttribute('playsinline', '');
+    const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let raf = 0;
+    const showEnd = () => {
+      const d = video.duration;
+      if (d && isFinite(d)) { video.currentTime = Math.max(0, d - 0.05); }
+    };
+    const start = () => {
+      if (mqReduce.matches) { video.pause(); showEnd(); return; }
+      const pr = video.play();
+      if (pr && pr.catch) { pr.catch(() => { showEnd(); }); }
+    };
+    this._pizza = { video, start, stop: () => { if (raf) { cancelAnimationFrame(raf); } } };
+    video.addEventListener('loadedmetadata', start);
+    start();
+  }
+  componentWillUnmount() {
+    if (this._fp) { this._fp.stop(); }
+    if (this._bg) { this._bg.stop(); }
+    const s = this._pizza;
+    if (!s) { return; }
+    s.stop();
+    s.video.removeEventListener('loadedmetadata', s.start);
+  }
+  renderVals() {
+    const st = this.state || {};
+    const lang = st.lang || 'fa';
+    const fa = lang === 'fa';
+
+    const FA = {
+      brand: '[نام رستوران]', navLabel: 'منوی اصلی', langLabel: 'انتخاب زبان',
+      cart: 'سبد خرید', cartCount: '۲', t1: 'خانه', t2: 'منو', t3: 'ساخت دلخواه', t4: 'رزرو میز', t5: 'حساب', login: 'ورود / ثبت‌نام',
+      kicker: 'سفارش آنلاین و رزرو میز',
+      h1: 'سفره‌ای گرم، با طعمی که می‌ماند',
+      lead: 'منوی امروز را ببینید، آنلاین سفارش بدهید یا میزتان را از همین حالا رزرو کنید.',
+      cta1: 'سفارش آنلاین', cta2: 'رزرو میز',
+      scrollHint: 'اسکرول کنید', dynLabel: 'تم پویا', dotsLabel: 'بخش‌های صفحه',
+      pizzaLabel: 'ویدیوی ساخته شدن پیتزای پپرونی، از تخته‌ی خالی تا پیتزای پخته؛ با اسکرول جلو می‌رود',
+      dishImg: 'عکس غذا', flipHint: 'برای دیدن جزئیات بزنید', go: 'شروع', arrowPath: 'M19 12H5M11 6l-6 6 6 6', ingTitle: 'مواد اصلی:', chipA: 'ارسال به آدرس', chipB: 'بیرون‌بر',
+      modesTitle: 'چطور می‌خواهید از ما غذا بخورید؟',
+      m1t: 'سفارش آنلاین', m1d: 'غذایتان را انتخاب کنید و سفارش را در چند لحظه ثبت کنید.',
+      m2t: 'رزرو میز', m2d: 'تاریخ، ساعت و تعداد نفرات را بگویید و میزتان را انتخاب کنید.',
+      m3t: 'بیرون‌بر و ارسال', m3d: 'خودتان بیایید و بگیرید، یا به آدرس شما می‌فرستیم.',
+      m4t: 'ساخت دلخواه', m4d: 'پیتزا، ساندویچ یا نوشیدنی‌ات را با مواد دلخواه خودت بساز.',
+      dishTitle: 'پیشنهاد آشپز', dishAll: 'دیدن همه منو', add: 'افزودن به سبد', currency: 'تومان',
+      howTitle: 'سفارش در سه قدم',
+      resTitle: 'امشب میز می‌خواهید؟',
+      resText: 'تاریخ، ساعت و تعداد نفرات را بگویید تا میزهای خالی را نشانتان بدهیم.',
+      resBtn: 'بررسی میز خالی',
+      footNote: 'سفارش آنلاین و رزرو میز، با هر زبانی که راحت‌ترید.',
+      fAddr: 'آدرس', fAddrV: '[آدرس رستوران]', fHours: 'ساعت کاری', fHoursV: '[ساعت کاری]',
+      fPhone: 'تماس', fPhoneV: '[شماره تماس]', fLang: 'زبان‌ها', rights: '© [نام رستوران]'
+    };
+    const EN = {
+      brand: '[Restaurant name]', navLabel: 'Main navigation', langLabel: 'Choose language',
+      cart: 'Cart', cartCount: '2', t1: 'Home', t2: 'Menu', t3: 'Build', t4: 'Reserve', t5: 'Account', login: 'Sign in / Sign up',
+      kicker: 'Online ordering & table booking',
+      h1: 'A warm table, a taste that stays',
+      lead: "See today's menu, order online, or book your table right now.",
+      cta1: 'Order online', cta2: 'Book a table',
+      scrollHint: 'Scroll', dynLabel: 'Dynamic theme', dotsLabel: 'Page sections',
+      pizzaLabel: 'Video of a pepperoni pizza being built from an empty board to a baked pizza; it advances as you scroll',
+      dishImg: 'Food photo', flipHint: 'Tap to see details', go: 'Start', arrowPath: 'M5 12h14M13 6l6 6-6 6', ingTitle: 'Main ingredients:', chipA: 'Delivery', chipB: 'Takeaway',
+      modesTitle: 'How would you like to dine with us?',
+      m1t: 'Order online', m1d: 'Pick your dishes and place your order in a few moments.',
+      m2t: 'Book a table', m2d: 'Tell us the date, time and party size, then choose your table.',
+      m3t: 'Takeaway & delivery', m3d: 'Come and collect it yourself, or we bring it to your address.',
+      m4t: 'Build your own', m4d: 'Make your own pizza, sandwich or drink from the ingredients you like.',
+      dishTitle: "Chef's picks", dishAll: 'See full menu', add: 'Add to cart', currency: 'Toman',
+      howTitle: 'Order in three steps',
+      resTitle: 'Want a table tonight?',
+      resText: 'Tell us the date, time and party size and we will show you the open tables.',
+      resBtn: 'Check open tables',
+      footNote: 'Online ordering and table booking, in whichever language suits you.',
+      fAddr: 'Address', fAddrV: '[Restaurant address]', fHours: 'Opening hours', fHoursV: '[Opening hours]',
+      fPhone: 'Phone', fPhoneV: '[Phone number]', fLang: 'Languages', rights: '© [Restaurant name]'
+    };
+
+    const bgs = [
+      'repeating-linear-gradient(135deg, rgba(243,233,220,.05) 0 12px, rgba(0,0,0,0) 12px 24px), radial-gradient(circle at 30% 30%, #6b4a2c, #2a1f16 72%)',
+      'repeating-linear-gradient(135deg, rgba(243,233,220,.05) 0 12px, rgba(0,0,0,0) 12px 24px), radial-gradient(circle at 70% 30%, #7a3f26, #2a1812 72%)',
+      'repeating-linear-gradient(135deg, rgba(243,233,220,.05) 0 12px, rgba(0,0,0,0) 12px 24px), radial-gradient(circle at 40% 70%, #4d5a2c, #1d2113 72%)',
+      'repeating-linear-gradient(135deg, rgba(243,233,220,.05) 0 12px, rgba(0,0,0,0) 12px 24px), radial-gradient(circle at 60% 60%, #6b3b2f, #261612 72%)'
+    ];
+    const dishFa = [
+      ['کباب کوبیده', 'دو سیخ کوبیده‌ی گوشت، با برنج و گوجه‌ی کبابی', '۲۸۰٬۰۰۰', 'گوشت گوسفندی و گوساله، پیاز، برنج، گوجه', '۲۵ دقیقه · ۱ نفر'],
+      ['جوجه‌کباب زعفرانی', 'مرغ ماریناد شده با زعفران، همراه برنج و سالاد شیرازی', '۲۴۰٬۰۰۰', 'سینه‌ی مرغ، زعفران، لیمو، برنج', '۲۵ دقیقه · ۱ نفر'],
+      ['قورمه‌سبزی', 'خورش سبزی معطر با گوشت و لوبیا، همراه برنج', '۲۲۰٬۰۰۰', 'سبزی تازه، گوشت، لوبیا قرمز، لیمو عمانی', '۲۰ دقیقه · ۱ نفر'],
+      ['زرشک‌پلو با مرغ', 'مرغ سرخ‌شده، زرشک و برنج زعفرانی', '۲۱۰٬۰۰۰', 'مرغ، زرشک، زعفران، برنج', '۲۰ دقیقه · ۱ نفر']
+    ];
+    const dishEn = [
+      ['Koobideh Kebab', 'Two skewers of minced meat with rice and grilled tomato', '280,000', 'Lamb and beef, onion, rice, tomato', '25 min · serves 1'],
+      ['Saffron Chicken Kebab', 'Saffron-marinated chicken with rice and Shirazi salad', '240,000', 'Chicken breast, saffron, lemon, rice', '25 min · serves 1'],
+      ['Ghormeh Sabzi', 'Fragrant herb stew with meat and beans, served with rice', '220,000', 'Fresh herbs, meat, kidney beans, dried lime', '20 min · serves 1'],
+      ['Barberry Rice with Chicken', 'Pan-fried chicken, barberries and saffron rice', '210,000', 'Chicken, barberries, saffron, rice', '20 min · serves 1']
+    ];
+    const dd = fa ? dishFa : dishEn;
+
+
+    const active = st.active || 0;
+    const dynOn = st.dyn !== false;
+    const dotLabels = fa
+      ? ['خانه', 'شیوه‌ی سفارش', 'پیشنهاد آشپز', 'مراحل سفارش', 'رزرو میز', 'تماس']
+      : ['Home', 'Ways to order', "Chef's picks", 'How it works', 'Book a table', 'Contact'];
+    const digits = (n) => fa ? String(n).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]) : String(n);
+
+    const mf = st.mflip || 0;
+    const modeVals = {};
+    [1, 2, 3, 4].forEach((n) => {
+      modeVals['m' + n + 'Cls'] = mf === n ? 'on' : '';
+      modeVals['m' + n + 'Pressed'] = mf === n ? 'true' : 'false';
+      modeVals['m' + n + 'Flip'] = () => this.setState({ mflip: mf === n ? 0 : n });
+    });
+
+    return {
+      ...modeVals,
+      active: String(active),
+      dynAttr: dynOn ? 'on' : 'off',
+      dynPressed: dynOn ? 'true' : 'false',
+      trackBg: dynOn ? '#E3A64B' : '#4a3f33',
+      knobBg: dynOn ? '#14100D' : '#F3E9DC',
+      knobPos: dynOn ? '18px' : '2px',
+      counterN: digits(active + 1),
+      counterT: digits(dotLabels.length),
+      toggleDyn: () => { if (this._fp) { this._fp.setDyn(!dynOn); } else { this.setState({ dyn: !dynOn }); } },
+      dots: dotLabels.map((label, i) => ({
+        label,
+        cur: i === active ? 'true' : 'false',
+        sz: i === active ? '12px' : '7px',
+        bg: i === active ? '#E3A64B' : 'rgba(243,233,220,.45)',
+        go: () => { if (this._fp) { this._fp.go(i); } }
+      })),
+      dir: fa ? 'rtl' : 'ltr',
+      tx: fa ? FA : EN,
+      dispFont: fa ? "'B Nazanin','Nazanin','Noto Naskh Arabic',serif" : "'Cormorant Garamond', serif",
+      h1Weight: fa ? 700 : 600,
+      h1Size: fa ? 'clamp(40px, 5.4vw, 68px)' : 'clamp(46px, 6.4vw, 84px)',
+      h1Lh: fa ? 1.5 : 1.05,
+      h2Lh: fa ? 1.5 : 1.15,
+      faBg: fa ? '#E3A64B' : 'transparent', faFg: fa ? '#1A120A' : '#D9CBB8',
+      enBg: fa ? 'transparent' : '#E3A64B', enFg: fa ? '#D9CBB8' : '#1A120A',
+      setFa: () => this.setState({ lang: 'fa' }),
+      setEn: () => this.setState({ lang: 'en' }),
+      nav: fa
+        ? [{ label: 'خانه', href: 'Main.dc.html' }, { label: 'منو', href: 'Menu.dc.html' }, { label: 'ساخت دلخواه', href: 'Builder.dc.html' }, { label: 'رزرو میز', href: 'Reserve.dc.html' }, { label: 'درباره ما', href: '#how' }, { label: 'تماس', href: '#contact' }]
+        : [{ label: 'Home', href: 'Main.dc.html' }, { label: 'Menu', href: 'Menu.dc.html' }, { label: 'Build your own', href: 'Builder.dc.html' }, { label: 'Reserve', href: 'Reserve.dc.html' }, { label: 'About', href: '#how' }, { label: 'Contact', href: '#contact' }],
+      tags: fa
+        ? [{ label: 'بیرون‌بر' }, { label: 'ارسال به آدرس' }, { label: 'پرداخت در محل یا آنلاین' }]
+        : [{ label: 'Takeaway' }, { label: 'Delivery' }, { label: 'Pay on arrival or online' }],
+      dishes: dd.map((x, i) => ({
+        name: x[0], desc: x[1], price: x[2], ing: x[3], meta: x[4], bg: bgs[i], i: i + 1,
+        cls: st.flip === i + 1 ? 'on' : '',
+        pressed: st.flip === i + 1 ? 'true' : 'false',
+        toggle: () => this.setState({ flip: st.flip === i + 1 ? 0 : i + 1 })
+      })),
+      steps: (fa
+        ? [
+            { n: '۱', title: 'غذایتان را انتخاب کنید', text: 'از منوی دسته‌بندی‌شده، هر چه دوست دارید را به سبد اضافه کنید.' },
+            { n: '۲', title: 'بیرون‌بر یا ارسال به آدرس', text: 'خودتان بگیرید یا آدرستان را از دفترچه‌ی آدرس انتخاب کنید.' },
+            { n: '۳', title: 'پرداخت در محل یا آنلاین', text: 'هر روشی که راحت‌ترید؛ وضعیت سفارش را زنده دنبال کنید.' }
+          ]
+        : [
+            { n: '1', title: 'Choose your dishes', text: 'Browse the categorised menu and add whatever you like to your cart.' },
+            { n: '2', title: 'Takeaway or delivery', text: 'Collect it yourself, or pick an address from your address book.' },
+            { n: '3', title: 'Pay on arrival or online', text: 'Whichever suits you, and follow your order status live.' }
+          ]).map((s, i) => ({ ...s, i: i + 1 })),
+      fields: fa
+        ? [{ label: 'تاریخ', ph: 'انتخاب تاریخ' }, { label: 'ساعت', ph: 'انتخاب ساعت' }, { label: 'تعداد نفرات', ph: 'مثلاً ۴ نفر' }]
+        : [{ label: 'Date', ph: 'Choose a date' }, { label: 'Time', ph: 'Choose a time' }, { label: 'Guests', ph: 'e.g. 4 guests' }],
+      langs: [
+        { label: 'فارسی', dir: 'rtl' }, { label: 'English', dir: 'ltr' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+/* Menu management: thumbnails, photo box and the form groups. */
+
+.menu-thumb-cell {
+  inline-size: 4.5rem;
+}
+
+.menu-thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--color-raised);
+  color: var(--color-muted);
+}
+
+.menu-thumb img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.fieldset-reset {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.photo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  align-items: flex-start;
+}
+
+.photo__preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 10rem;
+  block-size: 10rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--color-raised);
+  color: var(--color-muted);
+}
+
+.photo__preview img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.photo .stack {
+  flex: 1;
+  min-inline-size: 14rem;
+}
+
+@media (width <= 48rem) {
+  .menu-thumb-cell {
+    inline-size: auto;
+  }
+}

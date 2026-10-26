@@ -1,0 +1,36 @@
+{#- Round dish card with a flip to the details. Import with context:
+    {% import "macros/dish.html" as dish_cards with context %}
+    Parameters: dish (a DishView), position (0-based, picks the placeholder gradient). -#}
+{% import "macros/icons.html" as icons %}
+
+{% macro dish_card(dish, position=0) %}
+<div class="dish-card" data-dish-card data-category="{{ dish.category_slug }}">
+  <button type="button" class="dish-card__flip" aria-pressed="false" aria-label="{{ t('dish.details', name=dish.name) }}">
+    <span class="dish-card__inner">
+      <span class="dish-card__face dish-card__front" style="--dish-fallback: var(--dish-gradient-{{ position % 4 + 1 }})">
+        {% if dish.image_path %}
+        <img class="dish-card__photo" src="{{ url_for('static', filename=dish.image_path) }}" alt="" loading="lazy" decoding="async">
+        {% else %}
+        <span class="dish-card__chip">{{ t("dish.photo") }}</span>
+        {% endif %}
+        <span class="dish-card__hint">{{ icons.icon("flip", 16) }}</span>
+      </span>
+      <span class="dish-card__face dish-card__back">
+        <span class="dish-card__back-title">{{ dish.name }}</span>
+        {% if dish.description %}<span class="dish-card__back-text">{{ dish.description }}</span>{% endif %}
+        {% if dish.ingredients %}<span class="dish-card__ingredients"><b>{{ t("dish.ingredients") }}</b> {{ dish.ingredients }}</span>{% endif %}
+        {% if dish.serving_note %}<span class="dish-card__note">{{ dish.serving_note }}</span>{% endif %}
+      </span>
+    </span>
+  </button>
+  <span class="dish-card__name" aria-hidden="true">{{ dish.name }}</span>
+  <span class="dish-card__buy">
+    <span class="dish-card__price"><bdi>{{ dish.price|number }}</bdi> <small>{{ t("price.currency") }}</small></span>
+    {% if dish.is_in_stock %}
+    <button type="button" class="dish-card__add" data-add-dish="{{ dish.id }}" aria-label="{{ t('dish.add', name=dish.name) }}">{{ icons.icon("plus", 18) }}</button>
+    {% else %}
+    <span class="dish-card__sold-out">{{ t("dish.sold_out") }}</span>
+    {% endif %}
+  </span>
+</div>
+{% endmacro %}

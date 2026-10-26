@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% import "macros/ui.html" as ui %}
+
+{% block title %}{{ t("order.number", number=order.number) }} · {{ brand_name }}{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/order.css') }}">
+{% endblock %}
+
+{% block body_class %}page-order{% endblock %}
+
+{#- Parameters: `order`, `timeline` (statuses in order), `is_final`. The page script keeps
+    the timeline and the headline in step with the server (stream, then polling). -#}
+{% block content %}
+<div class="order-page" data-order-tracker data-token="{{ order.public_token }}" data-status="{{ order.status.value }}">
+  <p class="order-page__kicker" data-reveal>{{ t("order.thanks") }}</p>
+  <h1 class="order-page__title" data-reveal>{{ t("order.number", number=order.number|number) }}</h1>
+  <p class="order-page__status" data-status-label aria-live="polite">{{ t("order.status." ~ order.status.value) }}</p>
+  <p class="order-page__live" data-live-note{% if is_final %} hidden{% endif %}>{{ t("order.live") }}</p>
+
+  <ol class="timeline" data-timeline>
+    {% set current_index = timeline.index(order.status) if order.status in timeline else -1 %}
+    {% for step in timeline %}
+    <li class="timeline__step{% if loop.index0 < current_index %} is-done{% elif loop.index0 == current_index %} is-current{% endif %}" data-step="{{ step.value }}">
+      <span class="timeline__dot"></span>
+      <span class="timeline__label">{{ t("order.status." ~ step.value) }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="order-page__cancelled" data-cancelled{% if order.status.value != "cancelled" %} hidden{% endif %}>{{ t("order.cancelled") }}</p>
+
+  <div class="order-card">
+    <h2 class="order-card__title">{{ t("order.items") }}</h2>
+    <ul class="summary-lines">
+      {% for item in order.items %}
+      <li class="summary-lines__item">
+        <span class="summary-lines__name">{{ item.name_in(language.code) }} <span class="summary-lines__qty">× <bdi>{{ item.quantity|number }}</bdi></span></span>
+        <span><bdi>{{ item.line_total|number }}</bdi></span>
+      </li>
+      {% endfor %}
+    </ul>
+    <dl class="summary-totals">
+      <div><dt>{{ t("cart.subtotal") }}</dt><dd><bdi>{{ order.subtotal|number }}</bdi></dd></div>
+      {% if order.delivery_fee %}<div><dt>{{ t("cart.delivery_fee") }}</dt><dd><bdi>{{ order.delivery_fee|number }}</bdi></dd></div>{% endif %}
+      <div class="summary-totals__total"><dt>{{ t("cart.total") }}</dt><dd><bdi>{{ order.total|number }}</bdi> <small>{{ t("price.currency") }}</small></dd></div>
+    </dl>
+    <dl class="order-card__facts">
+      <div><dt>{{ t("order.fulfillment") }}</dt><dd>{{ t("checkout." ~ order.fulfillment.value) }}</dd></div>
+      {% if order.fulfillment == fulfillment_delivery %}<div><dt>{{ t("order.address") }}</dt><dd>{{ order.delivery_address }}</dd></div>{% endif %}
+      <div><dt>{{ t("order.payment") }}</dt><dd>{{ t("checkout.pay_on_site") }}</dd></div>
+      <div><dt>{{ t("order.placed_at") }}</dt><dd>{{ order.created_at|jdatetime }}</dd></div>
+    </dl>
+  </div>
+
+  <div class="order-page__actions">
+    {{ ui.button_link(url_for("public.menu"), t("order.back_to_menu"), "ghost") }}
+    {% if demo_mode and not is_final %}
+    <form method="post" action="{{ url_for('public.demo_advance_order', public_token=order.public_token) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn--primary" type="submit">{{ t("order.demo_advance") }}</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

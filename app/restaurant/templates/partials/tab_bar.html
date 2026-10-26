@@ -1,0 +1,10 @@
+{#- Bottom tab bar, shown on phones only. No parameters. -#}
+{% import "macros/icons.html" as icons %}
+<nav class="tab-bar" aria-label="{{ t('nav.label') }}">
+  {% for item in navigation_items() if item.in_tab_bar %}
+  <a class="tab-bar__link" href="{{ url_for(item.endpoint) }}"{% if is_current_page(item.endpoint) %} aria-current="page"{% endif %}>
+    {{ icons.icon(item.icon, 22) }}
+    <span>{{ t(item.text_key) }}</span>
+  </a>
+  {% endfor %}
+</nav>

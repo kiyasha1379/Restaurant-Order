@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+{% import "macros/icons.html" as icons %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.DASH %}
+
+{% block title %}{{ t("admin.dash.title") }}{% endblock %}
+{% block heading %}{{ t("admin.dash.title") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/dashboard.css') }}">{% endblock %}
+
+{% block content %}
+<section class="grid grid--kpi" aria-label="{{ t('admin.dash.orders_today') }}">
+  <div class="card kpi"><span class="kpi__label">{{ t("admin.dash.orders_today") }}</span><span class="kpi__value">{{ data.orders_today|number }}</span></div>
+  {% if show_money %}
+  <div class="card kpi"><span class="kpi__label">{{ t("admin.dash.sales_today") }}</span><span class="kpi__value"><bdi>{{ data.sales_today|number }}</bdi> <span class="kpi__unit">{{ t("price.currency") }}</span></span></div>
+  <div class="card kpi"><span class="kpi__label">{{ t("admin.dash.average") }}</span><span class="kpi__value"><bdi>{{ data.average_order|number }}</bdi> <span class="kpi__unit">{{ t("price.currency") }}</span></span></div>
+  {% endif %}
+  <div class="card kpi"><span class="kpi__label">{{ t("admin.dash.in_progress") }}</span><span class="kpi__value">{{ data.in_progress|number }}</span></div>
+</section>
+
+<div class="grid grid--two">
+  <section class="card">
+    <h2 class="card__title">{{ t("admin.dash.busy_hours") }}</h2>
+    {% if data.busiest_hour_count %}
+    <ol class="bars" role="img" aria-label="{{ t('admin.dash.busy_hours') }}">
+      {% for hour in data.visible_hours %}
+      {% set count = data.busy_hours[hour] %}
+      <li class="bars__item" title="{{ hour|number }} — {{ count|number }}">
+        <span class="bars__bar" style="--share: {{ count * 100 // data.busiest_hour_count }}"></span>
+        <span class="bars__hour"><bdi>{{ hour|number }}</bdi></span>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p class="empty">{{ t("admin.dash.busy_hours_empty") }}</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2 class="card__title">{{ t("admin.dash.alerts") }}</h2>
+    {% if data.alert_count %}
+    <ul class="alerts">
+      {% if data.waiting_orders %}<li class="alerts__item">{{ icons.icon("alert", 18) }}<span>{{ t("admin.dash.alert.waiting", count=data.waiting_orders|number) }}</span>{% if access.allows(keys.ORDERS) %}<a href="{{ url_for('admin.orders') }}">{{ t("admin.dash.open_orders") }}</a>{% endif %}</li>{% endif %}
+      {% if data.out_of_stock_dishes %}<li class="alerts__item">{{ icons.icon("alert", 18) }}<span>{{ t("admin.dash.alert.stock", count=data.out_of_stock_dishes|number) }}</span>{% if access.allows(keys.MENU) %}<a href="{{ url_for('admin.menu') }}">{{ t("admin.nav.menu") }}</a>{% endif %}</li>{% endif %}
+      {% if data.dishes_missing_english %}<li class="alerts__item">{{ icons.icon("alert", 18) }}<span>{{ t("admin.dash.alert.dishes_en", count=data.dishes_missing_english|number) }}</span>{% if access.allows(keys.LANGUAGES) %}<a href="{{ url_for('admin.languages') }}">{{ t("admin.nav.languages") }}</a>{% endif %}</li>{% endif %}
+      {% if data.texts_missing_english %}<li class="alerts__item">{{ icons.icon("alert", 18) }}<span>{{ t("admin.dash.alert.texts_en", count=data.texts_missing_english|number) }}</span>{% if access.allows(keys.LANGUAGES) %}<a href="{{ url_for('admin.languages') }}">{{ t("admin.nav.languages") }}</a>{% endif %}</li>{% endif %}
+    </ul>
+    {% else %}
+    <p class="empty">{{ icons.icon("check", 22) }}<br>{{ t("admin.dash.alerts_none") }}</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="card">
+  <h2 class="card__title">{{ t("admin.dash.by_status") }}</h2>
+  <ul class="status-list">
+    {% for status in statuses %}
+    <li class="status-list__item">{{ ui.status_badge(status) }}<span class="status-list__count">{{ data.orders_by_status.get(status, 0)|number }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

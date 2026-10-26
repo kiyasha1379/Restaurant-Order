@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>راهنمای سبک و حرکت</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap">
+<style>
+body{margin:0;background:#14100D}
+@keyframes fill{0%{width:8%}60%{width:66%}100%{width:66%}}
+@media (prefers-reduced-motion: reduce){.fillbar{animation:none}}
+</style>
+</helmet>
+<div style="width: 1280px; box-sizing: border-box; padding: 64px; background: #14100D; color: #F3E9DC; font-family: 'Vazirmatn', system-ui, sans-serif; line-height: 1.7; display: flex; flex-direction: column; gap: 64px">
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-family: 'B Nazanin','Nazanin','Noto Naskh Arabic',serif; font-weight: 700; font-size: 56px; line-height: 1.5">راهنمای سبک و حرکت</h1>
+<p style="margin: 0; font-size: 18px; color: #BCAA95">تیره و گرم؛ فارسی راست‌به‌چپ و بقیه‌ی زبان‌ها بسته به جهتشان، با یک ساختار.</p>
+</div>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 500; color: #E3A64B; letter-spacing: .04em">رنگ‌ها</h2>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px">
+<sc-for list="{{swatches}}" as="s" hint-placeholder-count="8">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="height: 88px; border-radius: 16px; background: {{s.bg}}; border: 1px solid rgba(243,233,220,.14)"></div>
+<div>
+<div style="font-size: 15px; font-weight: 500">{{s.name}}</div>
+<div dir="ltr" style="font-size: 13px; color: #BCAA95; text-align: start; unicode-bidi: isolate">{{s.hex}}</div>
+<div style="font-size: 13px; color: #A99882">{{s.use}}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 500; color: #E3A64B; letter-spacing: .04em">حروف</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+<div style="padding: 28px; border-radius: 20px; background: #1E1814; border: 1px solid rgba(243,233,220,.10); display: flex; flex-direction: column; gap: 14px">
+<div style="font-family: 'B Nazanin','Nazanin','Noto Naskh Arabic',serif; font-weight: 700; font-size: 52px; line-height: 1.5">سفره‌ای گرم</div>
+<div style="font-size: 13px; color: #BCAA95"><span dir="ltr" style="unicode-bidi: isolate">B Nazanin</span> · عنوان‌های فارسی</div>
+</div>
+<div style="padding: 28px; border-radius: 20px; background: #1E1814; border: 1px solid rgba(243,233,220,.10); display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 17px; line-height: 2">متن، دکمه‌ها و فرم‌ها در همه‌ی زبان‌ها با یک خانواده‌ی خوانا نوشته می‌شوند.</div>
+<div style="font-size: 13px; color: #BCAA95"><span dir="ltr" style="unicode-bidi: isolate">Vazirmatn</span> · متن و رابط</div>
+</div>
+<div style="padding: 28px; border-radius: 20px; background: #1E1814; border: 1px solid rgba(243,233,220,.10); display: flex; flex-direction: column; gap: 14px">
+<div dir="ltr" style="font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 60px; line-height: 1.05; text-align: start">A warm table</div>
+<div style="font-size: 13px; color: #BCAA95"><span dir="ltr" style="unicode-bidi: isolate">Cormorant Garamond</span> · عنوان‌های انگلیسی</div>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 500; color: #E3A64B; letter-spacing: .04em">اجزا و آینه شدن جهت</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start">
+
+<div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center">
+<button type="button" style="min-height: 54px; padding: 0 30px; border: 0; border-radius: 999px; background: #E3A64B; color: #1A120A; font: inherit; font-size: 16px; font-weight: 700">دکمه‌ی اصلی</button>
+<button type="button" style="min-height: 54px; padding: 0 30px; border-radius: 999px; background: transparent; border: 1px solid rgba(243,233,220,.35); color: #F3E9DC; font: inherit; font-size: 16px; font-weight: 500">دکمه‌ی دوم</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+<span style="padding: 6px 16px; border-radius: 999px; border: 1px solid rgba(227,166,75,.4); color: #E3A64B; font-size: 14px">برچسب</span>
+<span style="padding: 10px 20px; border-radius: 999px; background: #E3A64B; color: #1A120A; font-size: 15px; font-weight: 500">دسته‌ی انتخاب‌شده</span>
+<span style="padding: 10px 20px; border-radius: 999px; border: 1px solid rgba(243,233,220,.25); font-size: 15px; font-weight: 500">دسته‌ی عادی</span>
+</div>
+<p style="margin: 0; font-size: 14px; color: #BCAA95; max-width: 420px">فاصله‌ها، تراز و جای آیکون‌ها با ویژگی‌های منطقی (ابتدا و انتها) نوشته می‌شوند، پس با عوض شدن جهت، خودشان آینه می‌شوند.</p>
+</div>
+
+<div dir="rtl" style="flex: 0 0 320px; display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 20px; background: #1E1814; border: 1px solid rgba(243,233,220,.10)">
+<div style="width: 76px; height: 76px; flex-shrink: 0; border-radius: 14px; background: repeating-linear-gradient(135deg, rgba(243,233,220,.05) 0 10px, rgba(0,0,0,0) 10px 20px), radial-gradient(circle at 30% 30%, #6b4a2c, #2a1f16 72%)"></div>
+<div style="flex: 1; min-width: 0">
+<div style="font-weight: 700">کباب کوبیده</div>
+<div style="font-size: 13px; color: #BCAA95">با برنج و گوجه‌ی کبابی</div>
+<div style="margin-top: 4px; font-weight: 700; color: #E3A64B">۲۸۰٬۰۰۰ <span style="font-size: 12px; font-weight: 400; color: #BCAA95">تومان</span></div>
+</div>
+<div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: #E3A64B; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A120A" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></div>
+</div>
+
+<div dir="ltr" style="flex: 0 0 320px; display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 20px; background: #1E1814; border: 1px solid rgba(243,233,220,.10)">
+<div style="width: 76px; height: 76px; flex-shrink: 0; border-radius: 14px; background: repeating-linear-gradient(135deg, rgba(243,233,220,.05) 0 10px, rgba(0,0,0,0) 10px 20px), radial-gradient(circle at 30% 30%, #6b4a2c, #2a1f16 72%)"></div>
+<div style="flex: 1; min-width: 0">
+<div style="font-weight: 700">Koobideh Kebab</div>
+<div style="font-size: 13px; color: #BCAA95">With rice and grilled tomato</div>
+<div style="margin-top: 4px; font-weight: 700; color: #E3A64B">280,000 <span style="font-size: 12px; font-weight: 400; color: #BCAA95">Toman</span></div>
+</div>
+<div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: #E3A64B; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A120A" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></div>
+</div>
+
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 20px">
+<h2 style="margin: 0; font-size: 14px; font-weight: 500; color: #E3A64B; letter-spacing: .04em">حرکت</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+<sc-for list="{{motions}}" as="m" hint-placeholder-count="6">
+<div style="padding: 24px; border-radius: 20px; background: #1E1814; border: 1px solid rgba(243,233,220,.10); display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 17px; font-weight: 700">{{m.title}}</div>
+<div style="font-size: 14px; color: #BCAA95; line-height: 1.9">{{m.text}}</div>
+</div>
+</sc-for>
+</div>
+<div style="padding: 24px; border-radius: 20px; background: #1E1814; border: 1px solid rgba(243,233,220,.10); display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 17px; font-weight: 700">نمونه: نوار وضعیت سفارش</div>
+<div style="height: 8px; border-radius: 4px; background: #2A2119; overflow: hidden"><div class="fillbar" style="height: 100%; border-radius: 4px; background: #E3A64B; width: 66%; animation: fill 3.6s cubic-bezier(.2,.7,.2,1) infinite"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; color: #BCAA95"><span>ثبت‌شده</span><span style="color: #E3A64B; font-weight: 700">در حال آماده‌سازی</span><span>تحویل داده‌شد</span></div>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1560}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      swatches: [
+        { name: 'زمینه', hex: '#14100D', bg: '#14100D', use: 'پس‌زمینه‌ی صفحه' },
+        { name: 'سطح کارت', hex: '#1E1814', bg: '#1E1814', use: 'کارت‌ها و پنل‌ها' },
+        { name: 'سطح بالاتر', hex: '#241C16', bg: '#241C16', use: 'چیپ‌ها و میزها' },
+        { name: 'خط‌ها', hex: 'rgba(243, 233, 220, .10)', bg: 'rgba(243,233,220,.10)', use: 'حاشیه‌ی کارت‌ها' },
+        { name: 'متن اصلی', hex: '#F3E9DC', bg: '#F3E9DC', use: 'عنوان و متن' },
+        { name: 'متن کم‌رنگ', hex: '#BCAA95', bg: '#BCAA95', use: 'توضیح‌ها و برچسب‌ها' },
+        { name: 'زعفرانی', hex: '#E3A64B', bg: '#E3A64B', use: 'تأکید، دکمه‌ی اصلی، قیمت' },
+        { name: 'اخگر', hex: '#D9683A', bg: '#D9683A', use: 'لغو و خطا' }
+      ],
+      motions: [
+        { title: 'ورود صفحه', text: 'عناصر با محو شدن و بالا آمدن ۲۴ پیکسل ظاهر می‌شوند؛ ۰٫۹ ثانیه، با فاصله‌ی ۱۰۰ میلی‌ثانیه بین هر عنصر.' },
+        { title: 'اسکرول', text: 'هر بخش هنگام رسیدن به صفحه‌ی نمایش آرام ظاهر می‌شود. اسکرول نرم است و با GSAP ScrollTrigger و Lenis ساخته می‌شود.' },
+        { title: 'کارت‌ها', text: 'با رفتن ماوس روی کارت، ۸ پیکسل بالا می‌آید و حاشیه‌اش زعفرانی می‌شود؛ ۰٫۴ ثانیه.' },
+        { title: 'افزودن به سبد', text: 'دایره‌ای کوچک از دکمه به آیکون سبد پرواز می‌کند و عدد سبد یک ضربه بزرگ می‌شود و برمی‌گردد.' },
+        { title: 'نقشه‌ی میزها', text: 'میز انتخاب‌شده با حلقه‌ی زعفرانی می‌تپد؛ میزهای پر یا کم‌ظرفیت کم‌رنگ و غیرقابل انتخاب‌اند.' },
+        { title: 'جهت و دسترس‌پذیری', text: 'جهت ورود عناصر با زبان وارونه می‌شود. اگر کاربر «کاهش حرکت» را روشن کرده باشد، همه‌ی انیمیشن‌ها خاموش می‌شوند.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

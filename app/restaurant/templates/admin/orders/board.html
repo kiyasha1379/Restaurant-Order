@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}
+{% set section_key = keys.ORDERS %}
+
+{% block title %}{{ t("admin.orders.title") }}{% endblock %}
+{% block heading %}{{ t("admin.orders.title") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/orders.css') }}">{% endblock %}
+
+{% block content %}
+{% with active = "board" %}{% include "admin/orders/_tabs.html" %}{% endwith %}
+{% if not show_money %}<p class="admin-notice admin-notice--info">{{ t("admin.orders.money_hidden") }}</p>{% endif %}
+<div class="board" data-board data-fragment-url="{{ url_for('admin.orders_board_fragment') }}" data-stream-url="{{ url_for('admin.orders_stream') }}">
+  {% include "admin/orders/_board.html" %}
+</div>
+{% endblock %}
+
+{% block page_scripts %}<script type="module" src="{{ url_for('static', filename='js/admin/orders-board.js') }}"></script>{% endblock %}

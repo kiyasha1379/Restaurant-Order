@@ -1,0 +1,63 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.ORDERS %}
+
+{% block title %}{{ t("admin.orders.tab_history") }}{% endblock %}
+{% block heading %}{{ t("admin.orders.title") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/orders.css') }}">{% endblock %}
+
+{% block content %}
+{% with active = "history" %}{% include "admin/orders/_tabs.html" %}{% endwith %}
+<section class="card">
+  <form class="toolbar" method="get" action="{{ url_for('admin.orders_history') }}">
+    <label class="field"><span class="field__label">{{ t("admin.orders.filter.status") }}</span>
+      <select class="field__control" name="status">
+        <option value="">{{ t("admin.orders.filter.any") }}</option>
+        {% for option in statuses %}<option value="{{ option.value }}"{% if option == status %} selected{% endif %}>{{ t("order.status." ~ option.value) }}</option>{% endfor %}
+      </select></label>
+    <label class="field"><span class="field__label">{{ t("admin.orders.filter.fulfillment") }}</span>
+      <select class="field__control" name="fulfillment">
+        <option value="">{{ t("admin.orders.filter.any") }}</option>
+        <option value="takeaway"{% if fulfillment and fulfillment.value == "takeaway" %} selected{% endif %}>{{ t("admin.orders.takeaway") }}</option>
+        <option value="delivery"{% if fulfillment and fulfillment.value == "delivery" %} selected{% endif %}>{{ t("admin.orders.delivery") }}</option>
+      </select></label>
+    {% if show_money %}
+    <label class="field"><span class="field__label">{{ t("admin.search") }}</span>
+      <input class="field__control" type="search" name="q" value="{{ text }}" placeholder="{{ t('admin.orders.filter.search') }}"></label>
+    {% endif %}
+    <button class="btn btn--primary toolbar__spacer" type="submit">{{ t("admin.search") }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <p class="muted">{{ t("admin.orders.results", count=result.total|number) }}</p>
+  {% if result.orders %}
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead><tr>
+        <th>{{ t("admin.orders.number") }}</th><th>{{ t("admin.orders.placed_at") }}</th>
+        {% if show_money %}<th>{{ t("admin.orders.customer") }}</th>{% endif %}
+        <th>{{ t("admin.orders.fulfillment") }}</th><th>{{ t("admin.orders.status") }}</th>
+        {% if show_money %}<th>{{ t("admin.orders.total") }}</th>{% endif %}<th></th>
+      </tr></thead>
+      <tbody>
+        {% for order in result.orders %}
+        <tr>
+          <td data-label="{{ t('admin.orders.number') }}" class="table__num">#<bdi>{{ order.number|number }}</bdi></td>
+          <td data-label="{{ t('admin.orders.placed_at') }}">{{ order.created_at|jdatetime }}</td>
+          {% if show_money %}<td data-label="{{ t('admin.orders.customer') }}">{{ order.customer_name }}</td>{% endif %}
+          <td data-label="{{ t('admin.orders.fulfillment') }}">{{ t("admin.orders." ~ order.fulfillment.value) }}</td>
+          <td data-label="{{ t('admin.orders.status') }}">{{ ui.status_badge(order.status) }}</td>
+          {% if show_money %}<td data-label="{{ t('admin.orders.total') }}" class="table__num"><bdi>{{ order.total|number }}</bdi> {{ t("price.currency") }}</td>{% endif %}
+          <td><div class="table__actions"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.order_detail', order_id=order.id) }}">{{ t("admin.orders.view") }}</a></div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ ui.pagination(result.page, result.pages, 'admin.orders_history', {'status': status.value if status else None, 'fulfillment': fulfillment.value if fulfillment else None, 'q': text or None}) }}
+  {% else %}
+  <p class="empty">{{ t("admin.orders.empty") }}</p>
+  {% endif %}
+</section>
+{% endblock %}

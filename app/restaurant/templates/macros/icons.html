@@ -1,0 +1,36 @@
+{#- Inline icons drawn with the current text colour. Import: {% import "macros/icons.html" as icons %}
+    Parameters: name (logo, cart, user, home, menu, builder, reserve, account, plus, flip, arrow, and the admin set:
+    dash, orders, languages, users, logout, close, burger, edit, trash, print, external, check, search, up, down, image, clock, alert), size in px. -#}
+{% macro icon(name, size=22) %}
+<svg class="icon icon--{{ name }}" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  {%- if name == "logo" %}<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21"/>
+  {%- elif name == "cart" %}<path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L19.5 8H6"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>
+  {%- elif name == "user" or name == "account" %}<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/>
+  {%- elif name == "home" %}<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>
+  {%- elif name == "menu" %}<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 3c-2 2-3 4.5-3 7.5 0 1.4 1 2.5 3 2.5V21"/>
+  {%- elif name == "builder" %}<path d="M3 5c6-3 12-3 18 0L12 21z"/><circle cx="10" cy="9" r="1"/><circle cx="14" cy="11" r="1"/>
+  {%- elif name == "reserve" %}<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>
+  {%- elif name == "plus" %}<path d="M12 5v14M5 12h14" stroke-width="2.4"/>
+  {%- elif name == "flip" %}<path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4.5h-4.5"/>
+  {%- elif name == "arrow" %}<path d="M5 12h14M13 6l6 6-6 6" class="icon__arrow"/>
+  {%- elif name == "dash" %}<rect x="3.5" y="3.5" width="7" height="8" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="5" rx="1.6"/><rect x="13.5" y="11.5" width="7" height="9" rx="1.6"/><rect x="3.5" y="14.5" width="7" height="6" rx="1.6"/>
+  {%- elif name == "orders" %}<rect x="5" y="3.5" width="14" height="17" rx="2.4"/><path d="M9 8.5h6M9 12.5h6M9 16.5h3.5"/>
+  {%- elif name == "languages" %}<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 3.6 5.3 3.6 8.5S14.6 18.100 12 20.500C9.400 18.100 8.400 15.200 8.400 12S9.400 5.900 12 3.500z"/>
+  {%- elif name == "users" %}<circle cx="9" cy="8.5" r="3.3"/><path d="M2.800 19.500c.7-3.300 3.100-5 6.200-5s5.500 1.700 6.200 5M16 5.600a3.300 3.300 0 0 1 0 5.800M18 14.800c1.800.7 2.900 2.200 3.300 4.700"/>
+  {%- elif name == "logout" %}<path d="M14 4.500H7.500a1.500 1.500 0 0 0-1.500 1.500v12a1.500 1.500 0 0 0 1.500 1.500H14M10 12h10M17 8.500l3.500 3.500-3.500 3.500"/>
+  {%- elif name == "close" %}<path d="M6 6l12 12M18 6L6 18" stroke-width="2"/>
+  {%- elif name == "burger" %}<path d="M4 7h16M4 12h16M4 17h16" stroke-width="2"/>
+  {%- elif name == "edit" %}<path d="M4 20h4L19 9a2.100 2.100 0 0 0-3-3L5 17z"/><path d="M14.500 7.500l3 3"/>
+  {%- elif name == "trash" %}<path d="M4.500 7h15M9.500 7V4.500h5V7M6.500 7l.8 12.500h9.400l.8-12.500M10 11v5.500M14 11v5.500"/>
+  {%- elif name == "print" %}<path d="M7 9V3.500h10V9"/><rect x="3.500" y="9" width="17" height="8" rx="2"/><rect x="7" y="14" width="10" height="6.500" rx="1"/>
+  {%- elif name == "external" %}<path d="M13.500 4.500H19.500V10.500M19.500 4.500L11 13M17 14v4.500a1.500 1.500 0 0 1-1.500 1.500h-10A1.500 1.500 0 0 1 4 18.500v-10A1.500 1.500 0 0 1 5.500 7H10"/>
+  {%- elif name == "check" %}<path d="M5 12.500l4.500 4.500L19 7.500" stroke-width="2.200"/>
+  {%- elif name == "search" %}<circle cx="11" cy="11" r="6.500"/><path d="M16 16l4.500 4.500"/>
+  {%- elif name == "up" %}<path d="M6 14.500l6-6 6 6" stroke-width="2"/>
+  {%- elif name == "down" %}<path d="M6 9.500l6 6 6-6" stroke-width="2"/>
+  {%- elif name == "image" %}<rect x="3.500" y="4.500" width="17" height="15" rx="2.500"/><circle cx="9" cy="10" r="1.800"/><path d="M4 17l5-4.500 3.500 3 3-2.500 4.500 4"/>
+  {%- elif name == "clock" %}<circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/>
+  {%- elif name == "alert" %}<path d="M12 4l9 15.500H3z"/><path d="M12 10v4.500M12 17.500v.1"/>
+  {%- endif %}
+</svg>
+{% endmacro %}

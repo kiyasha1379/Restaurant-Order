@@ -1,0 +1,18 @@
+{#- Shared layout of the error pages. A child template sets `error_code` ("404" or "500"). -#}
+{% extends "base.html" %}
+{% import "macros/ui.html" as ui %}
+
+{% block title %}{{ t("error." ~ error_code ~ ".title") }} · {{ brand_name }}{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/error.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="error-page">
+  <p class="error-page__code"><bdi dir="ltr">{{ error_code }}</bdi></p>
+  <h1 class="error-page__title">{{ t("error." ~ error_code ~ ".title") }}</h1>
+  <p class="error-page__text">{{ t("error." ~ error_code ~ ".text") }}</p>
+  {{ ui.button_link(url_for("public.home"), t("error.back_home")) }}
+</section>
+{% endblock %}

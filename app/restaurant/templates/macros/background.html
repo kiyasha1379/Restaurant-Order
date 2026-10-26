@@ -1,0 +1,37 @@
+{#- Video/poster backgrounds. Import with context:
+    {% import "macros/background.html" as backgrounds with context %}
+    The fallback chain is video, then poster, then the dark gradient from CSS, so a missing
+    file never leaves a blank area. The video file is only fetched when the area is on screen
+    (js/modules/lazy-video.js), never up front. -#}
+
+{#- Full-area backdrop for a section or page. Parameters: key (a `backgrounds.key`). -#}
+{% macro backdrop(key) %}
+{% set background = find_background(key) %}
+<div class="bg" data-lazy-video data-mobile-mode="{{ background.mobile_mode.value if background else 'poster_only' }}" style="--bg-dim: {{ background.dim if background else 0.45 }}" aria-hidden="true">
+  {% if background and background.poster_path %}
+  <img class="bg__poster" src="{{ url_for('static', filename=background.poster_path) }}" alt="" loading="lazy" decoding="async">
+  {% endif %}
+  {% if background and background.video_path %}
+  <video class="bg__video" data-src="{{ url_for('static', filename=background.video_path) }}" muted loop playsinline preload="none"></video>
+  {% endif %}
+  <span class="bg__shade"></span>
+</div>
+{% endmacro %}
+
+{#- A framed video that is content, not a backdrop. Parameters: key, label (text for screen readers). -#}
+{% macro framed_video(key, label) %}
+{% set background = find_background(key) %}
+<figure class="framed-video" data-lazy-video data-mobile-mode="{{ background.mobile_mode.value if background else 'poster_only' }}" role="img" aria-label="{{ label }}">
+  <span class="framed-video__glow"></span>
+  <span class="framed-video__frame">
+    {% if background and background.poster_path %}
+    <img class="bg__poster" src="{{ url_for('static', filename=background.poster_path) }}" alt="" loading="lazy" decoding="async">
+    {% endif %}
+    {% if background and background.video_path %}
+    <video class="bg__video" data-src="{{ url_for('static', filename=background.video_path) }}" muted loop playsinline preload="none"></video>
+    {% endif %}
+    <span class="framed-video__shade"></span>
+  </span>
+  {{ caller() if caller else "" }}
+</figure>
+{% endmacro %}

@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set bare = true %}
+
+{% block title %}{{ t("admin.login.title") }}{% endblock %}
+
+{% block bare_content %}
+<div class="login">
+  <section class="card login__card">
+    <div class="login__brand">{{ icons.icon("logo", 34) }}<strong>{{ brand_name }}</strong></div>
+    <h1 class="login__title">{{ t("admin.login.title") }}</h1>
+    {% for link in language_links() %}<p class="muted"><a href="{{ link.url }}" lang="{{ link.code }}">{{ link.name }}</a></p>{% endfor %}
+    {% with notices = get_flashed_messages(with_categories=true) %}
+    {% for category, message in notices %}<p class="admin-notice admin-notice--{{ category }}" role="status">{{ message }}</p>{% endfor %}
+    {% endwith %}
+    {% if failure %}<p class="admin-notice admin-notice--error" role="alert">{{ failure }}</p>
+    {% elif form.errors %}<p class="admin-notice admin-notice--error" role="alert">{{ t("admin.login.error.fields") }}</p>{% endif %}
+    <form class="form" method="post" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="field">
+        <label class="field__label" for="{{ form.email.id }}">{{ t("admin.login.email") }}</label>
+        {{ form.email(class="field__control", type="email", autocomplete="username", dir="ltr", autofocus=true) }}
+      </div>
+      <div class="field">
+        <label class="field__label" for="{{ form.password.id }}">{{ t("admin.login.password") }}</label>
+        {{ form.password(class="field__control", autocomplete="current-password", dir="ltr") }}
+      </div>
+      <button class="btn btn--primary" type="submit">{{ t("admin.login.submit") }}</button>
+    </form>
+    {% if demo_mode %}<p class="muted">{{ t("admin.login.demo_hint") }}</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

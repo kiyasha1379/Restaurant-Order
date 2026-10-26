@@ -1,0 +1,22 @@
+/* Demo bar: thin strip shown on every page while DEMO_MODE is on. */
+
+.demo-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-raised);
+  border-block-end: 1px solid var(--color-line);
+  color: var(--color-muted);
+  font-size: var(--font-size-small);
+}
+
+.demo-bar__badge {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}

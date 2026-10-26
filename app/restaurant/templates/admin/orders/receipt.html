@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="{{ language.code }}" dir="{{ language.direction }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>{{ t("admin.orders.receipt") }} #{{ order.number|number }} · {{ brand_name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/receipt.css') }}">
+</head>
+<body>
+  <main class="slip">
+    <header class="slip__head">
+      <h1 class="slip__brand">{{ brand_name }}</h1>
+      <p>{{ t("admin.orders.order_title", number=order.number|number) }}</p>
+      <p>{{ order.created_at|jdatetime }}</p>
+      <p>{{ t("admin.orders." ~ order.fulfillment.value) }}</p>
+    </header>
+    <ul class="slip__lines">
+      {% for item in order.items %}
+      <li>
+        <span><bdi>{{ item.quantity|number }}</bdi>× {{ item.name_in(language.code) }}</span>
+        {% if show_money %}<span><bdi>{{ item.line_total|number }}</bdi></span>{% endif %}
+        {% if item.options %}<ol class="slip__options">{% for option in item.options %}<li>{{ option.name_in(language.code) }}</li>{% endfor %}</ol>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% if order.note %}<p class="slip__note">{{ t("admin.orders.note") }}: {{ order.note }}</p>{% endif %}
+    {% if show_money %}
+    <dl class="slip__totals">
+      <div><dt>{{ t("admin.orders.subtotal") }}</dt><dd><bdi>{{ order.subtotal|number }}</bdi></dd></div>
+      <div><dt>{{ t("admin.orders.delivery_fee") }}</dt><dd><bdi>{{ order.delivery_fee|number }}</bdi></dd></div>
+      <div class="slip__sum"><dt>{{ t("admin.orders.total") }}</dt><dd><bdi>{{ order.total|number }}</bdi> {{ t("price.currency") }}</dd></div>
+    </dl>
+    <p>{{ order.customer_name }} · <bdi dir="ltr">{{ order.customer_phone }}</bdi></p>
+    {% if order.delivery_address %}<p>{{ order.delivery_address }}</p>{% endif %}
+    <p>{{ t("admin.orders.payment." ~ order.payment_method.value) }}</p>
+    {% endif %}
+    <button class="slip__print" type="button" data-print>{{ t("admin.orders.print") }}</button>
+  </main>
+  <script type="module" src="{{ url_for('static', filename='js/admin/receipt.js') }}"></script>
+</body>
+</html>

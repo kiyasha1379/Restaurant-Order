@@ -1,0 +1,18 @@
+{#- Cart panel. The page script (cart.js) draws the lines from the cart API.
+    Import with context: {% import "macros/cart.html" as carts with context %}
+    Parameters: none. -#}
+{% macro cart_panel() %}
+<aside class="cart-panel" id="cart" data-cart-panel aria-label="{{ t('cart.title') }}">
+  <div class="cart-panel__head">
+    <h2 class="cart-panel__title">{{ t("cart.title") }}</h2>
+    <span class="cart-panel__count" data-cart-count><bdi>{{ cart_count|number }}</bdi></span>
+  </div>
+  <p class="cart-panel__empty" data-cart-empty{% if cart_count %} hidden{% endif %}>{{ t("cart.empty") }}</p>
+  <ul class="cart-panel__lines" data-cart-lines></ul>
+  <div class="cart-panel__total" data-cart-summary{% if not cart_count %} hidden{% endif %}>
+    <span>{{ t("cart.total") }}</span>
+    <span><bdi data-cart-total></bdi> <small>{{ t("price.currency") }}</small></span>
+  </div>
+  <a class="btn btn--primary cart-panel__checkout" href="{{ url_for('public.checkout') }}" data-cart-checkout{% if not cart_count %} hidden{% endif %}>{{ t("cart.checkout") }}</a>
+</aside>
+{% endmacro %}

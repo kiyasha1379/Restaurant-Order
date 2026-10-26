@@ -1,0 +1,11 @@
+{#- The four board columns. Rendered inside the page and again by the live-refresh fragment. -#}
+{% import "admin/orders/_card.html" as cards with context %}
+{% for column, orders in board.columns %}
+<section class="board__column board__column--{{ column.key }}" aria-labelledby="board-{{ column.key }}">
+  <h2 class="board__title" id="board-{{ column.key }}">{{ t("admin.orders.col." ~ column.key) }} <span class="badge">{{ orders|length|number }}</span></h2>
+  <div class="board__cards">
+    {% for order in orders %}{{ cards.order_card(order, with_actions=column.key != "done") }}
+    {% else %}<p class="board__empty">{{ t("admin.orders.col_empty") }}</p>{% endfor %}
+  </div>
+</section>
+{% endfor %}

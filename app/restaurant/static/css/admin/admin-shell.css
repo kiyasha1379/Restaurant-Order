@@ -1,0 +1,301 @@
+/* Admin shell: sidebar, top bar, page area and the phone drawer. Logical properties only. */
+
+.admin {
+  --admin-flip: 1;
+  min-block-size: 100vh;
+}
+
+html[dir="rtl"] .admin {
+  --admin-flip: -1;
+}
+
+.admin-skip:focus {
+  position: fixed;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.admin-shell {
+  display: flex;
+  min-block-size: 100vh;
+}
+
+/* ---- sidebar ---- */
+.admin-sidebar {
+  position: sticky;
+  inset-block-start: 0;
+  align-self: flex-start;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--space-4);
+  inline-size: var(--admin-sidebar-width);
+  block-size: 100vh;
+  padding: var(--space-5) var(--space-3);
+  overflow-y: auto;
+  border-inline-end: 1px solid var(--color-line);
+  background: var(--color-sidebar);
+  z-index: var(--z-admin-sidebar);
+  transition: transform 0.35s var(--motion-ease);
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-2) var(--space-3);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.admin-brand__mark {
+  display: inline-flex;
+  color: var(--color-accent);
+}
+
+.admin-brand__name {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.admin-brand__sub {
+  display: block;
+  color: var(--color-muted);
+  font-size: var(--font-size-small);
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.admin-nav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: 2.9rem;
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  text-decoration: none;
+  transition:
+    background-color var(--motion-quick),
+    color var(--motion-quick);
+}
+
+.admin-nav__link:hover {
+  background: rgb(243 233 220 / 6%);
+  color: var(--color-text);
+}
+
+.admin-nav__link[aria-current="page"] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.admin-nav__badge {
+  margin-inline-start: auto;
+  min-inline-size: 1.4rem;
+  padding-inline: 0.4rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  text-align: center;
+}
+
+.admin-sidebar__foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-block-start: auto;
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid var(--color-line);
+}
+
+.admin-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+.admin-user__avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.admin-user__text {
+  min-inline-size: 0;
+  line-height: 1.4;
+}
+
+.admin-user__name,
+.admin-user__role {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-user__role {
+  color: var(--color-muted);
+  font-size: var(--font-size-small);
+}
+
+.admin-scrim {
+  display: none;
+}
+
+/* ---- main area ---- */
+.admin-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.admin-topbar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--z-admin-topbar);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: var(--admin-topbar-height);
+  padding: var(--space-2) var(--space-6);
+  border-block-end: 1px solid var(--color-line);
+  background: rgb(20 16 13 / 90%);
+  backdrop-filter: blur(12px);
+}
+
+.admin-topbar__title {
+  font-size: 1.75rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-topbar__tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+.admin-burger {
+  display: none;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--tap-target);
+  block-size: var(--tap-target);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  inline-size: 100%;
+  max-inline-size: 80rem;
+  padding: var(--space-6);
+}
+
+.admin-notices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.admin-notice {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.admin-notice--success {
+  border-color: var(--color-ok);
+  background: var(--color-ok-soft);
+}
+
+.admin-notice--error {
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.admin-notice--info {
+  color: var(--color-muted);
+}
+
+/* ---- phones and small tablets: the sidebar becomes a drawer ---- */
+@media (width <= 60rem) {
+  .admin-sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    transform: translateX(calc(var(--admin-flip) * -100%));
+    box-shadow: var(--shadow-lift);
+  }
+
+  .admin-shell[data-open] .admin-sidebar {
+    transform: none;
+  }
+
+  .admin-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-admin-scrim);
+    background: rgb(0 0 0 / 55%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .admin-shell[data-open] .admin-scrim {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .admin-burger {
+    display: inline-flex;
+  }
+
+  .admin-topbar {
+    padding-inline: var(--space-4);
+  }
+
+  .admin-topbar__title {
+    font-size: 1.3rem;
+  }
+
+  .admin-page {
+    padding: var(--space-4);
+  }
+
+  .admin-topbar__tools .btn__label {
+    display: none;
+  }
+}

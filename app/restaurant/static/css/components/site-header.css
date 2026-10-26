@@ -1,0 +1,149 @@
+/* Site header: sticky, with brand, links, language switcher, cart pill and sign-in. */
+
+.site-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--z-header);
+  border-block-end: 1px solid var(--color-line);
+  background: var(--color-glass-strong);
+  backdrop-filter: blur(12px);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  max-inline-size: var(--content-wide);
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-5);
+}
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-inline-size: 0;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.site-header__brand .icon {
+  color: var(--color-accent);
+  flex: none;
+}
+
+.site-header__brand-name {
+  overflow: hidden;
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+}
+
+.site-header__link {
+  padding-block: var(--space-2);
+  border-block-end: 2px solid transparent;
+  color: #d9cbb8;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color var(--motion-quick);
+}
+
+.site-header__link:hover {
+  color: var(--color-text);
+}
+
+.site-header__link[aria-current="page"] {
+  border-block-end-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.site-header__cart,
+.site-header__login {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--tap-target);
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+}
+
+.site-header__cart {
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-text);
+}
+
+.site-header__login {
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.site-header__cart-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 22px;
+  block-size: 22px;
+  padding-inline: 5px;
+  border-radius: 11px;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Phones: brand, language and cart only; links move to the bottom tab bar. */
+@media (width <= 45rem) {
+  .site-header__inner {
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .site-header__brand {
+    flex: 1 1 auto;
+    gap: var(--space-2);
+  }
+
+  .site-header__brand .icon {
+    inline-size: 28px;
+    block-size: 28px;
+  }
+
+  .site-header__brand-name {
+    font-size: 1.2rem;
+  }
+
+  .site-header__nav,
+  .site-header__login,
+  .site-header__cart-label {
+    display: none;
+  }
+
+  .site-header__actions {
+    flex: none;
+    gap: var(--space-2);
+  }
+
+  .site-header__cart {
+    padding-inline: var(--space-3);
+  }
+}

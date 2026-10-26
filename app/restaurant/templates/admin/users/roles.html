@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.USERS %}
+
+{% block title %}{{ t("admin.users.tab_roles") }}{% endblock %}
+{% block heading %}{{ t("admin.nav.users") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/users.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  {% with active = "roles" %}{% include "admin/users/_tabs.html" %}{% endwith %}
+  <span class="toolbar__spacer"></span>
+  {% if access.can_edit(keys.USERS) %}<a class="btn btn--primary btn--small" href="{{ url_for('admin.role_new') }}"><span class="btn__icon">{{ icons.icon("plus", 16) }}</span>{{ t("admin.users.add_role") }}</a>{% endif %}
+</div>
+<section class="card">
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead><tr><th>{{ t("admin.users.role") }}</th><th>{{ t("admin.users.people") }}</th><th>{{ t("admin.users.access") }}</th><th></th></tr></thead>
+      <tbody>
+        {% for role in roles %}
+        <tr>
+          <td data-label="{{ t('admin.users.role') }}"><strong>{{ role.name_in(language.code) }}</strong>{% if role.is_system %} <span class="badge badge--accent">{{ t("admin.users.system") }}</span>{% endif %}</td>
+          <td data-label="{{ t('admin.users.people') }}" class="table__num">{{ role.users|length|number }}</td>
+          <td data-label="{{ t('admin.users.access') }}">{% if role.is_system %}<span class="muted">{{ t("admin.users.full_access") }}</span>{% else %}<span class="muted">{{ t("admin.users.sections_count", count=(role.grants|length)|number) }}</span>{% endif %}</td>
+          <td><div class="table__actions"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.role_edit', role_id=role.id) }}">{{ t("admin.edit") if access.can_edit(keys.USERS) and not role.is_system else t("admin.orders.view") }}</a></div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

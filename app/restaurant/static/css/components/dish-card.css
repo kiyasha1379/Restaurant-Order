@@ -1,0 +1,273 @@
+/* Round dish card: front shows the photo, a tap flips it to the details. */
+
+.dish-card {
+  position: relative;
+  inline-size: min(100%, 15rem);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  transition: transform 0.4s var(--motion-ease);
+}
+
+.dish-card:hover {
+  transform: translateY(-6px);
+}
+
+.dish-card__flip {
+  position: absolute;
+  inset: 0;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  perspective: 1100px;
+}
+
+.dish-card__flip:focus-visible,
+.dish-card__add:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 6px;
+}
+
+.dish-card__inner {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  transition:
+    transform var(--flip-duration) var(--motion-ease),
+    box-shadow 0.4s;
+  box-shadow:
+    0 26px 50px rgb(0 0 0 / 50%),
+    0 0 0 1px var(--color-line);
+}
+
+.dish-card:hover .dish-card__inner {
+  box-shadow:
+    0 30px 56px rgb(0 0 0 / 55%),
+    0 0 0 2px rgb(227 166 75 / 60%),
+    0 0 0 10px rgb(227 166 75 / 8%);
+}
+
+.dish-card.is-flipped .dish-card__inner {
+  transform: rotateY(180deg);
+}
+
+.dish-card__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.dish-card__front {
+  background: var(--dish-fallback, var(--dish-gradient-1));
+}
+
+.dish-card__photo {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.dish-card__chip {
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-glass);
+  color: #d9cbb8;
+  font-size: 0.75rem;
+}
+
+.dish-card__hint {
+  position: absolute;
+  inset-block-start: 9%;
+  inset-inline: 0;
+  inline-size: 30px;
+  block-size: 30px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-glass);
+  transition: transform 0.5s;
+}
+
+.dish-card:hover .dish-card__hint {
+  transform: rotate(180deg);
+}
+
+.dish-card__back {
+  gap: 0.4rem;
+  padding: 15% 13% 17%;
+  background: radial-gradient(circle at 30% 22%, #2c2118, #17110d 75%);
+  box-shadow: inset 0 0 0 2px rgb(227 166 75 / 40%);
+  text-align: center;
+  transform: rotateY(180deg);
+}
+
+.dish-card__back-title {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.dish-card__back-text {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+.dish-card__ingredients {
+  color: var(--color-accent);
+  font-size: 0.72rem;
+  line-height: 1.65;
+}
+
+.dish-card__note {
+  color: #a99882;
+  font-size: 0.7rem;
+}
+
+/* Name tag in the corner, like a speech bubble. */
+.dish-card__name {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: -12px;
+  inset-inline-start: -6px;
+  max-inline-size: 76%;
+  padding: 6px 15px;
+  border-start-start-radius: 18px;
+  border-start-end-radius: 18px;
+  border-end-end-radius: 18px;
+  border-end-start-radius: 4px;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  box-shadow: 0 10px 22px rgb(0 0 0 / 40%);
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+  pointer-events: none;
+}
+
+.dish-card.is-flipped .dish-card__name {
+  opacity: 0;
+  transform: scale(0.8) translateY(8px);
+}
+
+.dish-card__buy {
+  position: absolute;
+  z-index: 2;
+  inset-block-end: -26px;
+  inset-inline: 0;
+  inline-size: max-content;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 6px 6px 6px 6px;
+  padding-inline-start: var(--space-4);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  box-shadow: 0 14px 30px rgb(0 0 0 / 50%);
+}
+
+.dish-card__price {
+  color: var(--color-accent);
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dish-card__price small {
+  color: var(--color-muted);
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.dish-card__add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  inline-size: 42px;
+  block-size: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: transform var(--motion-quick);
+}
+
+.dish-card__add:hover {
+  transform: scale(1.08);
+}
+
+.dish-card__add:active {
+  transform: scale(0.9);
+}
+
+.dish-card__add.is-popped {
+  animation: add-pop 0.45s var(--motion-ease);
+}
+
+.dish-card__sold-out {
+  padding-inline: var(--space-3);
+  color: var(--color-muted);
+  font-size: var(--font-size-small);
+}
+
+@keyframes add-pop {
+  40% {
+    transform: scale(1.4);
+  }
+}
+
+/* Grid used by the menu and the home page's chef's picks. */
+.dish-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 4rem var(--space-5);
+  padding-block-end: var(--space-6);
+}
+
+@media (width <= 45rem) {
+  .dish-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3.6rem;
+  }
+
+  .dish-card {
+    inline-size: min(100%, 16.25rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dish-card,
+  .dish-card__inner,
+  .dish-card__name,
+  .dish-card__hint {
+    transition: none;
+  }
+}

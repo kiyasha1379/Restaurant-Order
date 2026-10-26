@@ -1,0 +1,42 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.MENU %}
+{% set editable = access.can_edit(keys.MENU) %}
+{% set action = url_for('admin.category_update', category_id=category.id) if category else url_for('admin.category_create') %}
+
+{% block title %}{{ t("admin.menu.category") }}{% endblock %}
+{% block heading %}{{ t("admin.menu.edit_category") if category else t("admin.menu.add_category") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/menu.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.categories') }}">{{ t("admin.back") }}</a></div>
+<form class="form" method="post" action="{{ action }}" novalidate>
+  {{ form.hidden_tag() }}
+  <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+    <section class="card form">
+      <div class="form__row">
+        {{ ui.form_field(form.name_fa, t("admin.menu.name") ~ " (" ~ t("admin.menu.texts_fa") ~ ")", dir="rtl", lang="fa") }}
+        {{ ui.form_field(form.name_en, t("admin.menu.name") ~ " (" ~ t("admin.menu.texts_en") ~ ")", dir="ltr", lang="en") }}
+      </div>
+      <div class="form__row">
+        {{ ui.form_field(form.slug, t("admin.menu.slug"), hint=t("admin.menu.slug_hint"), dir="ltr") }}
+        {{ ui.form_field(form.sort_order, t("admin.menu.sort_order"), inputmode="numeric", dir="ltr") }}
+      </div>
+      {{ ui.checkbox(form.is_visible, t("admin.menu.visible")) }}
+    </section>
+  </fieldset>
+  {% if editable %}
+  <div class="form__actions">
+    <button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button>
+    <a class="btn btn--ghost" href="{{ url_for('admin.categories') }}">{{ t("admin.cancel") }}</a>
+  </div>
+  {% endif %}
+</form>
+{% if category and editable %}
+<form class="form__actions" method="post" action="{{ url_for('admin.category_delete', category_id=category.id) }}" data-confirm="{{ t('admin.confirm_delete') }}">
+  {{ ui.csrf() }}
+  <button class="btn btn--danger btn--small" type="submit"><span class="btn__icon">{{ icons.icon("trash", 16) }}</span>{{ t("admin.delete") }}</button>
+</form>
+{% endif %}
+{% endblock %}

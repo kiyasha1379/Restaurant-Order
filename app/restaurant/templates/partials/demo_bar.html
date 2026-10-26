@@ -1,0 +1,7 @@
+{#- Thin "demo version" bar. Shown only when DEMO_MODE is on. No parameters. -#}
+{% if demo_mode %}
+<div class="demo-bar" role="note">
+  <span class="demo-bar__badge">DEMO</span>
+  <span class="demo-bar__text">{{ t("demo.bar") }}</span>
+</div>
+{% endif %}

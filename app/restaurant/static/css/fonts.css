@@ -1,0 +1,32 @@
+/* Self-hosted fonts. Nothing is loaded from a CDN (technical plan, section 7). */
+
+/* ---- Vazirmatn: body text and interface (both languages) ---- */
+@font-face { font-family: "Vazirmatn"; font-weight: 300; font-display: swap; src: url("../fonts/Vazirmatn-Light.woff2") format("woff2"); }
+@font-face { font-family: "Vazirmatn"; font-weight: 400; font-display: swap; src: url("../fonts/Vazirmatn-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Vazirmatn"; font-weight: 500; font-display: swap; src: url("../fonts/Vazirmatn-Medium.woff2") format("woff2"); }
+@font-face { font-family: "Vazirmatn"; font-weight: 600; font-display: swap; src: url("../fonts/Vazirmatn-SemiBold.woff2") format("woff2"); }
+@font-face { font-family: "Vazirmatn"; font-weight: 700; font-display: swap; src: url("../fonts/Vazirmatn-Bold.woff2") format("woff2"); }
+@font-face { font-family: "Vazirmatn"; font-weight: 800; font-display: swap; src: url("../fonts/Vazirmatn-ExtraBold.woff2") format("woff2"); }
+
+/* ---- Noto Naskh Arabic: free fallback for Persian headings ---- */
+@font-face { font-family: "Noto Naskh Arabic"; font-weight: 400; font-display: swap; src: url("../fonts/NotoNaskhArabic-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Noto Naskh Arabic"; font-weight: 600; font-display: swap; src: url("../fonts/NotoNaskhArabic-SemiBold.woff2") format("woff2"); }
+@font-face { font-family: "Noto Naskh Arabic"; font-weight: 700; font-display: swap; src: url("../fonts/NotoNaskhArabic-Bold.woff2") format("woff2"); }
+
+/* ---- Cormorant Garamond: English headings ---- */
+@font-face { font-family: "Cormorant Garamond"; font-weight: 500; font-display: swap; src: url("../fonts/CormorantGaramond-Medium.woff2") format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 600; font-display: swap; src: url("../fonts/CormorantGaramond-SemiBold.woff2") format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 700; font-display: swap; src: url("../fonts/CormorantGaramond-Bold.woff2") format("woff2"); }
+
+/*
+ * B Nazanin (Persian headings) is not a free font, so no file is shipped.
+ * If it is installed on the visitor's computer it is used; otherwise the
+ * heading stack in tokens.css falls back to Noto Naskh Arabic.
+ * To serve it from this site, put a licensed file at static/fonts/BNazanin.woff2
+ * and add a src: url() line to this rule.
+ */
+@font-face {
+  font-family: "B Nazanin";
+  font-display: swap;
+  src: local("B Nazanin"), local("BNazanin");
+}

@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.USERS %}
+
+{% block title %}{{ t("admin.nav.users") }}{% endblock %}
+{% block heading %}{{ t("admin.nav.users") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/users.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  {% with active = "staff" %}{% include "admin/users/_tabs.html" %}{% endwith %}
+  <span class="toolbar__spacer"></span>
+  {% if access.can_edit(keys.USERS) %}<a class="btn btn--primary btn--small" href="{{ url_for('admin.user_new') }}"><span class="btn__icon">{{ icons.icon("plus", 16) }}</span>{{ t("admin.users.add_staff") }}</a>{% endif %}
+</div>
+<section class="card">
+  {% if staff %}
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead><tr><th>{{ t("admin.users.name") }}</th><th>{{ t("admin.users.email") }}</th><th>{{ t("admin.users.roles") }}</th><th>{{ t("admin.users.last_login") }}</th><th>{{ t("admin.orders.status") }}</th><th></th></tr></thead>
+      <tbody>
+        {% for member in staff %}
+        <tr>
+          <td data-label="{{ t('admin.users.name') }}"><strong>{{ member.display_name }}</strong></td>
+          <td data-label="{{ t('admin.users.email') }}"><bdi dir="ltr">{{ member.email }}</bdi></td>
+          <td data-label="{{ t('admin.users.roles') }}">{% for role in member.roles %}<span class="badge">{{ role.name_in(language.code) }}</span> {% endfor %}</td>
+          <td data-label="{{ t('admin.users.last_login') }}">{% if member.last_login_at %}{{ member.last_login_at|jdatetime }}{% else %}<span class="muted">{{ t("admin.users.never") }}</span>{% endif %}</td>
+          <td data-label="{{ t('admin.orders.status') }}">{% if member.is_active %}<span class="badge badge--ok">{{ t("admin.users.active") }}</span>{% else %}<span class="badge badge--danger">{{ t("admin.users.blocked") }}</span>{% endif %}</td>
+          <td><div class="table__actions"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.user_edit', user_id=member.id) }}">{{ t("admin.edit") if access.can_edit(keys.USERS) else t("admin.orders.view") }}</a></div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">{{ t("admin.users.no_staff") }}</p>{% endif %}
+</section>
+{% endblock %}

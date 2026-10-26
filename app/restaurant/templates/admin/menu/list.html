@@ -1,0 +1,70 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.MENU %}
+
+{% block title %}{{ t("admin.menu.title") }}{% endblock %}
+{% block heading %}{{ t("admin.menu.title") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/menu.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <nav class="chips" aria-label="{{ t('admin.menu.filter') }}">
+    <a class="chip" href="{{ url_for('admin.menu') }}"{% if not category_id and not missing_english %} aria-current="true"{% endif %}>{{ t("admin.menu.all") }}</a>
+    {% for category in categories %}
+    <a class="chip" href="{{ url_for('admin.menu', category=category.id) }}"{% if category_id == category.id %} aria-current="true"{% endif %}>{{ display_name(category.translations, language.code, category.slug) }}</a>
+    {% endfor %}
+    <a class="chip" href="{{ url_for('admin.menu', missing='en') }}"{% if missing_english %} aria-current="true"{% endif %}>{{ t("admin.menu.missing_english") }}</a>
+  </nav>
+  <span class="toolbar__spacer"></span>
+  <a class="btn btn--ghost btn--small" href="{{ url_for('admin.categories') }}">{{ t("admin.menu.categories") }}</a>
+  {% if access.can_edit(keys.MENU) %}<a class="btn btn--primary btn--small" href="{{ url_for('admin.dish_new', category=category_id) }}"><span class="btn__icon">{{ icons.icon("plus", 16) }}</span>{{ t("admin.menu.add_dish") }}</a>{% endif %}
+</div>
+
+{% for category, dishes in groups %}
+<section class="card">
+  <div class="card__head">
+    <h2 class="card__title">{{ display_name(category.translations, language.code, category.slug) }}{% if not category.is_visible %} <span class="badge">{{ t("admin.menu.hidden") }}</span>{% endif %}</h2>
+    <span class="muted">{{ t("admin.menu.dish_count", count=dishes|length|number) }}</span>
+  </div>
+  {% if dishes %}
+  <div class="table-wrap">
+    <table class="table table--cards">
+      <thead><tr><th></th><th>{{ t("admin.menu.dish") }}</th><th>{{ t("admin.menu.price") }}</th><th>{{ t("admin.orders.status") }}</th><th></th></tr></thead>
+      <tbody>
+        {% for dish in dishes %}
+        {% set shown_name = display_name(dish.translations, language.code, "#" ~ dish.id) %}
+        <tr>
+          <td class="menu-thumb-cell">
+            <span class="menu-thumb">{% if dish.images %}<img src="{{ url_for('static', filename=dish.images[0].path) }}" alt="" loading="lazy" width="56" height="56">{% else %}{{ icons.icon("image", 22) }}{% endif %}</span>
+          </td>
+          <td data-label="{{ t('admin.menu.dish') }}"><strong>{{ shown_name }}</strong>
+            {% if not has_translation(dish, "en") %}<span class="badge badge--danger">{{ t("admin.menu.no_english") }}</span>{% endif %}
+            {% if dish.is_chefs_pick %}<span class="badge badge--accent">{{ t("admin.menu.chefs_pick") }}</span>{% endif %}
+          </td>
+          <td data-label="{{ t('admin.menu.price') }}" class="table__num"><bdi>{{ dish.base_price|number }}</bdi> {{ t("price.currency") }}</td>
+          <td data-label="{{ t('admin.orders.status') }}">
+            {% if dish.is_in_stock %}<span class="badge badge--ok">{{ t("admin.menu.in_stock") }}</span>{% else %}<span class="badge badge--danger">{{ t("admin.menu.sold_out") }}</span>{% endif %}
+            {% if not dish.is_visible %}<span class="badge">{{ t("admin.menu.hidden") }}</span>{% endif %}
+          </td>
+          <td>
+            <div class="table__actions">
+              {% if access.can_edit(keys.MENU) %}
+              {{ ui.post_button(url_for('admin.dish_set_stock', dish_id=dish.id), t("admin.menu.mark_sold_out") if dish.is_in_stock else t("admin.menu.mark_in_stock"), fields={"value": "0" if dish.is_in_stock else "1"}) }}
+              {{ ui.post_button(url_for('admin.dish_move', dish_id=dish.id), "", icon="up", fields={"direction": "up"}, aria=t("admin.menu.move_up")) }}
+              {{ ui.post_button(url_for('admin.dish_move', dish_id=dish.id), "", icon="down", fields={"direction": "down"}, aria=t("admin.menu.move_down")) }}
+              {% endif %}
+              <a class="btn btn--ghost btn--small" href="{{ url_for('admin.dish_edit', dish_id=dish.id) }}">{{ t("admin.edit") if access.can_edit(keys.MENU) else t("admin.orders.view") }}</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">{{ t("admin.menu.no_dishes") }}</p>{% endif %}
+</section>
+{% else %}
+<p class="empty">{{ t("admin.menu.no_dishes") }}</p>
+{% endfor %}
+{% endblock %}

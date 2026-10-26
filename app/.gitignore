@@ -1,0 +1,11 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+instance/
+.env
+# Uploaded media (backgrounds, dish photos) is data, not source.
+restaurant/static/uploads/*
+!restaurant/static/uploads/.gitkeep

@@ -1,0 +1,51 @@
+{#- Shared admin macros. Import with context: {% import "admin/macros.html" as ui with context %} -#}
+{% import "macros/icons.html" as icons %}
+
+{#- Hidden CSRF field every POST form needs. -#}
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+
+{#- A button that posts to `action` (used for small actions such as accept, cancel, delete).
+    Parameters: action (url), label, variant ("ghost", "primary" or "danger"), icon, confirm (text), small,
+    fields (hidden values) and aria (the name of an icon-only button). -#}
+{% macro post_button(action, label, variant="ghost", icon=None, confirm=None, small=True, fields=None, aria=None) %}
+<form class="inline-form" method="post" action="{{ action }}"{% if confirm %} data-confirm="{{ confirm }}"{% endif %}>
+  {{ csrf() }}
+  {% for name, value in (fields or {}).items() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+  <button class="btn btn--{{ variant }}{% if small %} btn--small{% endif %}{% if not label %} btn--icon{% endif %}" type="submit"{% if aria %} aria-label="{{ aria }}" title="{{ aria }}"{% endif %}>
+    {% if icon %}<span class="btn__icon">{{ icons.icon(icon, 16) }}</span>{% endif %}{{ label }}
+  </button>
+</form>
+{% endmacro %}
+
+{#- A labelled field from a WTForms field. Parameters: field, label, hint; extra keyword arguments
+    (dir, inputmode, rows...) go to the input. -#}
+{% macro form_field(field, label, hint=None) %}
+<div class="field{% if field.errors %} field--invalid{% endif %}">
+  <label class="field__label" for="{{ field.id }}">{{ label }}</label>
+  {{ field(class="field__control", **kwargs) }}
+  {% if hint %}<span class="muted">{{ hint }}</span>{% endif %}
+  {% for error in field.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+</div>
+{% endmacro %}
+
+{#- A checkbox from a WTForms BooleanField. -#}
+{% macro checkbox(field, label) %}
+<label class="check">{{ field() }} <span>{{ label }}</span></label>
+{% endmacro %}
+
+{#- Status badge for an order status string. -#}
+{% macro status_badge(status) %}
+<span class="badge badge--{{ status.value }}">{{ t("order.status." ~ status.value) }}</span>
+{% endmacro %}
+
+{#- Previous / next links for a page-numbered list.
+    Parameters: page, pages, endpoint (the list's endpoint) and params (a dict of the active filters). -#}
+{% macro pagination(page, pages, endpoint, params) %}
+{% if pages > 1 %}
+<nav class="pagination" aria-label="{{ t('admin.pagination') }}">
+  {% if page > 1 %}<a class="btn btn--ghost btn--small" href="{{ url_for(endpoint, page=page - 1, **params) }}">{{ t("admin.previous") }}</a>{% endif %}
+  <span class="muted">{{ page|number }} / {{ pages|number }}</span>
+  {% if page < pages %}<a class="btn btn--ghost btn--small" href="{{ url_for(endpoint, page=page + 1, **params) }}">{{ t("admin.next") }}</a>{% endif %}
+</nav>
+{% endif %}
+{% endmacro %}

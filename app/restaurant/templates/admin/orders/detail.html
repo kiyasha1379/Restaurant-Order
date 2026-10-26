@@ -1,0 +1,79 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.ORDERS %}
+
+{% block title %}{{ t("admin.orders.order_title", number=order.number|number) }}{% endblock %}
+{% block heading %}{{ t("admin.orders.order_title", number=order.number|number) }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/orders.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <a class="btn btn--ghost btn--small" href="{{ url_for('admin.orders') }}">{{ t("admin.back") }}</a>
+  <a class="btn btn--ghost btn--small" href="{{ url_for('admin.order_receipt', order_id=order.id) }}" target="_blank" rel="noopener"><span class="btn__icon">{{ icons.icon("print", 16) }}</span>{{ t("admin.orders.receipt") }}</a>
+</div>
+<div class="grid grid--two">
+  <section class="card">
+    <div class="card__head">
+      <h2 class="card__title">{{ t("admin.orders.items") }}</h2>
+      {{ ui.status_badge(order.status) }}
+    </div>
+    <ul class="lines">
+      {% for item in order.items %}
+      <li class="lines__item">
+        <div>
+          <strong><bdi>{{ item.quantity|number }}</bdi>× {{ item.name_in(language.code) }}</strong>
+          {% if item.options %}<ol class="lines__options">{% for option in item.options %}<li>{{ option.name_in(language.code) }}{% if show_money and option.price %} <span class="muted">(+<bdi>{{ option.price|number }}</bdi>)</span>{% endif %}</li>{% endfor %}</ol>{% endif %}
+        </div>
+        {% if show_money %}<span class="price"><bdi>{{ item.line_total|number }}</bdi> <small>{{ t("price.currency") }}</small></span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% if order.note %}<p class="order-card__note">{{ t("admin.orders.note") }}: {{ order.note }}</p>{% endif %}
+    {% if show_money %}
+    <dl class="totals">
+      <div><dt>{{ t("admin.orders.subtotal") }}</dt><dd class="price"><bdi>{{ order.subtotal|number }}</bdi></dd></div>
+      <div><dt>{{ t("admin.orders.delivery_fee") }}</dt><dd class="price"><bdi>{{ order.delivery_fee|number }}</bdi></dd></div>
+      <div class="totals__sum"><dt>{{ t("admin.orders.total") }}</dt><dd class="price"><bdi>{{ order.total|number }}</bdi> <small>{{ t("price.currency") }}</small></dd></div>
+    </dl>
+    {% else %}
+    <p class="muted">{{ t("admin.orders.money_hidden") }}</p>
+    {% endif %}
+  </section>
+
+  <div class="stack">
+    <section class="card">
+      <h2 class="card__title">{{ t("admin.orders.fulfillment") }}</h2>
+      <p>{{ t("admin.orders." ~ order.fulfillment.value) }} · {{ t("admin.orders.payment." ~ order.payment_method.value) }}</p>
+      <p class="muted">{{ t("admin.orders.placed_at") }}: {{ order.created_at|jdatetime }}</p>
+      {% if show_money %}
+      <h3 class="card__title">{{ t("admin.orders.customer") }}</h3>
+      <p>{{ order.customer_name }}<br><bdi dir="ltr">{{ order.customer_phone }}</bdi></p>
+      {% if order.delivery_address %}<p><span class="muted">{{ t("admin.orders.address") }}:</span> {{ order.delivery_address }}</p>{% endif %}
+      {% endif %}
+      {% if can_edit_orders %}
+      {% set target = next_status(order) %}
+      <div class="form__actions">
+        {% if target %}{{ ui.post_button(url_for('admin.order_advance', order_id=order.id), t("admin.orders.action." ~ target.value), variant="primary", small=False) }}{% endif %}
+        {% if can_cancel(order) %}{{ ui.post_button(url_for('admin.order_cancel', order_id=order.id), t("admin.orders.cancel"), variant="danger", confirm=t("admin.orders.cancel_confirm"), small=False) }}{% endif %}
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">{{ t("admin.orders.history") }}</h2>
+      <ol class="timeline">
+        {% for entry in order.status_log %}
+        <li class="timeline__item">
+          <span class="timeline__dot"></span>
+          <div>
+            <strong>{{ t("order.status." ~ entry.to_status.value) }}</strong>
+            <span class="muted">{{ entry.changed_at|jdatetime }} · {% if entry.changed_by %}{{ entry.changed_by.display_name or entry.changed_by.email }}{% else %}{{ t("admin.orders.by_system") }}{% endif %}</span>
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
+  </div>
+</div>
+{% endblock %}

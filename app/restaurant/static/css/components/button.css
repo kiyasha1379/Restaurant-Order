@@ -1,0 +1,42 @@
+/* Button: .btn with a role modifier (--primary, --ghost). */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--tap-target);
+  padding-inline: var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--motion-quick),
+    background-color var(--motion-quick),
+    border-color var(--motion-quick);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn--primary {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.btn--primary:hover {
+  background: color-mix(in srgb, var(--color-accent), white 12%);
+}
+
+.btn--ghost {
+  border-color: var(--color-line);
+  background: transparent;
+  color: var(--color-text);
+}
+
+.btn--ghost:hover {
+  background: var(--color-raised);
+}

@@ -1,0 +1,110 @@
+/*
+ * Video/poster backgrounds. The area is always painted with a dark gradient first,
+ * so a missing poster or video leaves a calm backdrop, never a blank page.
+ */
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(135deg, rgb(243 233 220 / 5%) 0 12px, transparent 12px 24px),
+    radial-gradient(circle at 30% 30%, #6b4a2c, #2a1f16 72%);
+  pointer-events: none;
+}
+
+.bg__poster,
+.bg__video {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* The video fades in over the poster once it has frames to show. */
+.bg__video {
+  opacity: 0;
+  transition: opacity 0.8s var(--motion-ease);
+}
+
+.bg__video.is-playing {
+  opacity: 1;
+}
+
+.bg__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 45%, transparent 30%, rgb(20 16 13 / 65%) 100%),
+    rgb(20 16 13 / calc(var(--bg-dim, 0.45) * 100%));
+}
+
+/* A fixed backdrop for pages that are not split into full-screen sections. */
+.page-menu .bg {
+  position: fixed;
+}
+
+/* A framed video that is content (home page showcase). */
+.framed-video {
+  position: relative;
+  inline-size: min(100%, 22rem);
+  margin: 0 auto;
+  aspect-ratio: 9 / 16;
+  max-block-size: 70vh;
+}
+
+.framed-video__glow {
+  position: absolute;
+  inset: 8% -8%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(227 166 75 / 35%), transparent 65%);
+  filter: blur(24px);
+}
+
+.framed-video__frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lift);
+}
+
+.framed-video__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgb(20 16 13 / 45%), transparent 40%);
+}
+
+.framed-video__chip {
+  position: absolute;
+  z-index: 1;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-glass-strong);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+  animation: chip-float 5s ease-in-out infinite;
+}
+
+.framed-video__chip--a {
+  inset-block-start: 12%;
+  inset-inline-end: -6%;
+}
+
+.framed-video__chip--b {
+  inset-block-end: 14%;
+  inset-inline-start: -6%;
+  animation-delay: -2.5s;
+}
+
+@keyframes chip-float {
+  50% {
+    transform: translateY(-8px);
+  }
+}

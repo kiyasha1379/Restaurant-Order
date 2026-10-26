@@ -1,0 +1,117 @@
+/* Users and roles: role checkboxes and the permission matrix. */
+
+.fieldset-reset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field__static {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--tap-target);
+}
+
+.role-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+}
+
+.role-checks ul {
+  display: contents;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.role-checks li {
+  display: inline-flex;
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft);
+}
+
+.matrix th,
+.matrix td {
+  text-align: center;
+}
+
+.matrix th:first-child,
+.matrix tbody th {
+  text-align: start;
+}
+
+.matrix__choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--tap-target);
+  min-block-size: var(--tap-target);
+  cursor: pointer;
+}
+
+.matrix__choice input {
+  inline-size: 1.2rem;
+  block-size: 1.2rem;
+  accent-color: var(--color-accent);
+}
+
+/* The level name is only shown when the columns are gone (phones). */
+.matrix__text {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (width <= 48rem) {
+  .matrix thead {
+    display: none;
+  }
+
+  .matrix tr {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-1) var(--space-2);
+    padding-block: var(--space-3);
+    border-block-end: 1px solid var(--color-line);
+  }
+
+  .matrix tbody th {
+    grid-column: 1 / -1;
+    border: 0;
+  }
+
+  .matrix td {
+    padding: 0;
+    border: 0;
+  }
+
+  .matrix__choice {
+    flex-direction: column;
+    inline-size: 100%;
+    gap: var(--space-1);
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  .matrix__text {
+    position: static;
+    inline-size: auto;
+    block-size: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+}

@@ -1,0 +1,88 @@
+{#- Admin layout. A child sets `bare` to true for pages without the sidebar (sign in) and
+    `section_key` (a PermissionKey) so the view-only notice can appear.
+    Blocks: title, heading, content, page_styles, page_scripts. -#}
+{% import "macros/icons.html" as icons %}
+{% set admin_styles = [
+    "css/fonts.css", "css/tokens.css", "css/base.css", "css/components/button.css",
+    "css/components/demo-bar.css", "css/admin/admin-shell.css", "css/admin/admin-ui.css",
+] %}
+<!doctype html>
+<html lang="{{ language.code }}" dir="{{ language.direction }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="robots" content="noindex">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}{{ t("admin.title") }}{% endblock %} · {{ brand_name }}</title>
+  {% for stylesheet in admin_styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename=stylesheet) }}">
+  {% endfor %}
+  {% block page_styles %}{% endblock %}
+</head>
+<body class="admin">
+  <a class="admin-skip u-visually-hidden" href="#admin-main">{{ t("admin.skip") }}</a>
+  {% include "partials/demo_bar.html" %}
+  {% if bare %}
+  <main id="admin-main">
+    {% block bare_content %}{% endblock %}
+  </main>
+  {% else %}
+  <div class="admin-shell" data-admin-shell>
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <a class="admin-brand" href="{{ url_for('admin.index') }}">
+        <span class="admin-brand__mark">{{ icons.icon("logo", 30) }}</span>
+        <span><span class="admin-brand__name">{{ brand_name }}</span><span class="admin-brand__sub">{{ t("admin.title") }}</span></span>
+      </a>
+      <nav class="admin-nav" aria-label="{{ t('admin.nav.label') }}">
+        {% for section in sections %}
+        <a class="admin-nav__link" href="{{ section.url }}"{% if section.active %} aria-current="page"{% endif %}>
+          {{ icons.icon(section.icon, 20) }}<span>{{ t(section.label_key) }}</span>
+          {% if section.permission == keys.ORDERS %}{% set waiting = waiting_orders_count() %}{% if waiting %}<span class="admin-nav__badge">{{ waiting|number }}</span>{% endif %}{% endif %}
+        </a>
+        {% endfor %}
+      </nav>
+      <div class="admin-sidebar__foot">
+        <div class="admin-user">
+          <span class="admin-user__avatar" aria-hidden="true">{{ (staff_user.display_name or staff_user.email or "?")[:1]|upper }}</span>
+          <span class="admin-user__text">
+            <span class="admin-user__name">{{ staff_user.display_name or staff_user.email }}</span>
+            <span class="admin-user__role">{% for role in staff_user.roles %}{{ role.name_in(language.code) }}{% if not loop.last %}، {% endif %}{% endfor %}</span>
+          </span>
+        </div>
+        <form method="post" action="{{ url_for('admin.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn--ghost btn--small" type="submit"><span class="btn__icon">{{ icons.icon("logout", 16) }}</span>{{ t("admin.logout") }}</button>
+        </form>
+      </div>
+    </aside>
+    <div class="admin-scrim" data-admin-scrim></div>
+    <div class="admin-main">
+      <header class="admin-topbar">
+        <button class="admin-burger" type="button" data-admin-burger aria-controls="admin-sidebar" aria-expanded="false" aria-label="{{ t('admin.menu_open') }}">{{ icons.icon("burger", 22) }}</button>
+        <h1 class="admin-topbar__title">{% block heading %}{{ t("admin.title") }}{% endblock %}</h1>
+        <div class="admin-topbar__tools">
+          {% for link in language_links() %}<a class="btn btn--ghost btn--small" href="{{ link.url }}" lang="{{ link.code }}">{{ link.name }}</a>{% endfor %}
+          <a class="btn btn--ghost btn--small" href="{{ url_for('public.home') }}" target="_blank" rel="noopener">{{ icons.icon("external", 16) }}<span class="btn__label">&nbsp;{{ t("admin.view_site") }}</span></a>
+        </div>
+      </header>
+      <div class="admin-page" id="admin-main">
+        {% with notices = get_flashed_messages(with_categories=true) %}
+        {% if notices %}
+        <div class="admin-notices" role="status">
+          {% for category, message in notices %}<p class="admin-notice admin-notice--{{ category }}">{{ message }}</p>{% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% if section_key and not access.can_edit(section_key) %}
+        <p class="admin-notice admin-notice--info">{{ t("admin.view_only") }}</p>
+        {% endif %}
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  <script type="module" src="{{ url_for('static', filename='js/admin/admin.js') }}"></script>
+  {% block page_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% import "macros/ui.html" as ui %}
+
+{% block title %}{{ t("checkout.title") }} · {{ brand_name }}{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/checkout.css') }}">
+{% endblock %}
+
+{% block body_class %}page-checkout{% endblock %}
+
+{#- Parameters: `form` (CheckoutForm), `priced` (PricedCart for takeaway). -#}
+{% macro field_error(field) %}
+{% for message in field.errors %}<p class="field__error" role="alert">{{ message }}</p>{% endfor %}
+{% endmacro %}
+
+{% block content %}
+<div class="checkout" data-checkout>
+  <h1 class="checkout__title" data-reveal>{{ t("checkout.title") }}</h1>
+  <div class="checkout__layout">
+    <form class="checkout__form" method="post" novalidate>
+      {{ form.csrf_token }}
+
+      <fieldset class="field-group">
+        <legend class="field-group__title">{{ t("checkout.details") }}</legend>
+        <div class="field">
+          <label class="field__label" for="customer_name">{{ t("checkout.name") }}</label>
+          <input class="field__input" id="customer_name" name="customer_name" autocomplete="name" value="{{ form.customer_name.data or '' }}" required>
+          {{ field_error(form.customer_name) }}
+        </div>
+        <div class="field">
+          <label class="field__label" for="customer_phone">{{ t("checkout.phone") }}</label>
+          <input class="field__input field__input--ltr" id="customer_phone" name="customer_phone" type="tel" inputmode="tel" autocomplete="tel" value="{{ form.customer_phone.data or '' }}" required aria-describedby="phone-hint">
+          <p class="field__hint" id="phone-hint">{{ t("checkout.phone_hint") }}</p>
+          {{ field_error(form.customer_phone) }}
+        </div>
+      </fieldset>
+
+      <fieldset class="field-group">
+        <legend class="field-group__title">{{ t("checkout.fulfillment") }}</legend>
+        <div class="choice-row">
+          {% for value, title_key, hint_key in [("takeaway", "checkout.takeaway", "checkout.takeaway_hint"), ("delivery", "checkout.delivery", "checkout.delivery_hint")] %}
+          <label class="choice">
+            <input class="choice__input" type="radio" name="fulfillment" value="{{ value }}" data-fulfillment{% if form.fulfillment.data == value %} checked{% endif %}>
+            <span class="choice__box">
+              <span class="choice__title">{{ t(title_key) }}</span>
+              <span class="choice__hint">{{ t(hint_key) }}</span>
+            </span>
+          </label>
+          {% endfor %}
+        </div>
+        {% if form.fulfillment.errors %}<p class="field__error" role="alert">{{ t("checkout.error.choice") }}</p>{% endif %}
+        <div class="field" data-address-field{% if form.fulfillment.data != "delivery" %} hidden{% endif %}>
+          <label class="field__label" for="delivery_address">{{ t("checkout.address") }}</label>
+          <textarea class="field__input" id="delivery_address" name="delivery_address" rows="3" autocomplete="street-address">{{ form.delivery_address.data or "" }}</textarea>
+          {{ field_error(form.delivery_address) }}
+        </div>
+      </fieldset>
+
+      <fieldset class="field-group">
+        <legend class="field-group__title">{{ t("checkout.payment") }}</legend>
+        <div class="choice-row">
+          <label class="choice">
+            <input class="choice__input" type="radio" name="payment_method" value="cash_on_site" checked>
+            <span class="choice__box">
+              <span class="choice__title">{{ t("checkout.pay_on_site") }}</span>
+              <span class="choice__hint">{{ t("checkout.pay_on_site_hint") }}</span>
+            </span>
+          </label>
+        </div>
+        {% if form.payment_method.errors %}<p class="field__error" role="alert">{{ t("checkout.error.choice") }}</p>{% endif %}
+        <div class="field">
+          <label class="field__label" for="note">{{ t("checkout.note") }}</label>
+          <textarea class="field__input" id="note" name="note" rows="2">{{ form.note.data or "" }}</textarea>
+          {{ field_error(form.note) }}
+        </div>
+      </fieldset>
+
+      <button class="btn btn--primary checkout__submit" type="submit">{{ t("checkout.submit") }}</button>
+    </form>
+
+    <aside class="checkout__summary" aria-label="{{ t('checkout.summary') }}">
+      <h2 class="checkout__summary-title">{{ t("checkout.summary") }}</h2>
+      <ul class="summary-lines">
+        {% for line in priced.lines %}
+        <li class="summary-lines__item">
+          <span class="summary-lines__name">{{ line.name }} <span class="summary-lines__qty">× <bdi>{{ line.quantity|number }}</bdi></span></span>
+          <span><bdi>{{ line.line_total|number }}</bdi></span>
+        </li>
+        {% endfor %}
+      </ul>
+      <dl class="summary-totals">
+        <div><dt>{{ t("cart.subtotal") }}</dt><dd><bdi data-quote-subtotal>{{ priced.subtotal|number }}</bdi></dd></div>
+        <div data-quote-fee-row hidden><dt>{{ t("cart.delivery_fee") }}</dt><dd><bdi data-quote-fee></bdi></dd></div>
+        <div class="summary-totals__total"><dt>{{ t("cart.total") }}</dt><dd><bdi data-quote-total>{{ priced.total|number }}</bdi> <small>{{ t("price.currency") }}</small></dd></div>
+      </dl>
+      <a class="checkout__edit" href="{{ url_for('public.cart') }}">{{ t("cart.view") }}</a>
+    </aside>
+  </div>
+</div>
+{% endblock %}

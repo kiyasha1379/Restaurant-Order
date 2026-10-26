@@ -1,0 +1,140 @@
+/*
+ * Shared date picker styles (BEM-like names: .dp, .dp__part, .dp__part--state).
+ * Colors come from CSS variables, so a page can re-theme the picker by setting
+ * the --dp-* variables on any parent element instead of copying the rules.
+ */
+.dp {
+  --dp-accent: #E3A64B;
+  --dp-on-accent: #1A120A;
+  --dp-ink: #F3E9DC;
+  --dp-muted: #BCAA95;
+  --dp-weekend: #D9683A;
+  --dp-surface: #1E1814;
+  --dp-line: rgba(243, 233, 220, .14);
+  box-sizing: border-box;
+  width: min(100%, 352px);
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid var(--dp-line);
+  background: var(--dp-surface);
+  color: var(--dp-ink);
+  font-family: inherit;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+}
+.dp *, .dp *::before, .dp *::after { box-sizing: border-box; }
+
+.dp .dp__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.dp .dp__title { font-size: 16px; font-weight: 700; }
+.dp .dp__nav {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--dp-line);
+  background: transparent;
+  color: var(--dp-ink);
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+.dp .dp__nav:hover { background: rgba(243, 233, 220, .08); }
+.dp .dp__nav--off { opacity: .28; cursor: not-allowed; }
+.dp .dp__nav--off:hover { background: transparent; }
+
+.dp .dp__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.dp .dp__weekday {
+  padding: 4px 0 6px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--dp-muted);
+}
+.dp .dp__day {
+  display: inline-grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--dp-ink);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, transform .2s;
+}
+.dp .dp__day:hover { background: rgba(243, 233, 220, .08); }
+.dp .dp__day:active { transform: scale(.94); }
+.dp .dp__day--friday { color: var(--dp-weekend); }
+.dp .dp__day--today { border-color: var(--dp-accent); }
+.dp .dp__day--selected,
+.dp .dp__day--selected:hover {
+  background: var(--dp-accent);
+  border-color: var(--dp-accent);
+  color: var(--dp-on-accent);
+  font-weight: 700;
+}
+.dp .dp__day--off {
+  opacity: .28;
+  cursor: not-allowed;
+}
+.dp .dp__day--off:hover { background: transparent; }
+
+.dp .dp__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--dp-line);
+  font-size: 12.5px;
+  color: var(--dp-muted);
+}
+.dp .dp__link {
+  padding: 8px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--dp-accent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Trigger button that looks like a form field and opens the picker. */
+.dp-field {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: start;
+  cursor: pointer;
+}
+
+/* Page-level overlay that centers a picker (used by the admin panel). */
+.dp-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(10, 8, 6, .62);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dp .dp__day, .dp .dp__nav { transition: none; }
+}

@@ -1,0 +1,10 @@
+{#- Links to the current page in the other languages. Shown only when another language is on.
+    No parameters: the links come from the template context. -#}
+{% set switch_links = language_switch_links() %}
+{% if switch_links %}
+<nav class="lang-switch" aria-label="{{ t('lang.switcher_label') }}">
+  {% for link in switch_links %}
+  <a class="lang-switch__link" href="{{ link.url }}" lang="{{ link.code }}" hreflang="{{ link.code }}">{{ link.name }}</a>
+  {% endfor %}
+</nav>
+{% endif %}

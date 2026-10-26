@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.LANGUAGES %}
+{% set editable = access.can_edit(keys.LANGUAGES) %}
+
+{% block title %}{{ t("admin.languages.title") }}{% endblock %}
+{% block heading %}{{ t("admin.languages.title") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/languages.css') }}">{% endblock %}
+
+{% macro meter(label, progress) %}
+<div class="meter">
+  <div class="meter__head"><span>{{ label }}</span><span class="muted"><bdi>{{ progress.done|number }}</bdi> / <bdi>{{ progress.total|number }}</bdi></span></div>
+  <div class="meter__track" role="progressbar" aria-label="{{ label }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress.percent }}"><span class="meter__fill" style="--share: {{ progress.percent }}"></span></div>
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="grid grid--two">
+  {% for status in statuses %}
+  <section class="card stack">
+    <div class="card__head">
+      <h2 class="card__title">{{ status.name }}</h2>
+      <span>
+        {% if status.is_default %}<span class="badge badge--accent">{{ t("admin.languages.default") }}</span>{% endif %}
+        <span class="badge {{ 'badge--ok' if status.is_enabled else '' }}">{{ t("admin.languages.on") if status.is_enabled else t("admin.languages.off") }}</span>
+      </span>
+    </div>
+    {{ meter(t("admin.languages.dishes"), status.dishes) }}
+    {{ meter(t("admin.languages.categories"), status.categories) }}
+    {{ meter(t("admin.languages.texts"), status.texts) }}
+  </section>
+  {% endfor %}
+</div>
+
+<section class="card">
+  <h2 class="card__title">{{ t("admin.languages.settings") }}</h2>
+  <form class="form" method="post" action="{{ url_for('admin.languages_save_settings') }}">
+    {{ ui.csrf() }}
+    <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+      <div class="stack">
+        <label class="check"><input type="checkbox" name="english_enabled" value="1"{% if statuses|selectattr("code", "equalto", "en")|first|attr("is_enabled") %} checked{% endif %}> <span>{{ t("admin.languages.english_on") }}</span></label>
+        <p class="muted">{{ t("admin.languages.english_hint") }}</p>
+        <label class="field"><span class="field__label">{{ t("admin.languages.default_language") }}</span>
+          <select class="field__control" name="default_code">
+            {% for status in statuses %}<option value="{{ status.code }}"{% if status.is_default %} selected{% endif %}>{{ status.name }}</option>{% endfor %}
+          </select></label>
+      </div>
+    </fieldset>
+    {% if editable %}<div class="form__actions"><button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button></div>{% endif %}
+  </form>
+</section>
+
+<section class="card stack">
+  <h2 class="card__title">{{ t("admin.languages.work") }}</h2>
+  <p><a class="btn btn--ghost" href="{{ url_for('admin.language_texts') }}">{{ t("admin.languages.edit_texts") }}</a>
+     {% if access.allows(keys.MENU) %}<a class="btn btn--ghost" href="{{ url_for('admin.menu', missing='en') }}">{{ t("admin.menu.missing_english") }}</a>{% endif %}</p>
+  {% if missing_english %}
+  <p>{{ t("admin.languages.missing_texts", count=missing_english|length|number) }} <a href="{{ url_for('admin.language_texts', missing='en') }}">{{ t("admin.languages.show") }}</a></p>
+  {% else %}<p class="muted">{{ t("admin.languages.nothing_missing") }}</p>{% endif %}
+</section>
+{% endblock %}

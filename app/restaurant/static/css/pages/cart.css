@@ -1,0 +1,21 @@
+/* Cart page: a single column with the cart panel. */
+
+.cart-page {
+  max-inline-size: 40rem;
+  margin-inline: auto;
+  padding-block: var(--space-7) var(--space-8);
+}
+
+.cart-page__title {
+  margin-block-end: var(--space-5);
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  line-height: 1.5;
+}
+
+.cart-page .cart-panel {
+  max-inline-size: none;
+}
+
+.cart-page__more {
+  margin-block-start: var(--space-5);
+}

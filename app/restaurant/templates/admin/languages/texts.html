@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% set section_key = keys.LANGUAGES %}
+{% set editable = access.can_edit(keys.LANGUAGES) %}
+
+{% block title %}{{ t("admin.languages.texts_title") }}{% endblock %}
+{% block heading %}{{ t("admin.languages.texts_title") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/languages.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.languages') }}">{{ t("admin.back") }}</a></div>
+<section class="card">
+  <form class="toolbar" method="get" action="{{ url_for('admin.language_texts') }}">
+    <label class="field"><span class="field__label">{{ t("admin.search") }}</span>
+      <input class="field__control" type="search" name="q" value="{{ query }}" placeholder="{{ t('admin.languages.search_hint') }}"></label>
+    <label class="field"><span class="field__label">{{ t("admin.languages.only_missing") }}</span>
+      <select class="field__control" name="missing">
+        <option value="">{{ t("admin.orders.filter.any") }}</option>
+        <option value="fa"{% if missing == "fa" %} selected{% endif %}>{{ t("admin.languages.missing_in_fa") }}</option>
+        <option value="en"{% if missing == "en" %} selected{% endif %}>{{ t("admin.languages.missing_in_en") }}</option>
+      </select></label>
+    <button class="btn btn--primary toolbar__spacer" type="submit">{{ t("admin.search") }}</button>
+  </form>
+</section>
+
+<form method="post" action="{{ url_for('admin.language_texts_save') }}" class="card form">
+  {{ ui.csrf() }}
+  <input type="hidden" name="next" value="{{ return_to }}">
+  <p class="muted">{{ t("admin.languages.texts_hint") }} · {{ t("admin.orders.results", count=page.total|number) }}</p>
+  {% if page.rows %}
+  <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+    <div class="texts">
+      {% for row in page.rows %}
+      <div class="texts__row">
+        <input type="hidden" name="keys" value="{{ row.key }}">
+        <code class="texts__key" dir="ltr">{{ row.key }}</code>
+        <label class="field"><span class="field__label">{{ t("admin.menu.texts_fa") }}</span>
+          <textarea class="field__control" name="text:fa:{{ row.key }}" rows="2" dir="rtl" lang="fa">{{ row.texts["fa"] }}</textarea></label>
+        <label class="field"><span class="field__label">{{ t("admin.menu.texts_en") }}</span>
+          <textarea class="field__control" name="text:en:{{ row.key }}" rows="2" dir="ltr" lang="en">{{ row.texts["en"] }}</textarea></label>
+      </div>
+      {% endfor %}
+    </div>
+  </fieldset>
+  {% if editable %}<div class="form__actions"><button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button></div>{% endif %}
+  {{ ui.pagination(page.page, page.pages, 'admin.language_texts', {'q': query or None, 'missing': missing}) }}
+  {% else %}<p class="empty">{{ t("admin.orders.empty") }}</p>{% endif %}
+</form>
+{% endblock %}

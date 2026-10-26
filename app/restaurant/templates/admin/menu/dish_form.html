@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+{% import "admin/macros.html" as ui with context %}
+{% import "macros/icons.html" as icons %}
+{% set section_key = keys.MENU %}
+{% set editable = access.can_edit(keys.MENU) %}
+{% set action = url_for('admin.dish_update', dish_id=dish.id) if dish else url_for('admin.dish_create') %}
+
+{% block title %}{{ t("admin.menu.dish_title") }}{% endblock %}
+{% block heading %}{{ t("admin.menu.edit_dish") if dish else t("admin.menu.add_dish") }}{% endblock %}
+{% block page_styles %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/menu.css') }}">{% endblock %}
+
+{% block content %}
+<div class="toolbar"><a class="btn btn--ghost btn--small" href="{{ url_for('admin.menu') }}">{{ t("admin.back") }}</a></div>
+<form class="form" method="post" action="{{ action }}" enctype="multipart/form-data" novalidate>
+  {{ form.hidden_tag() }}
+  <fieldset class="fieldset-reset" {% if not editable %}disabled{% endif %}>
+    <div class="stack">
+      <section class="card form">
+        <h2 class="card__title">{{ t("admin.menu.general") }}</h2>
+        <div class="form__row">
+          {{ ui.form_field(form.category_id, t("admin.menu.category")) }}
+          {{ ui.form_field(form.base_price, t("admin.menu.price") ~ " (" ~ t("price.currency") ~ ")", inputmode="numeric", dir="ltr") }}
+          {{ ui.form_field(form.sort_order, t("admin.menu.sort_order"), inputmode="numeric", dir="ltr") }}
+        </div>
+        <div class="toolbar">
+          {{ ui.checkbox(form.is_in_stock, t("admin.menu.in_stock")) }}
+          {{ ui.checkbox(form.is_visible, t("admin.menu.visible")) }}
+          {{ ui.checkbox(form.is_chefs_pick, t("admin.menu.chefs_pick")) }}
+        </div>
+      </section>
+
+      <section class="card form">
+        <h2 class="card__title">{{ t("admin.menu.photo") }}</h2>
+        <div class="photo">
+          <span class="photo__preview">{% if dish and dish.images %}<img src="{{ url_for('static', filename=dish.images[0].path) }}" alt="" width="160" height="160">{% else %}{{ icons.icon("image", 40) }}{% endif %}</span>
+          <div class="stack">
+            <div class="field{% if form.photo.errors %} field--invalid{% endif %}">
+              <label class="field__label" for="{{ form.photo.id }}">{{ t("admin.menu.photo_choose") }}</label>
+              {{ form.photo(class="field__control", accept="image/jpeg,image/png,image/webp") }}
+              <span class="muted">{{ t("admin.menu.photo_hint") }}</span>
+              {% for error in form.photo.errors %}<span class="field__error">{{ error }}</span>{% endfor %}
+            </div>
+            {% if dish and dish.images %}{{ ui.checkbox(form.remove_photo, t("admin.menu.photo_remove")) }}{% endif %}
+          </div>
+        </div>
+      </section>
+
+      <div class="grid grid--two">
+        {% for code, direction in (("fa", "rtl"), ("en", "ltr")) %}
+        <section class="card form">
+          <h2 class="card__title">{{ t("admin.menu.texts_" ~ code) }}</h2>
+          {{ ui.form_field(form["name_" ~ code], t("admin.menu.name"), dir=direction, lang=code) }}
+          {{ ui.form_field(form["description_" ~ code], t("admin.menu.description"), dir=direction, lang=code, rows=3) }}
+          {{ ui.form_field(form["ingredients_" ~ code], t("admin.menu.ingredients"), dir=direction, lang=code, rows=2) }}
+          {{ ui.form_field(form["serving_note_" ~ code], t("admin.menu.serving_note"), dir=direction, lang=code) }}
+        </section>
+        {% endfor %}
+      </div>
+    </div>
+  </fieldset>
+  {% if editable %}
+  <div class="form__actions">
+    <button class="btn btn--primary" type="submit">{{ t("admin.save") }}</button>
+    <a class="btn btn--ghost" href="{{ url_for('admin.menu') }}">{{ t("admin.cancel") }}</a>
+  </div>
+  {% endif %}
+</form>
+{% if dish and editable %}
+<form class="form__actions" method="post" action="{{ url_for('admin.dish_delete', dish_id=dish.id) }}" data-confirm="{{ t('admin.confirm_delete') }}">
+  {{ ui.csrf() }}
+  <button class="btn btn--danger btn--small" type="submit"><span class="btn__icon">{{ icons.icon("trash", 16) }}</span>{{ t("admin.delete") }}</button>
+</form>
+{% endif %}
+{% endblock %}

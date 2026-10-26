@@ -1,0 +1,5 @@
+{#- Board / history tabs. Parameter: active ("board" or "history"). -#}
+<nav class="chips" aria-label="{{ t('admin.nav.orders') }}">
+  <a class="chip" href="{{ url_for('admin.orders') }}"{% if active == "board" %} aria-current="true"{% endif %}>{{ t("admin.orders.tab_board") }}</a>
+  <a class="chip" href="{{ url_for('admin.orders_history') }}"{% if active == "history" %} aria-current="true"{% endif %}>{{ t("admin.orders.tab_history") }}</a>
+</nav>

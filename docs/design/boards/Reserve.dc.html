@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>رزرو میز</title>
+<script src="./support.js"></script>
+<script src="./datepicker.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="./datepicker.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap">
+<style>
+body{margin:0;background:#14100D}
+input::placeholder{color:#A99882;opacity:1}
+.rise{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes tpulse{0%{box-shadow:0 0 0 0 rgba(227,166,75,.55)}100%{box-shadow:0 0 0 18px rgba(227,166,75,0)}}
+.btn{transition:transform .25s,background .25s,border-color .25s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:scale(.95)}
+.tbl{transition:transform .3s cubic-bezier(.2,.7,.2,1),background .3s,border-color .3s}
+.tbl:not(:disabled):hover{transform:scale(1.07)}
+@media (prefers-reduced-motion: reduce){.rise{animation:none}.btn,.tbl{transition:none}}
+
+/* ===== mobile chrome: compact header + bottom tab bar ===== */
+.tabbar{display:none}
+@media (max-width:720px){
+  body{padding-bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+  header.hdr{position:sticky;top:0;z-index:30;background:rgba(20,16,13,.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+  .hdr-in{flex-wrap:nowrap!important;padding:8px 14px!important;gap:8px!important}
+  .hdr-brand{gap:8px!important;flex:1 1 auto;min-width:0}
+  .hdr-brand svg{width:28px;height:28px;flex:none}
+  .hdr-brand span{font-size:19px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hdr-nav,.hdr-acct{display:none!important}
+  .hdr-act{flex-wrap:nowrap!important;gap:6px!important;flex:none}
+  .hdr-act .hl{display:none}
+  .hdr-cart{min-height:44px!important;padding:0 12px!important;gap:6px!important}
+  .tabbar{display:flex;position:fixed;z-index:40;left:0;right:0;bottom:0;height:calc(62px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;background:rgba(20,16,13,.95);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid rgba(243,233,220,.12)}
+  .tb{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#A99882;text-decoration:none;font-size:11px;line-height:1.3;padding:0 2px;text-align:center}
+  .tb span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tb[aria-current="page"]{color:#E3A64B;font-weight:700}
+  .pg-top{padding:28px 16px 16px!important}
+  .pg-body{padding:8px 16px 40px!important;gap:24px!important}
+  .pg-foot{padding:22px 16px!important}
+}
+
+/* ===== floor plan: scales with its cell, so phones keep the same layout ===== */
+.hall{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tin{position:absolute;inset:0;--u:calc(min(100cqw,184px) / 168)}
+@media (max-width:640px){
+  .hall{grid-template-columns:repeat(2,minmax(0,1fr));padding:10px!important;gap:4px!important}
+  .mapcard{padding:14px!important;border-radius:20px!important}
+}
+
+/* ===== live video backdrop (fixed behind the page) ===== */
+.bgv{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bgv video{display:block;width:100%;height:100%;object-fit:cover}
+.bgv i{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(20,16,13,0) 30%,rgba(20,16,13,.65) 100%),rgba(20,16,13,var(--dim,.55))}
+</style>
+</helmet>
+<div style="min-height: 100%; background: transparent; isolation: isolate; color: #F3E9DC; font-family: 'Vazirmatn', system-ui, sans-serif; line-height: 1.7; overflow-x: hidden">
+<div class="bgv" aria-hidden="true" style="--dim: 0.5"><video data-bgv src="/_blob/835df6547c431c00083dbeb03f3d32be" poster="/_blob/af23821077af09c4906a677316e5c553" muted loop playsinline preload="auto"></video><i></i></div>
+
+<header class="hdr" style="border-bottom: 1px solid rgba(243,233,220,.08)">
+<div class="hdr-in" style="max-width: 1200px; margin: 0 auto; padding: 18px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="Main.dc.html" class="hdr-brand" style="display: flex; align-items: center; gap: 12px; color: #F3E9DC; text-decoration: none">
+<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#E3A64B" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.6"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21"/></svg>
+<span style="font-family: 'B Nazanin','Nazanin','Noto Naskh Arabic',serif; font-size: 28px; font-weight: 700; line-height: 1.3">[نام رستوران]</span>
+</a>
+<nav aria-label="منوی اصلی" class="hdr-nav" style="display: flex; flex-wrap: wrap; align-items: center; gap: 26px">
+<a href="Main.dc.html" style="color: #D9CBB8; text-decoration: none; font-size: 15px; padding: 10px 0">خانه</a>
+<a href="Menu.dc.html" style="color: #D9CBB8; text-decoration: none; font-size: 15px; padding: 10px 0">منو</a>
+<a href="Builder.dc.html" style="color: #D9CBB8; text-decoration: none; font-size: 15px; padding: 10px 0">ساخت دلخواه</a>
+<a href="Reserve.dc.html" aria-current="page" style="color: #E3A64B; text-decoration: none; font-size: 15px; font-weight: 700; padding: 10px 0; border-bottom: 2px solid #E3A64B">رزرو میز</a>
+</nav>
+<div class="hdr-act" style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+<a href="Menu.dc.html" class="btn hdr-cart" style="display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(243,233,220,.18); color: #F3E9DC; text-decoration: none; font-size: 14px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F3E9DC" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L19.5 8H6"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg>
+<span class="hl">سبد خرید</span>
+</a>
+<a href="Main.dc.html" class="btn hdr-acct" style="display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 999px; color: #E3A64B; text-decoration: none; font-size: 14px; font-weight: 500">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E3A64B" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg>
+ورود / ثبت‌نام
+</a>
+</div>
+</div>
+</header>
+
+<section class="pg-top" style="max-width: 1200px; margin: 0 auto; padding: 56px 24px 32px">
+<h1 class="rise" style="margin: 0 0 8px; font-family: 'B Nazanin','Nazanin','Noto Naskh Arabic',serif; font-weight: 700; font-size: clamp(38px, 5vw, 60px); line-height: 1.5">رزرو میز</h1>
+<p class="rise" style="margin: 0; color: #BCAA95; font-size: 17px; animation-delay: .1s">روز و ساعت را انتخاب کنید و میزتان را از روی نقشه‌ی سالن بردارید.</p>
+</section>
+
+<section class="pg-body" style="max-width: 1200px; margin: 0 auto; padding: 8px 24px 96px; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 36px">
+
+<div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 14px; color: #BCAA95">۱. روز</span>
+<div role="group" aria-label="روز" style="display: flex; flex-wrap: wrap; gap: 10px">
+<sc-for list="{{days}}" as="d" hint-placeholder-count="4">
+<button type="button" onClick="{{d.pick}}" aria-pressed="{{d.pressed}}" class="btn" style="min-height: 48px; padding: 0 20px; border-radius: 999px; font: inherit; font-size: 15px; font-weight: 500; cursor: pointer; background: {{d.bg}}; color: {{d.fg}}; border: 1px solid {{d.bd}}">{{d.label}}</button>
+</sc-for>
+<button type="button" class="btn" onClick="{{toggleCal}}" aria-expanded="{{calExpanded}}" style="min-height: 48px; padding: 0 20px; border-radius: 999px; font: inherit; font-size: 15px; font-weight: 500; cursor: pointer; background: {{other.bg}}; color: {{other.fg}}; border: 1px {{other.bs}} {{other.bd}}; display: inline-flex; align-items: center; gap: 8px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+{{other.label}}
+</button>
+</div>
+<sc-if value="{{calOpen}}" hint-placeholder-val="{{false}}">
+<div class="dp" role="group" aria-label="انتخاب تاریخ">
+<div class="dp__head">
+<sc-if value="{{cal.hasPrevious}}" hint-placeholder-val="{{true}}"><button type="button" class="dp__nav" aria-label="ماه قبل" onClick="{{cal.goPrevious}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></sc-if>
+<sc-if value="{{cal.noPrevious}}" hint-placeholder-val="{{false}}"><span class="dp__nav dp__nav--off" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></sc-if>
+<b class="dp__title" aria-live="polite">{{cal.title}}</b>
+<sc-if value="{{cal.hasNext}}" hint-placeholder-val="{{true}}"><button type="button" class="dp__nav" aria-label="ماه بعد" onClick="{{cal.goNext}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button></sc-if>
+<sc-if value="{{cal.noNext}}" hint-placeholder-val="{{false}}"><span class="dp__nav dp__nav--off" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span></sc-if>
+</div>
+<div class="dp__grid">
+<sc-for list="{{cal.weekdays}}" as="w" hint-placeholder-count="7"><span class="dp__weekday">{{w}}</span></sc-for>
+<sc-for list="{{cal.cells}}" as="c" hint-placeholder-count="35">
+<sc-if value="{{c.isBlank}}" hint-placeholder-val="{{false}}"><span></span></sc-if>
+<sc-if value="{{c.isOn}}" hint-placeholder-val="{{true}}"><button type="button" class="dp__day {{c.cls}}" aria-pressed="{{c.pressed}}" aria-label="{{c.aria}}" onClick="{{c.pick}}">{{c.label}}</button></sc-if>
+<sc-if value="{{c.isOffCell}}" hint-placeholder-val="{{false}}"><span class="dp__day dp__day--off" aria-disabled="true" aria-label="{{c.aria}} (غیرقابل انتخاب)">{{c.label}}</span></sc-if>
+</sc-for>
+</div>
+<div class="dp__foot"><span>{{cal.hint}}</span><button type="button" class="dp__link" onClick="{{cal.goCurrentMonth}}">ماه جاری</button></div>
+</div>
+</sc-if>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 14px; color: #BCAA95">۲. ساعت</span>
+<div role="group" aria-label="ساعت" style="display: flex; flex-wrap: wrap; gap: 10px">
+<sc-for list="{{times}}" as="t" hint-placeholder-count="5">
+<button type="button" onClick="{{t.pick}}" aria-pressed="{{t.pressed}}" class="btn" style="min-height: 48px; min-width: 84px; padding: 0 18px; border-radius: 14px; font: inherit; font-size: 15px; font-weight: 500; cursor: pointer; background: {{t.bg}}; color: {{t.fg}}; border: 1px solid {{t.bd}}">{{t.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 14px; color: #BCAA95">۳. تعداد نفرات</span>
+<div style="display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; padding: 6px; border-radius: 999px; border: 1px solid rgba(243,233,220,.18)">
+<button type="button" onClick="{{guestsDec}}" aria-label="یک نفر کمتر" class="btn" style="width: 48px; height: 48px; border-radius: 50%; border: 0; background: #241C16; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F3E9DC" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+<span style="min-width: 76px; text-align: center; font-size: 17px; font-weight: 700">{{guestsText}} نفر</span>
+<button type="button" onClick="{{guestsInc}}" aria-label="یک نفر بیشتر" class="btn" style="width: 48px; height: 48px; border-radius: 50%; border: 0; background: #241C16; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F3E9DC" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 14px; color: #BCAA95">۴. اطلاعات تماس</span>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #BCAA95">نام و نام خانوادگی
+<input type="text" placeholder="مثلاً: سارا احمدی" style="width: 100%; height: 50px; box-sizing: border-box; padding-inline: 16px; border-radius: 12px; border: 1px solid rgba(243,233,220,.18); background: #1E1814; color: #F3E9DC; font: inherit; font-size: 15px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #BCAA95">شماره‌ی تماس
+<input type="tel" dir="ltr" placeholder="09xx xxx xxxx" style="width: 100%; height: 50px; box-sizing: border-box; padding-inline: 16px; border-radius: 12px; border: 1px solid rgba(243,233,220,.18); background: #1E1814; color: #F3E9DC; font: inherit; font-size: 15px; text-align: start">
+</label>
+</div>
+</div>
+
+</div>
+
+<div style="flex: 1.3 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+
+<div class="mapcard" style="padding: 20px; border-radius: 24px; background: #1E1814; border: 1px solid rgba(243,233,220,.10); display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px">
+<h2 style="margin: 0; font-family: 'B Nazanin','Nazanin','Noto Naskh Arabic',serif; font-weight: 700; font-size: 26px; line-height: 1.5">نقشه‌ی سالن</h2>
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: #BCAA95">
+<li style="display: flex; align-items: center; gap: 8px"><span style="width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(227,166,75,.7); background: #241C16"></span>خالی</li>
+<li style="display: flex; align-items: center; gap: 8px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #E3A64B"></span>انتخاب شما</li>
+<li style="display: flex; align-items: center; gap: 8px"><span style="width: 14px; height: 14px; border-radius: 4px; border: 1px dashed rgba(243,233,220,.4)"></span>پر یا کم‌ظرفیت</li>
+</ul>
+</div>
+<div style="padding: 10px 14px; border-radius: 10px; background: #14100D; border: 1px solid rgba(243,233,220,.08); text-align: center; font-size: 12px; letter-spacing: .08em; color: #A99882">آشپزخانه</div>
+<div class="hall" style="display: grid; gap: 6px; padding: 14px; border-radius: 16px; background-color: #14100D; background-image: radial-gradient(rgba(243,233,220,.07) 1px, rgba(0,0,0,0) 1px); background-size: 22px 22px; border: 1px solid rgba(243,233,220,.08)">
+<sc-for list="{{tables}}" as="t" hint-placeholder-count="12">
+<button type="button" class="tbl" onClick="{{t.pick}}" disabled="{{t.disabled}}" aria-pressed="{{t.pressed}}" aria-label="{{t.aria}}" style="position: relative; width: 100%; aspect-ratio: 168 / 132; container-type: inline-size; padding: 0; border: 0; background: transparent; font: inherit; cursor: {{t.cursor}}; color: {{t.fg}}">
+<span class="tin">
+<sc-for list="{{t.chairs}}" as="c" hint-placeholder-count="4">
+<span aria-hidden="true" style="position: absolute; display: block; left: {{c.l}}; top: {{c.t}}; width: {{c.w}}; height: {{c.h}}; border-radius: {{c.r}}; background: {{t.chairBg}}; border: 1px {{t.chairBs}} {{t.chairBd}}"></span>
+</sc-for>
+<span style="position: absolute; left: 50%; top: 50%; width: {{t.w}}; height: {{t.h}}; margin-left: {{t.mw}}; margin-top: {{t.mh}}; box-sizing: border-box; border-radius: {{t.r}}; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.3; background: {{t.bg}}; border: 1px {{t.bs}} {{t.bd}}; animation: {{t.anim}}">
+<span style="font-size: max(14px, calc(var(--u) * 20)); font-weight: 700">{{t.id}}</span>
+<span style="font-size: max(10.5px, calc(var(--u) * 12))">{{t.cap}}</span>
+</span>
+</span>
+</button>
+</sc-for>
+</div>
+<div style="padding: 10px 14px; border-radius: 10px; background: #14100D; border: 1px solid rgba(243,233,220,.08); text-align: center; font-size: 12px; letter-spacing: .08em; color: #A99882">ورودی</div>
+</div>
+
+<div class="mapcard" style="padding: 24px; border-radius: 24px; background: #1E1814; border: 1px solid rgba(243,233,220,.10); display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-family: 'B Nazanin','Nazanin','Noto Naskh Arabic',serif; font-weight: 700; font-size: 26px; line-height: 1.5">خلاصه‌ی رزرو</h2>
+<dl style="margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px">
+<div><dt style="font-size: 13px; color: #BCAA95">روز</dt><dd style="margin: 0; font-weight: 700">{{sumDay}}</dd></div>
+<div><dt style="font-size: 13px; color: #BCAA95">ساعت</dt><dd style="margin: 0; font-weight: 700">{{sumTime}}</dd></div>
+<div><dt style="font-size: 13px; color: #BCAA95">نفرات</dt><dd style="margin: 0; font-weight: 700">{{guestsText}} نفر</dd></div>
+<div><dt style="font-size: 13px; color: #BCAA95">میز</dt><dd style="margin: 0; font-weight: 700; color: #E3A64B">{{sumTable}}</dd></div>
+</dl>
+<p style="margin: 0; font-size: 14px; color: #BCAA95">رزرو ابتدا در انتظار تأیید است و وضعیتش را در حساب کاربری خود می‌بینید.</p>
+<button type="button" disabled="{{noSel}}" class="btn" style="align-self: flex-start; min-height: 54px; padding: 0 34px; border: 0; border-radius: 999px; background: #E3A64B; color: #1A120A; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; opacity: {{ctaOpacity}}">ثبت رزرو</button>
+</div>
+
+</div>
+</section>
+
+<footer style="background: #100C09; border-top: 1px solid rgba(243,233,220,.08)">
+<div class="pg-foot" style="max-width: 1200px; margin: 0 auto; padding: 28px 24px; color: #A99882; font-size: 13px">© [نام رستوران]</div>
+</footer>
+
+<nav class="tabbar" aria-label="ناوبری اصلی">
+<a href="Main.dc.html" class="tb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>خانه</span></a>
+<a href="Menu.dc.html" class="tb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2 1-3.5 4-3.5 8h3.5"/></svg><span>منو</span></a>
+<a href="Builder.dc.html" class="tb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5c6-3 12-3 18 0L12 21 3 5z"/><circle cx="10" cy="10" r="1.2"/><circle cx="14" cy="12" r="1.2"/></svg><span>ساخت دلخواه</span></a>
+<a href="Reserve.dc.html" class="tb" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>رزرو میز</span></a>
+<a href="Main.dc.html" class="tb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg><span>حساب</span></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  initBackdrop() {
+    const vids = Array.from(document.querySelectorAll('video[data-bgv]'));
+    if (!vids.length) { return; }
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    vids.forEach((v) => { v.muted = true; v.loop = true; v.setAttribute('playsinline', ''); });
+    const kick = () => {
+      if (mq.matches) { vids.forEach((v) => v.pause()); return; }
+      vids.forEach((v) => {
+        if (v.paused) { const p = v.play(); if (p && p.catch) { p.catch(() => {}); } }
+      });
+    };
+    vids.forEach((v) => { v.addEventListener('loadeddata', kick); v.addEventListener('canplay', kick); });
+    const gestures = ['pointerdown', 'touchstart', 'wheel', 'keydown', 'scroll'];
+    gestures.forEach((g) => window.addEventListener(g, kick, { passive: true }));
+    const timer = setInterval(kick, 1500);
+    kick();
+    this._bg = { stop: () => { clearInterval(timer); gestures.forEach((g) => window.removeEventListener(g, kick)); } };
+  }
+  componentDidMount() { this.initBackdrop(); }
+  componentWillUnmount() { if (this._bg) { this._bg.stop(); } }
+  renderVals() {
+    const st = this.state || {};
+    const todayDate = JalaliCalendar.today();
+    // Mirrors the admin setting "max advance booking (days)".
+    const MAX_ADVANCE_DAYS = 30;
+    const lastBookableDate = JalaliCalendar.addDays(todayDate, MAX_ADVANCE_DAYS);
+    // Demo only: one special closing day so the disabled style is visible.
+    const demoClosedDate = JalaliCalendar.addDays(todayDate, 9);
+    const isClosedDay = (date) => JalaliCalendar.isSame(date, demoClosedDate);
+    const date = st.date || todayDate;
+    const calOpen = st.calOpen === true;
+    const view = st.view || { year: date.year, month: date.month };
+    const time = st.time === undefined ? 2 : st.time;
+    const guests = st.guests === undefined ? 2 : st.guests;
+    const sel = st.sel === undefined ? 5 : st.sel;
+    const fmt = (n) => n.toLocaleString('fa-IR');
+
+    const quickDayLabels = ['امروز', 'فردا', 'پس‌فردا'];
+    const timeLabels = ['۱۲:۰۰', '۱۳:۳۰', '۱۸:۰۰', '۱۹:۳۰', '۲۱:۰۰'];
+    const caps = [2, 2, 4, 4, 2, 4, 6, 4, 2, 6, 4, 2];
+    const busyBy = [[3, 7], [2, 5, 9], [1, 4, 8, 11], [3, 6, 10], [2, 7, 12]];
+
+    const seg = (on) => ({ bg: on ? '#E3A64B' : 'transparent', fg: on ? '#1A120A' : '#F3E9DC', bd: on ? '#E3A64B' : 'rgba(243,233,220,.25)' });
+    const fix = (nextTime, nextGuests) => {
+      if (sel === null) { return null; }
+      const isBusy = busyBy[nextTime].indexOf(sel) !== -1;
+      const tooSmall = caps[sel - 1] < nextGuests;
+      return (isBusy || tooSmall) ? null : sel;
+    };
+
+    const days = quickDayLabels.map((label, offset) => {
+      const quickDate = JalaliCalendar.addDays(todayDate, offset);
+      const isOn = JalaliCalendar.isSame(quickDate, date);
+      const s = seg(isOn);
+      return {
+        label, pressed: isOn, bg: s.bg, fg: s.fg, bd: s.bd,
+        pick: () => this.setState({ date: quickDate, calOpen: false })
+      };
+    });
+    // The "other date" button shows the chosen date when it is not one of the quick days.
+    const isOtherDate = !days.some((d) => d.pressed);
+    const other = {
+      label: isOtherDate ? JalaliCalendar.formatLong(date) : 'تاریخ دیگر',
+      bg: isOtherDate ? '#E3A64B' : 'transparent',
+      fg: isOtherDate ? '#1A120A' : '#E3A64B',
+      bd: isOtherDate ? '#E3A64B' : 'rgba(227,166,75,.6)',
+      bs: isOtherDate ? 'solid' : 'dashed'
+    };
+    const cal = DatePickerView.build({
+      view, selected: date, min: todayDate, max: lastBookableDate, isClosed: isClosedDay,
+      hint: 'روزهای کم‌رنگ گذشته، تعطیل یا بیرون از بازه‌ی رزرو هستند.',
+      onPick: (picked) => this.setState({ date: picked, calOpen: false }),
+      onChangeView: (nextView) => this.setState({ view: nextView })
+    });
+    const times = timeLabels.map((label, i) => {
+      const s = seg(i === time);
+      return { label, pressed: i === time, bg: s.bg, fg: s.fg, bd: s.bd, pick: () => this.setState({ time: i, sel: fix(i, guests) }) };
+    });
+
+    const chairsFor = (cap) => {
+      const list = [];
+      const U = (n) => 'calc(var(--u) * ' + n + ')';
+      const add = (x, y, w, h) => list.push({ l: 'calc(50% + ' + U(x) + ')', t: 'calc(50% + ' + U(y) + ')', w: U(w), h: U(h), r: U(6) });
+      if (cap === 2) {
+        add(-48, -13, 14, 26); add(34, -13, 14, 26);
+      } else if (cap === 4) {
+        [-22, 22].forEach((x) => { add(x - 13, -47, 26, 14); add(x - 13, 33, 26, 14); });
+      } else {
+        [-30, 30].forEach((x) => { add(x - 13, -47, 26, 14); add(x - 13, 33, 26, 14); });
+        add(-77, -13, 14, 26); add(63, -13, 14, 26);
+      }
+      return list;
+    };
+    const busy = busyBy[time];
+    const tables = caps.map((cap, i) => {
+      const id = i + 1;
+      const isBusy = busy.indexOf(id) !== -1;
+      const small = cap < guests;
+      const isSel = sel === id;
+      const disabled = isBusy || small;
+      let bg = '#241C16'; let fg = '#F3E9DC'; let bd = 'rgba(227,166,75,.6)'; let bs = 'solid';
+      if (isSel) { bg = '#E3A64B'; fg = '#1A120A'; bd = '#E3A64B'; }
+      else if (disabled) { bg = 'transparent'; fg = '#A99882'; bd = 'rgba(243,233,220,.3)'; bs = 'dashed'; }
+      const tw = cap === 2 ? 58 : (cap === 4 ? 88 : 116);
+      const th = cap === 2 ? 58 : 56;
+      const U = (n) => 'calc(var(--u) * ' + n + ')';
+      const w = U(tw); const h = U(th);
+      const mw = U(-tw / 2); const mh = U(-th / 2);
+      const r = cap === 2 ? '50%' : U(16);
+      let chairBg = '#3A2D22'; let chairBd = 'rgba(243,233,220,.22)'; let chairBs = 'solid';
+      if (isSel) { chairBg = '#B97F2A'; chairBd = '#E3A64B'; }
+      else if (disabled) { chairBg = 'transparent'; chairBd = 'rgba(243,233,220,.3)'; chairBs = 'dashed'; }
+      const note = isBusy ? '، رزرو شده' : (small ? '، ظرفیت کم' : '');
+      return {
+        id: fmt(id), cap: fmt(cap) + ' نفره', w, h, r, mw, mh, bg, fg, bd, bs,
+        chairBg, chairBd, chairBs, chairs: chairsFor(cap),
+        disabled, pressed: isSel, cursor: disabled ? 'not-allowed' : 'pointer',
+        anim: isSel ? 'tpulse 2.4s ease-out infinite' : 'none',
+        aria: 'میز ' + fmt(id) + '، ' + fmt(cap) + ' نفره' + note,
+        pick: () => this.setState({ sel: id })
+      };
+    });
+
+    return {
+      days, other, cal, calOpen, calExpanded: calOpen ? 'true' : 'false',
+      toggleCal: () => this.setState({ calOpen: !calOpen, view: { year: date.year, month: date.month } }),
+      times, tables,
+      guestsText: fmt(guests),
+      guestsDec: () => { const g = Math.max(1, guests - 1); this.setState({ guests: g, sel: fix(time, g) }); },
+      guestsInc: () => { const g = Math.min(8, guests + 1); this.setState({ guests: g, sel: fix(time, g) }); },
+      sumDay: JalaliCalendar.formatLong(date),
+      sumTime: timeLabels[time],
+      sumTable: sel === null ? 'انتخاب نشده' : ('شماره‌ی ' + fmt(sel)),
+      noSel: sel === null,
+      ctaOpacity: sel === null ? 0.45 : 1
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{#- Sticky top bar: brand, main links, language switcher, cart pill, sign-in link. No parameters. -#}
+{% import "macros/icons.html" as icons %}
+{% set items = navigation_items() %}
+<header class="site-header" data-site-header>
+  <div class="site-header__inner">
+    <a class="site-header__brand" href="{{ url_for('public.home') }}">
+      {{ icons.icon("logo", 34) }}
+      <span class="site-header__brand-name">{{ brand_name }}</span>
+    </a>
+    <nav class="site-header__nav" aria-label="{{ t('nav.label') }}">
+      {% for item in items if item.in_header %}
+      <a class="site-header__link" href="{{ url_for(item.endpoint) }}"{% if is_current_page(item.endpoint) %} aria-current="page"{% endif %}>{{ t(item.text_key) }}</a>
+      {% endfor %}
+    </nav>
+    <div class="site-header__actions">
+      {% include "partials/language_switcher.html" %}
+      <a class="site-header__cart" href="{{ url_for('public.cart') if has_page('public.cart') else url_for('public.menu') ~ '#cart' }}">
+        {{ icons.icon("cart", 20) }}
+        <span class="site-header__cart-label">{{ t("header.cart") }}</span>
+        <span class="site-header__cart-count" data-cart-count><bdi>{{ cart_count|number }}</bdi></span>
+      </a>
+      {% if has_page("public.account") %}
+      <a class="site-header__login" href="{{ url_for('public.account') }}">{{ icons.icon("user", 20) }}<span>{{ t("header.login") }}</span></a>
+      {% endif %}
+    </div>
+  </div>
+</header>

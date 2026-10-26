@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% import "macros/ui.html" as ui %}
+{% import "macros/cart.html" as carts with context %}
+
+{% block title %}{{ t("cart.title") }} · {{ brand_name }}{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/cart.css') }}">
+{% endblock %}
+
+{% block body_class %}page-cart{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+  <h1 class="cart-page__title" data-reveal>{{ t("cart.title") }}</h1>
+  {{ carts.cart_panel() }}
+  <p class="cart-page__more">{{ ui.button_link(url_for("public.menu"), t("cart.continue"), "ghost") }}</p>
+</div>
+{% endblock %}

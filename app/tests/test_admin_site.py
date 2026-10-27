@@ -340,3 +340,26 @@ def test_only_the_listed_home_texts_can_be_changed_here(app) -> None:
     )
     assert "hacked" not in app.test_client().get("/fa/").get_data(as_text=True)
     assert "ok" in app.test_client().get("/fa/").get_data(as_text=True)
+
+
+# Sidebar regression: a page variable must never hide the sidebar's own list -----------------
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/admin/dashboard",
+        "/admin/settings",
+        "/admin/site",
+        "/admin/site/backgrounds",
+        "/admin/site/home",
+        "/admin/languages",
+        "/admin/users",
+    ],
+)
+def test_every_admin_page_has_a_working_sidebar(app, path) -> None:
+    import re
+
+    page = staff_client(app, "manager").get(path).get_data(as_text=True)
+    links = re.findall(r'<a class="admin-nav__link"[^>]*href="([^"]*)"', page)
+    assert len(links) >= 6 and all(link.startswith("/admin/") for link in links)

@@ -149,11 +149,14 @@ def test_reset_demo_wipes_everything_and_reseeds(tmp_path) -> None:
         (tmp_path / "uploads" / "site" / "logo.webp").write_bytes(b"x")
         db.session.commit()
         users_before = db.session.query(User).count()
+        orders_before = db.session.query(Order).count()
+        assert orders_before > 0
 
         result = runner.invoke(args=["reset-demo", "--yes"])
         assert result.exit_code == 0, result.output
         assert db.session.get(Setting, "brand_name") is None
-        assert db.session.query(Order).count() == 0
+        # Sample orders are reseeded, so the count is the sample set, not doubled.
+        assert db.session.query(Order).count() == orders_before
         assert db.session.query(User).count() == users_before
         assert not any((tmp_path / "uploads").rglob("*.webp"))
         assert client_ok(app)

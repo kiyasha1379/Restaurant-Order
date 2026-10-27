@@ -14,6 +14,8 @@ from restaurant.seed.demo_reset import DemoWiper
 from restaurant.seed.demo_staff import DEMO_STAFF_PASSWORD
 from restaurant.service_factory import (
     make_access_service,
+    make_demo_activity_seeder,
+    make_demo_contact_seeder,
     make_demo_customer_seeder,
     make_demo_seed_service,
     make_demo_staff_seeder,
@@ -54,8 +56,15 @@ def _seed_everything() -> None:
             f"(admin@example.com, manager@, cashier@, kitchen@, viewer@) "
             f"with the password {DEMO_STAFF_PASSWORD}. Use them for the demo only."
         )
+    if make_demo_contact_seeder().seed():
+        click.echo("seed-demo: filled in sample contact details for the footer.")
+    db.session.commit()
     customer_rows = make_demo_customer_seeder().seed()
     db.session.commit()
+    activity = make_demo_activity_seeder().seed()
+    db.session.commit()
+    if activity:
+        click.echo(f"seed-demo: added {activity} sample orders and reservations.")
     if customer_rows:
         click.echo(
             "seed-demo: added a sample customer (customer@example.com or 09120000000, "

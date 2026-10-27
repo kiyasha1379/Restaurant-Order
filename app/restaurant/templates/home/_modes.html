@@ -9,7 +9,7 @@
     <div class="modes">
       {% for mode, endpoint in [("order", "public.menu"), ("reserve", "public.reserve"), ("takeaway", "public.menu"), ("builder", "public.builder")] if has_page(endpoint) %}
       <div class="dish-card mode-card" data-dish-card data-scroll-reveal>
-        <button type="button" class="dish-card__flip" aria-pressed="false" aria-label="{{ t('home.mode.' ~ mode ~ '.title') }}. {{ t('home.mode.flip_hint') }}">
+        <span class="dish-card__stage" aria-hidden="true">
           <span class="dish-card__inner" aria-hidden="true">
             <span class="dish-card__face mode-card__front">
               {{ icons.icon({"order": "menu", "reserve": "reserve", "takeaway": "cart", "builder": "builder"}[mode], 44) }}
@@ -21,7 +21,8 @@
               <span class="dish-card__back-text">{{ t("home.mode." ~ mode ~ ".text") }}</span>
             </span>
           </span>
-        </button>
+        </span>
+        <button type="button" class="dish-card__flip" aria-pressed="false" aria-label="{{ t('home.mode.' ~ mode ~ '.title') }}. {{ t('home.mode.flip_hint') }}"></button>
         <span class="u-visually-hidden">{{ t("home.mode." ~ mode ~ ".text") }}</span>
         {#- A link cannot sit inside a button, so it floats over the back face once flipped. -#}
         <a class="mode-card__go" href="{{ url_for(endpoint) }}">{{ t("home.mode.start") }} {{ icons.icon("arrow", 16) }}</a>

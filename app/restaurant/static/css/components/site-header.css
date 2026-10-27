@@ -40,6 +40,7 @@
   font-weight: 700;
   line-height: 1.3;
   text-overflow: ellipsis;
+  unicode-bidi: plaintext; /* a Latin name in a Persian page is cut at its end, not its start */
   white-space: nowrap;
 }
 

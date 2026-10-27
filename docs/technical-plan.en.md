@@ -66,12 +66,16 @@ Restaurant/                         # the project folder
     ├── README.md                  # how to install, run and test
     ├── wsgi.py                    # entry point for flask run
     ├── pyproject.toml             # black, ruff and pytest settings
-    ├── requirements.txt           # runtime dependencies (+ requirements-dev.txt)
+    ├── requirements.txt           # runtime dependencies (+ requirements-dev.txt, requirements-prod.txt)
+    ├── deploy/                    # gunicorn.conf.py, nginx.conf.example, restaurant.service.example
     ├── migrations/                # Alembic: every schema change goes here
     ├── tests/                     # unit tests for services, route tests for flows
     └── restaurant/                # the application package
         ├── __init__.py            # create_app()
-        ├── config.py              # Dev, Demo and Test configuration classes
+        ├── config.py              # Dev, Demo, Prod and Test configuration classes
+        ├── hardening.py           # production checks, proxy trust and security headers
+        ├── backup.py              # SQLite backup and pruning (flask backup-db)
+        ├── seed/                  # demo data: menu, contact details, sample orders and bookings, demo reset
         ├── constants.py           # enums and named constants (languages, access levels)
         ├── extensions.py          # db, migrate (later: login, csrf, limiter)
         ├── database.py            # SQLite foreign keys and WAL mode
@@ -79,7 +83,7 @@ Restaurant/                         # the project folder
         ├── timeutils.py           # Tehran time helpers
         ├── text_catalog.py        # t(key) lookup (phase 2 moves it to the database)
         ├── template_context.py    # language, brand name, demo flag for every template
-        ├── cli.py                 # flask seed-demo, flask reset-demo
+        ├── cli.py                 # flask seed-demo, reset-demo, sync-ui-strings, backup-db
         ├── models/                # one module per domain: language, setting, background, access, menu...
         ├── repositories/          # one class per aggregate; the only code that writes queries
         ├── services/              # business rules: language, settings; later pricing, orders, booking, payments/
@@ -324,7 +328,7 @@ Every phase produces a version that runs and can be demonstrated, and the next p
 **Working conventions**
 
 - One Git branch per phase and small commits with clear messages; merge to `main` only when the phase is done.
-- Three configurations: `Dev` (debug), `Demo` (`DEMO_MODE` on, seeded data) and `Test` (in-memory database).
+- Four configurations: `Dev` (debug), `Demo` (`DEMO_MODE` on, seeded data), `Prod` (`APP_CONFIG=prod`: needs a `SECRET_KEY` of 32+ characters, refuses the mock gateway and demo mode, secure cookies, HSTS, proxy headers) and `Test` (in-memory database).
 - Schema changes go only through Alembic migrations, never by editing the database by hand.
 - This plan is updated whenever a decision changes, so it always matches the code.
 
@@ -426,6 +430,8 @@ The order is chosen so the site can take orders as early as possible (phase 4). 
 
 **Done when:** changing a background or a setting in the panel changes the public site with no code edit.
 
+**Built as planned, with these notes:** home sections live in the `site_sections` table (key, position, visibility); the brand logo, accent color, pause switch and payment toggles are rows in `settings`; background videos are MP4 only (12 MB limit, checked by file signature) and posters are resized on upload.
+
 ### Phase 11: Polish and demo readiness
 
 - Complete the tests for pricing, booking and payment; fix gaps found in earlier phases.
@@ -435,6 +441,8 @@ The order is chosen so the site can take orders as early as possible (phase 4). 
 - Final seed data, the `reset-demo` walkthrough, and a short README that explains how to run and demo the site.
 
 **Done when:** a fresh install runs the full demo from a reset, every item in the definition of done holds, and this plan matches the code.
+
+**Built as planned, with these notes:** `flask reset-demo --yes` wipes and reseeds (menu, contact details, five sample orders, three bookings) and refuses outside demo mode; `flask backup-db` copies the database and prunes old copies; the `deploy/` folder holds the Gunicorn, Nginx and systemd examples (the order-status stream needs buffering off in Nginx); an axe-core check reports no violations on the public and admin pages; the real-phone test is still open.
 
 ## 13. Risks, open questions and later items
 
@@ -452,7 +460,7 @@ The order is chosen so the site can take orders as early as possible (phase 4). 
 
 **Open questions**
 
-1. **Delivery fee:** a fixed amount, or per zone (`delivery_zones`)? The admin settings support both; the default for the first build is a fixed fee.
+1. **Delivery fee:** settled. The first build uses one fixed fee set in the admin settings; `delivery_zones` stays in the schema for a later per-zone mode.
 2. **Guest checkout:** may a visitor order with only a name and phone number, or must they log in? The plan assumes guests can order.
 3. **Currency display:** one currency for both languages (toman), or each language with its own? The plan assumes toman everywhere.
 4. **Hosting:** inside Iran or abroad? It affects self-hosting of assets and, later, the choice of a real payment gateway.
@@ -464,4 +472,7 @@ The order is chosen so the site can take orders as early as possible (phase 4). 
 - Real photos and builder layers with background removal.
 - Restoring scroll-controlled video on desktop only.
 - Real SMS or email notifications.
-- Removing watermarks from the generated background videos.
+- Removing watermarks from the generated background videos (the sample videos still carry one).
+- Refunds for cancelled orders that were paid online.
+- A live price panel in the admin builder form.
+- A Windows run-through of the install steps (built and tested on Linux).

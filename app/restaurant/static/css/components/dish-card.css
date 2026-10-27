@@ -12,9 +12,18 @@
   transform: translateY(-6px);
 }
 
+/* The faces sit in a stage that only exists for the eyes; an empty button over it is the control. */
+.dish-card__stage {
+  position: absolute;
+  inset: 0;
+  display: block;
+  perspective: 1100px;
+}
+
 .dish-card__flip {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: block;
   margin: 0;
   padding: 0;
@@ -24,7 +33,6 @@
   color: inherit;
   font: inherit;
   cursor: pointer;
-  perspective: 1100px;
 }
 
 .dish-card__flip:focus-visible,

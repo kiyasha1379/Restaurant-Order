@@ -48,4 +48,4 @@ def test_seed_and_reset_commands_exist(app):
 
     assert f"added {len(DEMO_BACKGROUNDS)} backgrounds" in runner.invoke(args=["seed-demo"]).output
     assert "added 0 backgrounds" in runner.invoke(args=["seed-demo"]).output
-    assert "nothing to reset" in runner.invoke(args=["reset-demo"]).output
+    assert "APP_CONFIG=demo" in runner.invoke(args=["reset-demo"]).output

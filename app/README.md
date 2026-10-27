@@ -23,7 +23,14 @@ flask db upgrade                # creates instance\restaurant.db with the two la
 flask run                       # http://127.0.0.1:5000
 ```
 
-Use `$env:APP_CONFIG = "demo"` (or put `APP_CONFIG=demo` in `.env`) to show the "demo version" bar. Configurations are `dev` (default), `demo` and `test`.
+After the first `flask db upgrade`, load the interface texts and the sample data once:
+
+```powershell
+flask sync-ui-strings           # default texts in both languages
+flask seed-demo                 # menu, builders, tables, staff, a customer, sample orders and bookings
+```
+
+Use `$env:APP_CONFIG = "demo"` (or put `APP_CONFIG=demo` in `.env`, as `.env.example` does) to show the "demo version" bar and to allow `flask reset-demo`. Configurations are `dev` (default), `demo`, `prod` and `test`.
 
 If PowerShell blocks the activation script, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once.
 
@@ -39,7 +46,8 @@ If PowerShell blocks the activation script, run `Set-ExecutionPolicy -Scope Curr
 | Add the sample menu, backgrounds and demo staff (safe to repeat) | `flask seed-demo` |
 | Copy default interface texts into the database | `flask sync-ui-strings` |
 | Create the first administrator (asks for e-mail, name, password) | `flask create-admin` |
-| Reset the demo (arrives in a later phase) | `flask reset-demo` |
+| Delete ALL data and uploads and load the sample data again (demo mode only; asks first, `--yes` skips) | `flask reset-demo` |
+| Save a consistent copy of the database into `instance/backups` and keep the newest 14 | `flask backup-db` |
 
 ## Admin panel
 
@@ -50,6 +58,32 @@ Uploaded photos (dishes and builder options) are stored under `restaurant/static
 The section "Settings" turns online ordering off for a while, sets the delivery fee, the payment methods and the contact details in the footer. "Site appearance" changes the brand name, accent colour and logo, the video and poster of every background, and the order of the home page sections and its main texts.
 
 Schema changes go only through migrations, never by editing the database by hand.
+
+## Demo walkthrough
+
+After `flask seed-demo` (or `flask reset-demo`) the site is ready to show:
+
+1. Home page (`/fa/`, `/en/`): scroll through the sections; flip a round card.
+2. Menu: add dishes, open the cart, check out (pay on arrival, or "Pay online" for the test gateway page; its code and amount are fake). In the demo the customer sign-up code is always `12345`.
+3. "Build your own": pizza, sandwich or drink with a live price.
+4. Reservation: choose a day (Jalali calendar), a time and a table on the floor plan.
+5. Admin (`/admin/login`, `admin@example.com` / `demo-pass-1234`): the kitchen board with live updates (move an order with the buttons), the dashboard, reservations, the menu, "Settings" (pause orders and watch the notice appear on the site) and "Site appearance" (accent colour, logo, backgrounds, section order).
+6. `flask reset-demo --yes` returns everything to the start.
+
+## Going live
+
+The demo build is not for a real restaurant until these are done:
+
+- `APP_CONFIG=prod` and a random `SECRET_KEY` (32+ characters) in the environment; the app refuses to start otherwise. In `prod` the test payment page, the demo bar and the demo accounts are off, cookies are HTTPS-only and security headers (including HSTS) are sent.
+- Create the first administrator with `flask create-admin`; do not run `flask seed-demo` on a real server.
+- Serve it from a Linux server with Gunicorn behind nginx: see `deploy/` (`gunicorn.conf.py`, `nginx.conf.example`, `restaurant.service.example`; `pip install -r requirements-prod.txt`). On Windows use Waitress instead (`pip install waitress`, `waitress-serve --port 8000 wsgi:app`).
+- Online payment stays off (`PAYMENT_GATEWAY` empty) until a real gateway class is added in `restaurant/services/payment_gateway.py`. No SMS or e-mail is sent: sign-up codes are only written to the log until a real sender is added.
+- Schedule `flask backup-db` (for example nightly) and copy `instance/backups` and `restaurant/static/uploads` somewhere else.
+- The sample background videos carry a generator watermark; replace them from "Site appearance".
+
+## Accessibility check
+
+`tests/browser/a11y_check.js` runs axe-core on the main pages in both languages (see the comment at its top for the command). It reports no WCAG A or AA violations.
 
 ## Layout
 

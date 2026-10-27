@@ -31,6 +31,8 @@ from restaurant.repositories import (
     UserRepository,
     VerificationCodeRepository,
 )
+from restaurant.seed.demo_activity import DemoActivitySeeder
+from restaurant.seed.demo_contact import DemoContactSeeder
 from restaurant.seed.demo_customers import DemoCustomerSeeder
 from restaurant.seed.demo_staff import DemoStaffSeeder
 from restaurant.seed.seed_service import DemoSeedService
@@ -305,6 +307,24 @@ def make_customer_admin_service() -> CustomerAdminService:
         ReservationRepository(db.session),
         AddressRepository(db.session),
     )
+
+
+def make_demo_activity_seeder() -> DemoActivitySeeder:
+    """Build a DemoActivitySeeder on the current session."""
+    return DemoActivitySeeder(
+        make_order_service(),
+        make_booking_service(),
+        OrderRepository(db.session),
+        ReservationRepository(db.session),
+        DishRepository(db.session),
+        TableRepository(db.session),
+        UserRepository(db.session),
+    )
+
+
+def make_demo_contact_seeder() -> DemoContactSeeder:
+    """Build a DemoContactSeeder on the current session."""
+    return DemoContactSeeder(make_settings_admin_service())
 
 
 def make_demo_customer_seeder() -> DemoCustomerSeeder:

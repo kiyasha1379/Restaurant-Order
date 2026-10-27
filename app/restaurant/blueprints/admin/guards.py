@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from functools import wraps
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from flask import abort
 from flask_login import current_user
@@ -69,14 +69,16 @@ def first_allowed_section(profile: AccessProfile) -> AdminSection | None:
     return next((s for s in ADMIN_SECTIONS if profile.allows(s.permission)), None)
 
 
-def is_safe_admin_path(target: str | None) -> bool:
-    """Return True for a local address inside the panel (blocks open redirects)."""
-    if not target:
-        return False
+def safe_admin_target(target: str | None) -> str | None:
+    """Return a local address inside the panel built from `target`, else None.
+
+    This blocks open redirects: a value with a scheme, a host, a backslash or a control
+    character is refused, and the result is rebuilt from its parsed parts (path, query and
+    fragment) so it can only ever point at this site's own `/admin/...` pages.
+    """
+    if not target or "\\" in target or any(ord(char) < 32 or ord(char) == 127 for char in target):
+        return None
     parts = urlsplit(target)
-    return (
-        not parts.scheme
-        and not parts.netloc
-        and parts.path.startswith(f"{ADMIN_PATH_PREFIX}/")
-        and not parts.path.startswith("//")
-    )
+    if parts.scheme or parts.netloc or not parts.path.startswith(f"{ADMIN_PATH_PREFIX}/"):
+        return None
+    return urlunsplit(("", "", parts.path, parts.query, parts.fragment))

@@ -4,7 +4,7 @@ from flask import flash, redirect, render_template, request, url_for
 from werkzeug.wrappers import Response
 
 from restaurant.blueprints.admin import admin_blueprint
-from restaurant.blueprints.admin.guards import is_safe_admin_path, permission_required
+from restaurant.blueprints.admin.guards import permission_required, safe_admin_target
 from restaurant.constants import SUPPORTED_LANGUAGE_CODES, AccessLevel, PermissionKey
 from restaurant.extensions import db
 from restaurant.language_context import get_translator
@@ -78,4 +78,4 @@ def language_texts_save() -> Response:
     db.session.commit()
     flash(get_translator()("admin.languages.texts_saved", count=changed), "success")
     target = request.form.get("next")
-    return redirect(target if is_safe_admin_path(target) else url_for("admin.language_texts"))
+    return redirect(safe_admin_target(target) or url_for("admin.language_texts"))

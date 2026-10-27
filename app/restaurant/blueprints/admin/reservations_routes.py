@@ -4,7 +4,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from werkzeug.wrappers import Response
 
 from restaurant.blueprints.admin import admin_blueprint
-from restaurant.blueprints.admin.guards import permission_required
+from restaurant.blueprints.admin.guards import permission_required, safe_admin_target
 from restaurant.booking_web import parse_day
 from restaurant.constants import (
     WEEKDAYS_SATURDAY_FIRST,
@@ -115,10 +115,11 @@ def _change_booking(reservation_id: int, action) -> Response:  # noqa: ANN001 - 
         flash(_booking_error_text(error), "error")
     else:
         flash(get_translator()("admin.saved"), "success")
-    target = request.form.get("next", "")
-    if target.startswith("/admin/"):
-        return redirect(target)
-    return redirect(url_for("admin.reservation_detail", reservation_id=reservation_id))
+    target = request.form.get("next")
+    return redirect(
+        safe_admin_target(target)
+        or url_for("admin.reservation_detail", reservation_id=reservation_id)
+    )
 
 
 @admin_blueprint.post("/reservations/<int:reservation_id>/confirm")

@@ -4,7 +4,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from werkzeug.wrappers import Response
 
 from restaurant.blueprints.admin import admin_blueprint
-from restaurant.blueprints.admin.guards import is_safe_admin_path, permission_required
+from restaurant.blueprints.admin.guards import permission_required, safe_admin_target
 from restaurant.constants import LANGUAGE_CODE_ENGLISH as EN
 from restaurant.constants import AccessLevel, PermissionKey
 from restaurant.extensions import db
@@ -35,7 +35,7 @@ def display_name(translations, language_code: str, fallback: str) -> str:  # noq
 def _back_to(default_endpoint: str, **values) -> Response:  # noqa: ANN003 - url_for values
     """Redirect to `next` when it is a panel address, else to the default page."""
     target = request.form.get("next")
-    return redirect(target if is_safe_admin_path(target) else url_for(default_endpoint, **values))
+    return redirect(safe_admin_target(target) or url_for(default_endpoint, **values))
 
 
 def _category_choices(service) -> list[tuple[int, str]]:  # noqa: ANN001 - MenuAdminService

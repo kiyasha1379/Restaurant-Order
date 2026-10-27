@@ -17,8 +17,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from restaurant.blueprints.admin import admin_blueprint
 from restaurant.blueprints.admin.guards import (
     current_profile,
-    is_safe_admin_path,
     permission_required,
+    safe_admin_target,
 )
 from restaurant.constants import (
     AccessLevel,
@@ -181,9 +181,7 @@ def order_receipt(order_id: int) -> str:
 def _after_action(order_id: int) -> Response:
     """Go back to where the action came from (the board or the detail page)."""
     target = request.form.get("next")
-    return redirect(
-        target if is_safe_admin_path(target) else url_for("admin.order_detail", order_id=order_id)
-    )
+    return redirect(safe_admin_target(target) or url_for("admin.order_detail", order_id=order_id))
 
 
 def _change_order(order_id: int, move) -> Response:  # noqa: ANN001 - a callable (service, order)

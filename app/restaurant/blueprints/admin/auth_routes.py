@@ -8,7 +8,7 @@ from restaurant.blueprints.admin import admin_blueprint
 from restaurant.blueprints.admin.guards import (
     current_profile,
     first_allowed_section,
-    is_safe_admin_path,
+    safe_admin_target,
 )
 from restaurant.extensions import db, limiter
 from restaurant.forms.admin_login_form import LoginForm
@@ -55,7 +55,7 @@ def login() -> Response | str:
             login_user(result.user)
             db.session.commit()
             target = request.args.get("next")
-            return redirect(target if is_safe_admin_path(target) else landing_url())
+            return redirect(safe_admin_target(target) or landing_url())
         failure = get_translator()(FAILURE_TEXT_KEYS[result.outcome])
     return render_template("admin/login.html", form=form, failure=failure)
 
@@ -74,4 +74,4 @@ def set_language(code: str) -> Response:
     if make_language_service().get_language(code) is not None:
         session[ADMIN_LANGUAGE_SESSION_KEY] = code
     target = request.args.get("next")
-    return redirect(target if is_safe_admin_path(target) else url_for("admin.index"))
+    return redirect(safe_admin_target(target) or url_for("admin.index"))
